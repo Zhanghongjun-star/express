@@ -13,7 +13,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, todo *service.TodoService, addr *service.AddressService) *http.Server {
+func NewHTTPServer(c *conf.Server, todo *service.TodoService) *http.Server {
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -38,6 +38,5 @@ func NewHTTPServer(c *conf.Server, todo *service.TodoService, addr *service.Addr
 	}
 	srv := http.NewServer(opts...)
 	v1.RegisterTodoServiceHTTPServer(srv, todo)
-	addr.RegisterRoutes(srv)
 	return srv
 }

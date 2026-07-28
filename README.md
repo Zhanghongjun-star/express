@@ -4,7 +4,7 @@
 
 ## 技术栈
 
-- Go 1.25+
+- Go 1.26+
 - Kratos v3 微服务框架
 - gRPC + HTTP 双协议
 - Protobuf + buf 代码生成
