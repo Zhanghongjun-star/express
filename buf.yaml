@@ -1,12 +1,6 @@
 version: v2
 modules:
-  - path: .
-    excludes:
-      - cmd/protoc-gen-go-errors
-      - third_party
-lint:
-  use:
-    - DEFAULT
-breaking:
-  use:
-    - FILE
+  - path: api
+  - path: internal
+deps:
+  - buf.build/googleapis/googleapis
