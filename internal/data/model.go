@@ -49,6 +49,8 @@ type Address struct {
 	District      string    `gorm:"column:district;type:varchar(32)" db:"district" json:"district"`
 	DetailAddr    string    `gorm:"column:detail_addr;type:varchar(256)" db:"detail_addr" json:"detail_addr"`
 	IsDefault     bool      `gorm:"column:is_default;type:tinyint" db:"is_default" json:"is_default"`
+	Latitude      float64   `gorm:"column:latitude;type:decimal(10,6)" db:"latitude" json:"latitude"`
+	Longitude     float64   `gorm:"column:longitude;type:decimal(10,6)" db:"longitude" json:"longitude"`
 	CreateTime    time.Time `gorm:"column:create_time" db:"create_time" json:"create_time"`
 	UpdateTime    time.Time `gorm:"column:update_time" db:"update_time" json:"update_time"`
 	DelFlag       bool      `gorm:"column:del_flag;type:tinyint;default:0" db:"del_flag" json:"del_flag"`
@@ -77,10 +79,37 @@ func (Order) TableName() string {
 	return "sf_order_history"
 }
 
+// IdentityUser 对应 identity_user 表，保存登录账号、角色和状态。
+type IdentityUser struct {
+	ID            int64      `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	UserNo        string     `gorm:"column:user_no;type:varchar(32);uniqueIndex" db:"user_no" json:"user_no"`
+	PhoneCipher   string     `gorm:"column:phone_cipher;type:varchar(255)" db:"phone_cipher" json:"phone_cipher"`
+	PhoneHash     string     `gorm:"column:phone_hash;type:char(64);uniqueIndex" db:"phone_hash" json:"phone_hash"`
+	Email         string     `gorm:"column:email;type:varchar(128);uniqueIndex" db:"email" json:"email"`
+	PasswordHash  string     `gorm:"column:password_hash;type:varchar(255)" db:"password_hash" json:"password_hash"`
+	RoleCode      string     `gorm:"column:role_code;type:varchar(32);default:user" db:"role_code" json:"role_code"`
+	AccountStatus string     `gorm:"column:account_status;type:varchar(32);default:normal" db:"account_status" json:"account_status"`
+	LockedUntil   *time.Time `gorm:"column:locked_until" db:"locked_until" json:"locked_until"`
+	CreatedAt     time.Time  `gorm:"column:created_at" db:"created_at" json:"created_at"`
+	UpdatedAt     time.Time  `gorm:"column:updated_at" db:"updated_at" json:"updated_at"`
+}
+
+// TableName 指定表名。
+func (IdentityUser) TableName() string {
+	return "identity_user"
+}
+
 // IdentityRealNameAuth 对应 identity_real_name_auth 表，保存实名认证审核资料。
 type IdentityRealNameAuth struct {
-	UserID       int64  `gorm:"primaryKey;column:user_id" db:"user_id" json:"user_id"`
-	RejectReason string `gorm:"column:reject_reason;type:varchar(256)" db:"reject_reason" json:"reject_reason"`
+	UserID         int64     `gorm:"primaryKey;column:user_id" db:"user_id" json:"user_id"`
+	RealNameCipher string    `gorm:"column:real_name_cipher;type:varchar(255)" db:"real_name_cipher" json:"real_name_cipher"`
+	IDCardCipher   string    `gorm:"column:id_card_cipher;type:varchar(255)" db:"id_card_cipher" json:"id_card_cipher"`
+	IDCardHash     string    `gorm:"column:id_card_hash;type:char(64);uniqueIndex" db:"id_card_hash" json:"id_card_hash"`
+	ImageURLs      string    `gorm:"column:image_urls;type:json" db:"image_urls" json:"image_urls"`
+	AuthStatus     string    `gorm:"column:auth_status;type:varchar(32);default:pending" db:"auth_status" json:"auth_status"`
+	RejectReason   string    `gorm:"column:reject_reason;type:varchar(256)" db:"reject_reason" json:"reject_reason"`
+	CreatedAt      time.Time `gorm:"column:created_at" db:"created_at" json:"created_at"`
+	UpdatedAt      time.Time `gorm:"column:updated_at" db:"updated_at" json:"updated_at"`
 }
 
 // TableName 指定表名。
@@ -234,3 +263,20 @@ type PickupReservation struct {
 }
 
 func (PickupReservation) TableName() string { return "order_pickup_reservation" }
+
+// IdentitySecurityLog 对应 identity_security_log 表，保存登录、改密、退出等安全事件。
+type IdentitySecurityLog struct {
+	ID            int64     `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	UserID        int64     `gorm:"column:user_id;index:idx_identity_security_log_user_created_at" db:"user_id" json:"user_id"`
+	EventType     string    `gorm:"column:event_type;type:varchar(64)" db:"event_type" json:"event_type"`
+	Result        string    `gorm:"column:result;type:varchar(32)" db:"result" json:"result"`
+	IP            string    `gorm:"column:ip;type:varchar(64)" db:"ip" json:"ip"`
+	DeviceID      string    `gorm:"column:device_id;type:varchar(128)" db:"device_id" json:"device_id"`
+	FailureReason string    `gorm:"column:failure_reason;type:varchar(255)" db:"failure_reason" json:"failure_reason"`
+	CreatedAt     time.Time `gorm:"column:created_at;index:idx_identity_security_log_user_created_at" db:"created_at" json:"created_at"`
+}
+
+// TableName 指定表名。
+func (IdentitySecurityLog) TableName() string {
+	return "identity_security_log"
+}
