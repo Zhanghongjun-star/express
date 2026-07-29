@@ -17,34 +17,25 @@ import (
 	"shunfeng-miniprogram/internal/service"
 )
 
-import (
-	_ "go.uber.org/automaxprocs"
-)
-
 // Injectors from wire.go:
 
 // wireApp init kratos application.
 func wireApp(confServer *conf.Server, confData *conf.Data, logger *slog.Logger, registrar registry.Registrar) (*kratos.App, func(), error) {
-	dataData, cleanup, err := data.NewData(confData)
-	if err != nil {
-		return nil, nil, err
-	}
-	todoRepo := data.NewTodoRepo(dataData)
+	todoRepo := data.NewTodoRepo()
 	todoUsecase := biz.NewTodoUsecase(todoRepo)
 	todoService := service.NewTodoService(todoUsecase)
-	userRepo := data.NewUserRepo(dataData)
+	userRepo := data.NewUserRepo()
 	userUsecase := biz.NewUserUsecase(userRepo)
 	userService := service.NewUserService(userUsecase)
-	addressRepo := data.NewAddressRepo(dataData)
+	addressRepo := data.NewAddressRepo()
 	addressUsecase := biz.NewAddressUsecase(addressRepo)
 	addressService := service.NewAddressService(addressUsecase)
-	orderRepo := data.NewOrderRepo(dataData)
+	orderRepo := data.NewOrderRepo()
 	orderUsecase := biz.NewOrderUsecase(orderRepo)
 	orderService := service.NewOrderService(orderUsecase)
 	grpcServer := server.NewGRPCServer(confServer, todoService, userService, addressService, orderService)
 	httpServer := server.NewHTTPServer(confServer, todoService, userService, addressService, orderService)
 	app := newApp(logger, grpcServer, httpServer, registrar)
 	return app, func() {
-		cleanup()
 	}, nil
 }

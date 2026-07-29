@@ -1,47 +1,29 @@
 package data
 
 import (
-	"cmp"
 	"context"
-	"slices"
-	"sync"
 	"time"
 
-	v1 "shunfeng-miniprogram/api/address/v1"
 	"shunfeng-miniprogram/internal/biz"
-	"shunfeng-miniprogram/internal/model"
 )
 
-// addressRepo 地址仓储的内存实现。
-type addressRepo struct {
-	data *Data
-
-	mu     sync.RWMutex
-	nextID int64
-	items  map[int64]*model.Address
-}
+// addressRepo 地址仓储的 GORM 实现。
+type addressRepo struct{}
 
 // NewAddressRepo 创建地址仓储。
-func NewAddressRepo(data *Data) biz.AddressRepo {
-	return &addressRepo{
-		data:   data,
-		nextID: 1,
-		items:  make(map[int64]*model.Address),
-	}
+func NewAddressRepo() biz.AddressRepo {
+	return &addressRepo{}
 }
 
-func (r *addressRepo) FindByID(_ context.Context, userID, id int64) (*biz.Address, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	item, ok := r.items[id]
-	if !ok || item.DelFlag || item.UserID != userID {
+func (r *addressRepo) FindByID(ctx context.Context, userID, id int64) (*biz.Address, error) {
+	var po Address
+	if err := DB.WithContext(ctx).Where("id = ? AND user_id = ? AND del_flag = 0", id, userID).First(&po).Error; err != nil {
 		return nil, biz.ErrAddressNotFound
 	}
-	return toBiz(item), nil
+	return toAddressBiz(&po), nil
 }
 
-func (r *addressRepo) ListAddresses(_ context.Context, userID int64, opts ...biz.AddressListOption) ([]*biz.Address, error) {
+func (r *addressRepo) ListAddresses(ctx context.Context, userID int64, opts ...biz.AddressListOption) ([]*biz.Address, error) {
 	options := biz.AddressListOptions{Limit: 20}
 	for _, opt := range opts {
 		opt(&options)
@@ -50,101 +32,74 @@ func (r *addressRepo) ListAddresses(_ context.Context, userID int64, opts ...biz
 		return nil, biz.ErrAddressInvalidArgument
 	}
 
-	r.mu.RLock()
-	defer r.mu.RUnlock()
+	tx := DB.WithContext(ctx).Where("user_id = ? AND del_flag = 0", userID)
+	if options.AddrType != 0 {
+		tx = tx.Where("addr_type = ?", options.AddrType)
+	}
+	var pos []Address
+	if err := tx.Order("id ASC").Offset(options.Offset).Limit(options.Limit).Find(&pos).Error; err != nil {
+		return nil, err
+	}
 
-	records := make([]*biz.Address, 0, len(r.items))
-	for _, item := range r.items {
-		if item.DelFlag || item.UserID != userID {
-			continue
-		}
-		if options.AddrType != v1.AddressType_ADDRESS_TYPE_UNSPECIFIED && item.AddrType != options.AddrType {
-			continue
-		}
-		records = append(records, toBiz(item))
+	addresses := make([]*biz.Address, len(pos))
+	for i, po := range pos {
+		addresses[i] = toAddressBiz(&po)
 	}
-	slices.SortFunc(records, func(a, b *biz.Address) int {
-		return cmp.Compare(a.ID, b.ID)
-	})
-
-	if options.Offset >= len(records) {
-		return []*biz.Address{}, nil
-	}
-	end := options.Offset + options.Limit
-	if end > len(records) {
-		end = len(records)
-	}
-	return records[options.Offset:end], nil
+	return addresses, nil
 }
 
-func (r *addressRepo) CreateAddress(_ context.Context, address *biz.Address) (*biz.Address, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
+func (r *addressRepo) CreateAddress(ctx context.Context, address *biz.Address) (*biz.Address, error) {
+	po := newAddressPO(address)
+	po.CreateTime = time.Now()
+	po.UpdateTime = time.Now()
 
-	now := time.Now()
-	addr := newAddress(address)
-	addr.ID = r.nextID
-	addr.CreateTime = now
-	addr.UpdateTime = now
-	r.items[addr.ID] = addr
-	r.nextID++
-	return toBiz(addr), nil
+	if err := DB.WithContext(ctx).Create(po).Error; err != nil {
+		return nil, err
+	}
+	return toAddressBiz(po), nil
 }
 
-func (r *addressRepo) UpdateAddress(_ context.Context, address *biz.Address) (*biz.Address, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	current, ok := r.items[address.ID]
-	if !ok || current.DelFlag || current.UserID != address.UserID {
+func (r *addressRepo) UpdateAddress(ctx context.Context, address *biz.Address) (*biz.Address, error) {
+	var po Address
+	if err := DB.WithContext(ctx).Where("id = ? AND user_id = ? AND del_flag = 0", address.ID, address.UserID).First(&po).Error; err != nil {
 		return nil, biz.ErrAddressNotFound
 	}
 
-	updated := newAddress(address)
-	updated.CreateTime = current.CreateTime
+	updated := newAddressPO(address)
+	updated.ID = po.ID
+	updated.CreateTime = po.CreateTime
 	updated.UpdateTime = time.Now()
-	updated.DelFlag = current.DelFlag
-	r.items[address.ID] = updated
-	return toBiz(updated), nil
+	updated.DelFlag = po.DelFlag
+
+	if err := DB.WithContext(ctx).Model(&po).Updates(updated).Error; err != nil {
+		return nil, err
+	}
+	return toAddressBiz(updated), nil
 }
 
-func (r *addressRepo) DeleteAddress(_ context.Context, userID, id int64) error {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	current, ok := r.items[id]
-	if !ok || current.DelFlag || current.UserID != userID {
+func (r *addressRepo) DeleteAddress(ctx context.Context, userID, id int64) error {
+	result := DB.WithContext(ctx).Model(&Address{}).
+		Where("id = ? AND user_id = ? AND del_flag = 0", id, userID).
+		Update("del_flag", 1)
+	if result.RowsAffected == 0 {
 		return biz.ErrAddressNotFound
 	}
-	current.DelFlag = true
-	current.UpdateTime = time.Now()
-	return nil
+	return result.Error
 }
 
-func (r *addressRepo) BatchDeleteAddresses(_ context.Context, userID int64, ids []int64) (int32, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	var deleted int32
-	for _, id := range ids {
-		current, ok := r.items[id]
-		if !ok || current.DelFlag || current.UserID != userID {
-			continue
-		}
-		current.DelFlag = true
-		current.UpdateTime = time.Now()
-		deleted++
-	}
-	return deleted, nil
+func (r *addressRepo) BatchDeleteAddresses(ctx context.Context, userID int64, ids []int64) (int32, error) {
+	result := DB.WithContext(ctx).Model(&Address{}).
+		Where("id IN ? AND user_id = ? AND del_flag = 0", ids, userID).
+		Update("del_flag", 1)
+	return int32(result.RowsAffected), result.Error
 }
 
-// newAddress 将 biz.Address 转换为 model.Address（DO → PO）。
-func newAddress(in *biz.Address) *model.Address {
+// newAddressPO 将 biz.Address 转换为 Address（DO → PO）。
+func newAddressPO(in *biz.Address) *Address {
 	if in == nil {
 		return nil
 	}
-	return &model.Address{
-		ID:            in.ID,
+	return &Address{
 		UserID:        in.UserID,
 		AddrType:      in.AddrType,
 		ReceiverName:  in.ReceiverName,
@@ -154,14 +109,11 @@ func newAddress(in *biz.Address) *model.Address {
 		District:      in.District,
 		DetailAddr:    in.DetailAddr,
 		IsDefault:     in.IsDefault,
-		CreateTime:    in.CreateTime,
-		UpdateTime:    in.UpdateTime,
-		DelFlag:       in.DelFlag,
 	}
 }
 
-// toBiz 将 model.Address 转换为 biz.Address（PO → DO）。
-func toBiz(in *model.Address) *biz.Address {
+// toAddressBiz 将 Address 转换为 biz.Address（PO → DO）。
+func toAddressBiz(in *Address) *biz.Address {
 	if in == nil {
 		return nil
 	}
