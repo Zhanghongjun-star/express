@@ -3,6 +3,7 @@
 import (
 	addressv1 "shunfeng-miniprogram/api/address/v1"
 	orderv1 "shunfeng-miniprogram/api/order/v1"
+	orderv2 "shunfeng-miniprogram/api/order/v2"
 	todov1 "shunfeng-miniprogram/api/todo/v1"
 	userv1 "shunfeng-miniprogram/api/user/v1"
 	"shunfeng-miniprogram/internal/conf"
@@ -16,7 +17,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService) *http.Server {
+func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, freight *service.FreightService) *http.Server {
 
 	var opts = []http.ServerOption{
 		http.Middleware(
@@ -44,6 +45,7 @@ func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.User
 	todov1.RegisterTodoServiceHTTPServer(srv, todo)
 	userv1.RegisterUserServiceHTTPServer(srv, user)
 	orderv1.RegisterOrderServiceHTTPServer(srv, order)
+	orderv2.RegisterOrderServiceHTTPServer(srv, freight)
 	if address != nil {
 		addressv1.RegisterAddressServiceHTTPServer(srv, address)
 	}

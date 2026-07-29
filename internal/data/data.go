@@ -8,7 +8,7 @@ import (
 )
 
 // ProviderSet 数据层依赖注入。
-var ProviderSet = wire.NewSet(NewData, NewTodoRepo, NewAddressRepo, NewUserRepo, NewOrderRepo)
+var ProviderSet = wire.NewSet(NewData, NewTodoRepo, NewAddressRepo, NewUserRepo, NewOrderRepo, NewFreightRepo)
 
 // Data 数据层共享客户端。
 type Data struct {

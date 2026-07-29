@@ -6,6 +6,24 @@ info:
     title: ""
     version: 0.0.1
 paths:
+    /api/order/freight/estimate:
+        post:
+            tags:
+                - OrderService
+            operationId: OrderService_EstimateFreight
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v2.EstimateFreightRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v2.EstimateFreightReply'
     /api/order/history/count:
         get:
             tags:
@@ -163,10 +181,7 @@ paths:
         post:
             tags:
                 - TodoService
-            description: |-
-                CreateTodo creates a new todo item and returns the persisted record
-                 with the server-assigned id, create_time, and update_time populated.
-                 Returns INVALID_ARGUMENT if the request payload fails validation.
+            description: "CreateTodo creates a new todo item and returns the persisted record\r\n with the server-assigned id, create_time, and update_time populated.\r\n Returns INVALID_ARGUMENT if the request payload fails validation."
             operationId: TodoService_CreateTodo
             requestBody:
                 content:
@@ -185,49 +200,28 @@ paths:
         get:
             tags:
                 - TodoService
-            description: |-
-                ListTodos returns a page of todo items, optionally filtered and ordered.
-                 Use the next_page_token from TodoSet to retrieve subsequent pages.
-                 Returns INVALID_ARGUMENT if filter, order_by, or page_token are malformed.
+            description: "ListTodos returns a page of todo items, optionally filtered and ordered.\r\n Use the next_page_token from TodoSet to retrieve subsequent pages.\r\n Returns INVALID_ARGUMENT if filter, order_by, or page_token are malformed."
             operationId: TodoService_ListTodos
             parameters:
                 - name: pageSize
                   in: query
-                  description: |-
-                    Optional. Maximum number of todo items to return in a single page.
-                     The server may apply a default and a maximum when unset or out of range.
+                  description: "Optional. Maximum number of todo items to return in a single page.\r\n The server may apply a default and a maximum when unset or out of range."
                   schema:
                     type: integer
                     format: int32
                 - name: pageToken
                   in: query
-                  description: |-
-                    Optional. Token from a previous response's next_page_token used to fetch
-                     the next page. Leave empty to request the first page.
+                  description: "Optional. Token from a previous response's next_page_token used to fetch\r\n the next page. Leave empty to request the first page."
                   schema:
                     type: string
                 - name: filter
                   in: query
-                  description: |-
-                    Optional. The standard list filter.
-                     Supported fields:
-                        * `title` (i.e. `title:"bug"`)
-                        * `content` (i.e. `content:"docs"`)
-                        * `completed` (i.e. `completed` or `NOT completed`)
-                        * `create_time` range (i.e. `create_time>="2026-01-01T00:00:00Z"`)
+                  description: "Optional. The standard list filter.\r\n Supported fields:\r\n    * `title` (i.e. `title:\"bug\"`)\r\n    * `content` (i.e. `content:\"docs\"`)\r\n    * `completed` (i.e. `completed` or `NOT completed`)\r\n    * `create_time` range (i.e. `create_time>=\"2026-01-01T00:00:00Z\"`)"
                   schema:
                     type: string
                 - name: orderBy
                   in: query
-                  description: |-
-                    Optional. A comma-separated list of fields to order by.
-                     Supported fields:
-                        * `id`
-                        * `title`
-                        * `create_time`
-                        * `update_time`
-                     Append ` desc` to a field for descending order, e.g. `create_time desc`.
-                     Defaults to ascending order when no direction is supplied.
+                  description: "Optional. A comma-separated list of fields to order by.\r\n Supported fields:\r\n    * `id`\r\n    * `title`\r\n    * `create_time`\r\n    * `update_time`\r\n Append ` desc` to a field for descending order, e.g. `create_time desc`.\r\n Defaults to ascending order when no direction is supplied."
                   schema:
                     type: string
             responses:
@@ -241,11 +235,7 @@ paths:
         post:
             tags:
                 - TodoService
-            description: |-
-                SyncTodos opens a bidirectional stream for two-way synchronization.
-                 The client sends SyncTodoRequest messages describing local changes, and
-                 the server pushes back TodoEvent messages reflecting the resulting state.
-                 The stream stays open until either side closes it.
+            description: "SyncTodos opens a bidirectional stream for two-way synchronization.\r\n The client sends SyncTodoRequest messages describing local changes, and\r\n the server pushes back TodoEvent messages reflecting the resulting state.\r\n The stream stays open until either side closes it."
             operationId: TodoService_SyncTodos
             requestBody:
                 content:
@@ -264,19 +254,12 @@ paths:
         put:
             tags:
                 - TodoService
-            description: |-
-                UpdateTodo applies a partial update to an existing todo item using a
-                 FieldMask. Only the fields listed in update_mask are overwritten; all
-                 other fields are left unchanged.
-                 Returns NOT_FOUND if the target todo does not exist, or
-                 INVALID_ARGUMENT if update_mask references unknown fields.
+            description: "UpdateTodo applies a partial update to an existing todo item using a\r\n FieldMask. Only the fields listed in update_mask are overwritten; all\r\n other fields are left unchanged.\r\n Returns NOT_FOUND if the target todo does not exist, or\r\n INVALID_ARGUMENT if update_mask references unknown fields."
             operationId: TodoService_UpdateTodo
             parameters:
                 - name: updateMask
                   in: query
-                  description: |-
-                    Set of field paths in todo to overwrite. Fields not listed are left
-                     unchanged. Use a single path of `*` to replace every mutable field.
+                  description: "Set of field paths in todo to overwrite. Fields not listed are left\r\n unchanged. Use a single path of `*` to replace every mutable field."
                   schema:
                     type: string
                     format: field-mask
@@ -297,17 +280,12 @@ paths:
         get:
             tags:
                 - TodoService
-            description: |-
-                WatchTodos opens a server-side stream that emits a TodoEvent for every
-                 create, update, or delete that matches the supplied filter and ordering.
-                 The stream remains open until the client cancels or the server terminates it.
+            description: "WatchTodos opens a server-side stream that emits a TodoEvent for every\r\n create, update, or delete that matches the supplied filter and ordering.\r\n The stream remains open until the client cancels or the server terminates it."
             operationId: TodoService_WatchTodos
             parameters:
                 - name: pageSize
                   in: query
-                  description: |-
-                    Optional. Maximum number of todo items returned in the initial snapshot
-                     before live events begin streaming.
+                  description: "Optional. Maximum number of todo items returned in the initial snapshot\r\n before live events begin streaming."
                   schema:
                     type: integer
                     format: int32
@@ -337,9 +315,7 @@ paths:
         get:
             tags:
                 - TodoService
-            description: |-
-                GetTodo returns a single todo item by its id.
-                 Returns NOT_FOUND if no todo exists with the supplied id.
+            description: "GetTodo returns a single todo item by its id.\r\n Returns NOT_FOUND if no todo exists with the supplied id."
             operationId: TodoService_GetTodo
             parameters:
                 - name: id
@@ -358,9 +334,7 @@ paths:
         delete:
             tags:
                 - TodoService
-            description: |-
-                DeleteTodo permanently removes a todo item by its id.
-                 Returns NOT_FOUND if no todo exists with the supplied id.
+            description: "DeleteTodo permanently removes a todo item by its id.\r\n Returns NOT_FOUND if no todo exists with the supplied id."
             operationId: TodoService_DeleteTodo
             parameters:
                 - name: id
@@ -623,6 +597,70 @@ components:
                     format: int32
                 nextPageToken:
                     type: string
+        order.v2.EstimateFreightReply:
+            type: object
+            properties:
+                baseFreight:
+                    type: number
+                    format: double
+                insureFee:
+                    type: number
+                    format: double
+                totalPrice:
+                    type: number
+                    format: double
+                calcWeight:
+                    type: number
+                    format: double
+                tips:
+                    type: string
+            description: 运费预估返回结果
+        order.v2.EstimateFreightRequest:
+            required:
+                - senderProvince
+                - senderCity
+                - receiverProvince
+                - receiverCity
+                - weight
+                - expressType
+            type: object
+            properties:
+                senderProvince:
+                    type: string
+                    description: 寄件信息
+                senderCity:
+                    type: string
+                senderArea:
+                    type: string
+                receiverProvince:
+                    type: string
+                    description: 收件信息
+                receiverCity:
+                    type: string
+                receiverArea:
+                    type: string
+                weight:
+                    type: number
+                    description: 包裹参数
+                    format: double
+                length:
+                    type: integer
+                    format: int32
+                width:
+                    type: integer
+                    format: int32
+                height:
+                    type: integer
+                    format: int32
+                expressType:
+                    type: integer
+                    description: 快递类型：1标快 2特快 3特惠
+                    format: int32
+                insureValue:
+                    type: number
+                    description: 保价金额 0=不保价
+                    format: double
+            description: 运费预估请求
         todo.v1.SyncTodoRequest:
             type: object
             properties:
@@ -638,13 +676,9 @@ components:
                     description: Identifier of the target todo. Required for `delete` and `update`.
                 updateMask:
                     type: string
-                    description: |-
-                        Field mask used by `update` actions to limit which fields are overwritten.
-                         Ignored for `create` and `delete`.
+                    description: "Field mask used by `update` actions to limit which fields are overwritten.\r\n Ignored for `create` and `delete`."
                     format: field-mask
-            description: |-
-                SyncTodoRequest is a single client message in the SyncTodos bidirectional
-                 stream. The action field selects which operation to perform on the server.
+            description: "SyncTodoRequest is a single client message in the SyncTodos bidirectional\r\n stream. The action field selects which operation to perform on the server."
         todo.v1.Todo:
             type: object
             properties:
@@ -678,16 +712,12 @@ components:
                 todo:
                     allOf:
                         - $ref: '#/components/schemas/todo.v1.Todo'
-                    description: |-
-                        The todo item after the change. For `deleted` events only the id field
-                         is guaranteed to be populated.
+                    description: "The todo item after the change. For `deleted` events only the id field\r\n is guaranteed to be populated."
                 eventTime:
                     type: string
                     description: Time at which the change was observed by the server.
                     format: date-time
-            description: |-
-                TodoEvent is a server-sent message describing a change to a todo item.
-                 It is emitted by both WatchTodos and SyncTodos streams.
+            description: "TodoEvent is a server-sent message describing a change to a todo item.\r\n It is emitted by both WatchTodos and SyncTodos streams."
         todo.v1.TodoSet:
             type: object
             properties:
@@ -698,9 +728,7 @@ components:
                     description: The page of todo items in the order requested by ListTodosRequest.order_by.
                 nextPageToken:
                     type: string
-                    description: |-
-                        Token used to retrieve the next page via ListTodosRequest.page_token.
-                         Empty when there are no more results.
+                    description: "Token used to retrieve the next page via ListTodosRequest.page_token.\r\n Empty when there are no more results."
             description: TodoSet is a paginated collection of todo items returned by ListTodos.
         user.v1.AccountStatusInfo:
             type: object
@@ -784,9 +812,7 @@ components:
 tags:
     - name: AddressService
     - name: OrderService
+    - name: OrderService
     - name: TodoService
-      description: |-
-        TodoService provides a simple CRUD example for managing todo items.
-         It demonstrates unary, server-streaming, and bidirectional-streaming RPCs
-         together with AIP-style list filtering, ordering, and pagination.
+      description: "TodoService provides a simple CRUD example for managing todo items.\r\n It demonstrates unary, server-streaming, and bidirectional-streaming RPCs\r\n together with AIP-style list filtering, ordering, and pagination."
     - name: UserService
