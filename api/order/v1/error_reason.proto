@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package order.v1;
+
+option go_package = "shunfeng-miniprogram/api/order/v1;v1";
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.order.v1";
+option java_outer_classname = "OrderErrorReasonProto";
+
+enum ErrorReason {
+  ERROR_REASON_UNSPECIFIED = 0;
+  ORDER_NOT_FOUND = 1;
+  ORDER_INVALID_ARGUMENT = 2;
+  ORDER_QUERY_LIMIT_EXCEEDED = 3;
+  ORDER_EXPORT_FORBIDDEN = 4;
+}

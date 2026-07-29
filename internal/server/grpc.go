@@ -1,7 +1,10 @@
 ﻿package server
 
 import (
-	v1 "shunfeng-miniprogram/api/todo/v1"
+	addressv1 "shunfeng-miniprogram/api/address/v1"
+	orderv1 "shunfeng-miniprogram/api/order/v1"
+	todov1 "shunfeng-miniprogram/api/todo/v1"
+	userv1 "shunfeng-miniprogram/api/user/v1"
 	"shunfeng-miniprogram/internal/conf"
 	"shunfeng-miniprogram/internal/service"
 
@@ -10,7 +13,8 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, todo *service.TodoService) *grpc.Server {
+func NewGRPCServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService) *grpc.Server {
+
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
@@ -26,6 +30,11 @@ func NewGRPCServer(c *conf.Server, todo *service.TodoService) *grpc.Server {
 		opts = append(opts, grpc.Timeout(c.Grpc.Timeout.AsDuration()))
 	}
 	srv := grpc.NewServer(opts...)
-	v1.RegisterTodoServiceServer(srv, todo)
+	todov1.RegisterTodoServiceServer(srv, todo)
+	userv1.RegisterUserServiceServer(srv, user)
+	orderv1.RegisterOrderServiceServer(srv, order)
+	if address != nil {
+		addressv1.RegisterAddressServiceServer(srv, address)
+	}
 	return srv
 }

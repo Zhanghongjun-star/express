@@ -10,6 +10,7 @@ import (
 	"shunfeng-miniprogram/internal/biz"
 )
 
+// todoRepo 待办事项仓储的内存实现。
 type todoRepo struct {
 	data *Data
 
@@ -18,7 +19,7 @@ type todoRepo struct {
 	todos  map[int64]*biz.Todo
 }
 
-// NewTodoRepo creates a new TodoRepo instance.
+// NewTodoRepo 创建待办事项仓储。
 func NewTodoRepo(data *Data) biz.TodoRepo {
 	return &todoRepo{
 		data:   data,
@@ -108,6 +109,7 @@ func (r *todoRepo) DeleteTodo(_ context.Context, id int64) error {
 	return nil
 }
 
+// cloneTodo 深拷贝待办事项对象，防止数据竞态。
 func cloneTodo(todo *biz.Todo) *biz.Todo {
 	if todo == nil {
 		return nil

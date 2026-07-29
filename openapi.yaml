@@ -3,13 +3,162 @@
 
 openapi: 3.0.3
 info:
-    title: TodoService API
-    description: |-
-        TodoService provides a simple CRUD example for managing todo items.
-         It demonstrates unary, server-streaming, and bidirectional-streaming RPCs
-         together with AIP-style list filtering, ordering, and pagination.
+    title: ""
     version: 0.0.1
 paths:
+    /api/order/history/count:
+        get:
+            tags:
+                - OrderService
+            operationId: OrderService_GetHistoryCount
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v1.HistoryCount'
+    /api/order/history/export:
+        get:
+            tags:
+                - OrderService
+            operationId: OrderService_ExportHistory
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: recordIds
+                  in: query
+                  schema:
+                    type: array
+                    items:
+                        type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v1.ExportHistoryReply'
+    /api/order/history/list:
+        get:
+            tags:
+                - OrderService
+            operationId: OrderService_ListHistoryRecords
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v1.HistoryRecordSet'
+    /api/user/account/status:
+        get:
+            tags:
+                - UserService
+            operationId: UserService_GetAccountStatus
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.AccountStatusInfo'
+    /api/user/auth/status:
+        get:
+            tags:
+                - UserService
+            operationId: UserService_GetAuthStatus
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.AuthStatus'
+    /api/user/profile:
+        get:
+            tags:
+                - UserService
+            operationId: UserService_GetProfile
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.Profile'
+    /api/user/profile/avatar:
+        put:
+            tags:
+                - UserService
+            operationId: UserService_UpdateAvatar
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.UpdateAvatarRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.Profile'
+    /api/user/profile/nickname:
+        put:
+            tags:
+                - UserService
+            operationId: UserService_UpdateNickname
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/user.v1.UpdateNicknameRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/user.v1.Profile'
     /v1/todos/create:
         post:
             tags:
@@ -224,8 +373,256 @@ paths:
                 "200":
                     description: OK
                     content: {}
+    /v1/user/address/add:
+        post:
+            tags:
+                - AddressService
+            operationId: AddressService_CreateAddress
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/address.v1.Address'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/address.v1.Address'
+    /v1/user/address/ai/parse:
+        post:
+            tags:
+                - AddressService
+            operationId: AddressService_ParseAddress
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/address.v1.ParseAddressRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/address.v1.ParseAddressReply'
+    /v1/user/address/batch/del:
+        post:
+            tags:
+                - AddressService
+            operationId: AddressService_BatchDeleteAddresses
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/address.v1.BatchDeleteAddressesRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/address.v1.BatchDeleteAddressesReply'
+    /v1/user/address/edit/{address.id}:
+        put:
+            tags:
+                - AddressService
+            operationId: AddressService_UpdateAddress
+            parameters:
+                - name: address.id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: updateMask
+                  in: query
+                  schema:
+                    type: string
+                    format: field-mask
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/address.v1.Address'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/address.v1.Address'
+    /v1/user/address/list:
+        get:
+            tags:
+                - AddressService
+            operationId: AddressService_ListAddresses
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: addrType
+                  in: query
+                  schema:
+                    type: integer
+                    format: enum
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/address.v1.AddressSet'
+    /v1/user/address/{id}:
+        delete:
+            tags:
+                - AddressService
+            operationId: AddressService_DeleteAddress
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
 components:
     schemas:
+        address.v1.Address:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                addrType:
+                    type: integer
+                    format: enum
+                receiverName:
+                    type: string
+                receiverPhone:
+                    type: string
+                province:
+                    type: string
+                city:
+                    type: string
+                district:
+                    type: string
+                detailAddr:
+                    type: string
+                isDefault:
+                    type: boolean
+                createTime:
+                    type: string
+                    format: date-time
+                updateTime:
+                    type: string
+                    format: date-time
+                delFlag:
+                    type: boolean
+        address.v1.AddressSet:
+            type: object
+            properties:
+                addresses:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/address.v1.Address'
+                nextPageToken:
+                    type: string
+        address.v1.BatchDeleteAddressesReply:
+            type: object
+            properties:
+                deletedCount:
+                    type: integer
+                    format: int32
+        address.v1.BatchDeleteAddressesRequest:
+            required:
+                - userId
+                - ids
+            type: object
+            properties:
+                userId:
+                    type: string
+                ids:
+                    type: array
+                    items:
+                        type: string
+        address.v1.ParseAddressReply:
+            type: object
+            properties:
+                address:
+                    $ref: '#/components/schemas/address.v1.Address'
+        address.v1.ParseAddressRequest:
+            required:
+                - content
+            type: object
+            properties:
+                content:
+                    type: string
+        order.v1.ExportHistoryReply:
+            type: object
+            properties:
+                downloadUrl:
+                    type: string
+        order.v1.HistoryCount:
+            type: object
+            properties:
+                queryCountToday:
+                    type: integer
+                    format: int32
+                maxQueryPerDay:
+                    type: integer
+                    format: int32
+        order.v1.HistoryRecord:
+            type: object
+            properties:
+                id:
+                    type: string
+                orderNo:
+                    type: string
+                expressNo:
+                    type: string
+                senderName:
+                    type: string
+                receiverName:
+                    type: string
+                status:
+                    type: string
+                createTime:
+                    type: string
+                    format: date-time
+        order.v1.HistoryRecordSet:
+            type: object
+            properties:
+                records:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/order.v1.HistoryRecord'
+                totalCount:
+                    type: integer
+                    format: int32
+                nextPageToken:
+                    type: string
         todo.v1.SyncTodoRequest:
             type: object
             properties:
@@ -305,5 +702,91 @@ components:
                         Token used to retrieve the next page via ListTodosRequest.page_token.
                          Empty when there are no more results.
             description: TodoSet is a paginated collection of todo items returned by ListTodos.
+        user.v1.AccountStatusInfo:
+            type: object
+            properties:
+                userId:
+                    type: string
+                accountStatus:
+                    type: integer
+                    format: int32
+                realNameAuth:
+                    type: integer
+                    format: int32
+                isEnterprise:
+                    type: boolean
+                canModifyProfile:
+                    type: boolean
+                canManageAddress:
+                    type: boolean
+                canQueryHistory:
+                    type: boolean
+                canExport:
+                    type: boolean
+        user.v1.AuthStatus:
+            type: object
+            properties:
+                userId:
+                    type: string
+                realNameAuth:
+                    type: integer
+                    format: int32
+                rejectReason:
+                    type: string
+        user.v1.Profile:
+            type: object
+            properties:
+                userId:
+                    type: string
+                avatarUrl:
+                    type: string
+                nickName:
+                    type: string
+                phone:
+                    type: string
+                realNameAuth:
+                    type: integer
+                    format: int32
+                accountStatus:
+                    type: integer
+                    format: int32
+                isEnterprise:
+                    type: boolean
+                queryCountToday:
+                    type: integer
+                    format: int32
+                createTime:
+                    type: string
+                    format: date-time
+                updateTime:
+                    type: string
+                    format: date-time
+        user.v1.UpdateAvatarRequest:
+            required:
+                - userId
+                - avatarUrl
+            type: object
+            properties:
+                userId:
+                    type: string
+                avatarUrl:
+                    type: string
+        user.v1.UpdateNicknameRequest:
+            required:
+                - userId
+                - nickName
+            type: object
+            properties:
+                userId:
+                    type: string
+                nickName:
+                    type: string
 tags:
+    - name: AddressService
+    - name: OrderService
     - name: TodoService
+      description: |-
+        TodoService provides a simple CRUD example for managing todo items.
+         It demonstrates unary, server-streaming, and bidirectional-streaming RPCs
+         together with AIP-style list filtering, ordering, and pagination.
+    - name: UserService
