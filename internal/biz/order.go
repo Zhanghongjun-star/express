@@ -16,8 +16,6 @@ var (
 	ErrOrderInvalidArgument = errors.BadRequest(v1.ErrorReason_ORDER_INVALID_ARGUMENT.String(), "invalid order argument")
 	// ErrOrderQueryLimitExceeded 当日查询次数超限时返回。
 	ErrOrderQueryLimitExceeded = errors.Forbidden(v1.ErrorReason_ORDER_QUERY_LIMIT_EXCEEDED.String(), "query limit exceeded")
-	// ErrOrderExportForbidden 无导出权限时返回。
-	ErrOrderExportForbidden = errors.Forbidden(v1.ErrorReason_ORDER_EXPORT_FORBIDDEN.String(), "export forbidden")
 )
 
 const (
