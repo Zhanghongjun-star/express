@@ -1,7 +1,8 @@
-﻿package server
+package server
 
 import (
 	addressv1 "shunfeng-miniprogram/api/address/v1"
+	authv1 "shunfeng-miniprogram/api/auth/v1"
 	orderv1 "shunfeng-miniprogram/api/order/v1"
 	todov1 "shunfeng-miniprogram/api/todo/v1"
 	userv1 "shunfeng-miniprogram/api/user/v1"
@@ -13,7 +14,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService) *grpc.Server {
+func NewGRPCServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, auth *service.AuthService) *grpc.Server {
 
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
@@ -33,6 +34,7 @@ func NewGRPCServer(c *conf.Server, todo *service.TodoService, user *service.User
 	todov1.RegisterTodoServiceServer(srv, todo)
 	userv1.RegisterUserServiceServer(srv, user)
 	orderv1.RegisterOrderServiceServer(srv, order)
+	authv1.RegisterAuthServiceServer(srv, auth)
 	if address != nil {
 		addressv1.RegisterAddressServiceServer(srv, address)
 	}

@@ -33,8 +33,11 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger *slog.Logger, 
 	orderRepo := data.NewOrderRepo()
 	orderUsecase := biz.NewOrderUsecase(orderRepo)
 	orderService := service.NewOrderService(orderUsecase)
-	grpcServer := server.NewGRPCServer(confServer, todoService, userService, addressService, orderService)
-	httpServer := server.NewHTTPServer(confServer, todoService, userService, addressService, orderService)
+	authRepo := data.NewAuthRepo()
+	authUsecase := biz.NewAuthUsecase(authRepo)
+	authService := service.NewAuthService(authUsecase)
+	grpcServer := server.NewGRPCServer(confServer, todoService, userService, addressService, orderService, authService)
+	httpServer := server.NewHTTPServer(confServer, todoService, userService, addressService, orderService, authService)
 	app := newApp(logger, grpcServer, httpServer, registrar)
 	return app, func() {
 	}, nil
