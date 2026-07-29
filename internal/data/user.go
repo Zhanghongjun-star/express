@@ -2,126 +2,95 @@ package data
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	"shunfeng-miniprogram/internal/biz"
 )
 
-// userRepo 用户仓储的内存实现。
-type userRepo struct {
-	data *Data
-
-	mu         sync.RWMutex
-	nextID     int64
-	users      map[int64]*biz.User
-	authStatus map[int64]*biz.AuthStatus
-}
+// userRepo 用户仓储的 GORM 实现。
+type userRepo struct{}
 
 // NewUserRepo 创建用户仓储。
-func NewUserRepo(data *Data) biz.UserRepo {
-	r := &userRepo{
-		data:       data,
-		nextID:     1,
-		users:      make(map[int64]*biz.User),
-		authStatus: make(map[int64]*biz.AuthStatus),
+func NewUserRepo() biz.UserRepo {
+	return &userRepo{}
+}
+
+func (r *userRepo) FindByID(ctx context.Context, id int64) (*biz.User, error) {
+	var po User
+	if err := DB.WithContext(ctx).First(&po, id).Error; err != nil {
+		return nil, biz.ErrUserNotFound
+	}
+	return toUserBiz(&po), nil
+}
+
+func (r *userRepo) UpdateAvatar(ctx context.Context, id int64, avatarURL string) (*biz.User, error) {
+	var po User
+	if err := DB.WithContext(ctx).First(&po, id).Error; err != nil {
+		return nil, biz.ErrUserNotFound
 	}
 	now := time.Now()
-	r.users[1] = &biz.User{
-		ID:              1,
-		Phone:           "138****1234",
-		Email:           "user@example.com",
-		AvatarURL:       "https://example.com/avatar/default.png",
-		NickName:        "用户",
-		RealNameAuth:    0,
-		AccountStatus:   1,
-		IsEnterprise:    false,
-		QueryCountToday: 0,
-		CreateTime:      now,
-		UpdateTime:      now,
+	if err := DB.WithContext(ctx).Model(&po).Updates(map[string]any{
+		"avatar_url":  avatarURL,
+		"update_time": now,
+	}).Error; err != nil {
+		return nil, err
 	}
-	r.authStatus[1] = &biz.AuthStatus{
-		UserID:       1,
-		RealNameAuth: 0,
-		RejectReason: "",
-	}
-	return r
+	po.AvatarURL = avatarURL
+	po.UpdateTime = now
+	return toUserBiz(&po), nil
 }
 
-func (r *userRepo) FindByID(_ context.Context, id int64) (*biz.User, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	user, ok := r.users[id]
-	if !ok {
+func (r *userRepo) UpdateNickname(ctx context.Context, id int64, nickName string) (*biz.User, error) {
+	var po User
+	if err := DB.WithContext(ctx).First(&po, id).Error; err != nil {
 		return nil, biz.ErrUserNotFound
 	}
-	return cloneUser(user), nil
+	now := time.Now()
+	if err := DB.WithContext(ctx).Model(&po).Updates(map[string]any{
+		"nick_name":   nickName,
+		"update_time": now,
+	}).Error; err != nil {
+		return nil, err
+	}
+	po.NickName = nickName
+	po.UpdateTime = now
+	return toUserBiz(&po), nil
 }
 
-func (r *userRepo) UpdateAvatar(_ context.Context, id int64, avatarURL string) (*biz.User, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	user, ok := r.users[id]
-	if !ok {
+func (r *userRepo) GetAuthStatus(ctx context.Context, userID int64) (*biz.AuthStatus, error) {
+	var po User
+	if err := DB.WithContext(ctx).First(&po, userID).Error; err != nil {
 		return nil, biz.ErrUserNotFound
 	}
-	updated := cloneUser(user)
-	updated.AvatarURL = avatarURL
-	updated.UpdateTime = time.Now()
-	r.users[id] = cloneUser(updated)
-	return cloneUser(updated), nil
-}
-
-func (r *userRepo) UpdateNickname(_ context.Context, id int64, nickName string) (*biz.User, error) {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	user, ok := r.users[id]
-	if !ok {
-		return nil, biz.ErrUserNotFound
+	status := &biz.AuthStatus{
+		UserID:       po.ID,
+		RealNameAuth: po.RealNameAuth,
 	}
-	updated := cloneUser(user)
-	updated.NickName = nickName
-	updated.UpdateTime = time.Now()
-	r.users[id] = cloneUser(updated)
-	return cloneUser(updated), nil
-}
-
-func (r *userRepo) GetAuthStatus(_ context.Context, userID int64) (*biz.AuthStatus, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	status, ok := r.authStatus[userID]
-	if !ok {
-		return nil, biz.ErrUserNotFound
+	var auth IdentityRealNameAuth
+	if err := DB.WithContext(ctx).Where("user_id = ?", userID).First(&auth).Error; err == nil {
+		status.RejectReason = auth.RejectReason
 	}
-	cp := *status
-	return &cp, nil
+	return status, nil
 }
 
-func (r *userRepo) GetAccountStatus(_ context.Context, userID int64) (*biz.AccountStatusInfo, error) {
-	r.mu.RLock()
-	defer r.mu.RUnlock()
-
-	user, ok := r.users[userID]
-	if !ok {
+func (r *userRepo) GetAccountStatus(ctx context.Context, userID int64) (*biz.AccountStatusInfo, error) {
+	var po User
+	if err := DB.WithContext(ctx).First(&po, userID).Error; err != nil {
 		return nil, biz.ErrUserNotFound
 	}
 	info := &biz.AccountStatusInfo{
-		UserID:        user.ID,
-		AccountStatus: user.AccountStatus,
-		RealNameAuth:  user.RealNameAuth,
-		IsEnterprise:  user.IsEnterprise,
+		UserID:        po.ID,
+		AccountStatus: po.AccountStatus,
+		RealNameAuth:  po.RealNameAuth,
+		IsEnterprise:  po.IsEnterprise,
 	}
 	switch {
-	case user.AccountStatus == 2:
+	case po.AccountStatus == 2:
 		info.CanModifyProfile = false
 		info.CanManageAddress = false
 		info.CanQueryHistory = true
 		info.CanExport = false
-	case user.RealNameAuth == 0 || user.RealNameAuth == 3:
+	case po.RealNameAuth == 0 || po.RealNameAuth == 3:
 		info.CanModifyProfile = true
 		info.CanManageAddress = true
 		info.CanQueryHistory = true
@@ -135,22 +104,22 @@ func (r *userRepo) GetAccountStatus(_ context.Context, userID int64) (*biz.Accou
 	return info, nil
 }
 
-// cloneUser 深拷贝用户对象，防止数据竞态。
-func cloneUser(u *biz.User) *biz.User {
-	if u == nil {
+// toUserBiz 将 User 转换为 biz.User（PO → DO）。
+func toUserBiz(in *User) *biz.User {
+	if in == nil {
 		return nil
 	}
 	return &biz.User{
-		ID:              u.ID,
-		Phone:           u.Phone,
-		Email:           u.Email,
-		AvatarURL:       u.AvatarURL,
-		NickName:        u.NickName,
-		RealNameAuth:    u.RealNameAuth,
-		AccountStatus:   u.AccountStatus,
-		IsEnterprise:    u.IsEnterprise,
-		QueryCountToday: u.QueryCountToday,
-		CreateTime:      u.CreateTime,
-		UpdateTime:      u.UpdateTime,
+		ID:              in.ID,
+		Phone:           in.Phone,
+		Email:           in.Email,
+		AvatarURL:       in.AvatarURL,
+		NickName:        in.NickName,
+		RealNameAuth:    in.RealNameAuth,
+		AccountStatus:   in.AccountStatus,
+		IsEnterprise:    in.IsEnterprise,
+		QueryCountToday: in.QueryCountToday,
+		CreateTime:      in.CreateTime,
+		UpdateTime:      in.UpdateTime,
 	}
 }

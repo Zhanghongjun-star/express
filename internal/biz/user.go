@@ -15,8 +15,6 @@ var (
 	ErrUserNotFound = errors.NotFound(v1.ErrorReason_USER_NOT_FOUND.String(), "user not found")
 	// ErrUserInvalidArgument 请求参数无效时返回。
 	ErrUserInvalidArgument = errors.BadRequest(v1.ErrorReason_USER_INVALID_ARGUMENT.String(), "invalid user argument")
-	// ErrUserUnauthorized 用户未登录时返回。
-	ErrUserUnauthorized = errors.Unauthorized(v1.ErrorReason_USER_UNAUTHORIZED.String(), "user unauthorized")
 	// ErrUserForbidden 账号被封禁时返回。
 	ErrUserForbidden = errors.Forbidden(v1.ErrorReason_USER_FORBIDDEN.String(), "user account is banned")
 )

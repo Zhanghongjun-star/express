@@ -138,6 +138,7 @@ type Data struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Database      *Data_Database         `protobuf:"bytes,1,opt,name=database,proto3" json:"database,omitempty"`
 	Redis         *Data_Redis            `protobuf:"bytes,2,opt,name=redis,proto3" json:"redis,omitempty"`
+	Elasticsearch *Data_Elasticsearch    `protobuf:"bytes,3,opt,name=elasticsearch,proto3" json:"elasticsearch,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -182,6 +183,13 @@ func (x *Data) GetDatabase() *Data_Database {
 func (x *Data) GetRedis() *Data_Redis {
 	if x != nil {
 		return x.Redis
+	}
+	return nil
+}
+
+func (x *Data) GetElasticsearch() *Data_Elasticsearch {
+	if x != nil {
+		return x.Elasticsearch
 	}
 	return nil
 }
@@ -238,6 +246,8 @@ type Nacos struct {
 	LogDir        string                 `protobuf:"bytes,4,opt,name=log_dir,json=logDir,proto3" json:"log_dir,omitempty"`
 	CacheDir      string                 `protobuf:"bytes,5,opt,name=cache_dir,json=cacheDir,proto3" json:"cache_dir,omitempty"`
 	LogLevel      string                 `protobuf:"bytes,6,opt,name=log_level,json=logLevel,proto3" json:"log_level,omitempty"`
+	DataId        string                 `protobuf:"bytes,7,opt,name=data_id,json=dataId,proto3" json:"data_id,omitempty"`
+	Group         string                 `protobuf:"bytes,8,opt,name=group,proto3" json:"group,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -310,6 +320,20 @@ func (x *Nacos) GetCacheDir() string {
 func (x *Nacos) GetLogLevel() string {
 	if x != nil {
 		return x.LogLevel
+	}
+	return ""
+}
+
+func (x *Nacos) GetDataId() string {
+	if x != nil {
+		return x.DataId
+	}
+	return ""
+}
+
+func (x *Nacos) GetGroup() string {
+	if x != nil {
+		return x.Group
 	}
 	return ""
 }
@@ -436,8 +460,11 @@ func (x *Server_GRPC) GetTimeout() *durationpb.Duration {
 
 type Data_Database struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Driver        string                 `protobuf:"bytes,1,opt,name=driver,proto3" json:"driver,omitempty"`
-	Source        string                 `protobuf:"bytes,2,opt,name=source,proto3" json:"source,omitempty"`
+	User          string                 `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Host          string                 `protobuf:"bytes,3,opt,name=host,proto3" json:"host,omitempty"`
+	Port          int32                  `protobuf:"varint,4,opt,name=port,proto3" json:"port,omitempty"`
+	Database      string                 `protobuf:"bytes,5,opt,name=database,proto3" json:"database,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -472,26 +499,48 @@ func (*Data_Database) Descriptor() ([]byte, []int) {
 	return file_conf_conf_proto_rawDescGZIP(), []int{2, 0}
 }
 
-func (x *Data_Database) GetDriver() string {
+func (x *Data_Database) GetUser() string {
 	if x != nil {
-		return x.Driver
+		return x.User
 	}
 	return ""
 }
 
-func (x *Data_Database) GetSource() string {
+func (x *Data_Database) GetPassword() string {
 	if x != nil {
-		return x.Source
+		return x.Password
+	}
+	return ""
+}
+
+func (x *Data_Database) GetHost() string {
+	if x != nil {
+		return x.Host
+	}
+	return ""
+}
+
+func (x *Data_Database) GetPort() int32 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
+}
+
+func (x *Data_Database) GetDatabase() string {
+	if x != nil {
+		return x.Database
 	}
 	return ""
 }
 
 type Data_Redis struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Network       string                 `protobuf:"bytes,1,opt,name=network,proto3" json:"network,omitempty"`
-	Addr          string                 `protobuf:"bytes,2,opt,name=addr,proto3" json:"addr,omitempty"`
-	ReadTimeout   *durationpb.Duration   `protobuf:"bytes,3,opt,name=read_timeout,json=readTimeout,proto3" json:"read_timeout,omitempty"`
-	WriteTimeout  *durationpb.Duration   `protobuf:"bytes,4,opt,name=write_timeout,json=writeTimeout,proto3" json:"write_timeout,omitempty"`
+	Addr          string                 `protobuf:"bytes,1,opt,name=addr,proto3" json:"addr,omitempty"`
+	Password      string                 `protobuf:"bytes,2,opt,name=password,proto3" json:"password,omitempty"`
+	Db            int32                  `protobuf:"varint,3,opt,name=db,proto3" json:"db,omitempty"`
+	ReadTimeout   *durationpb.Duration   `protobuf:"bytes,4,opt,name=read_timeout,json=readTimeout,proto3" json:"read_timeout,omitempty"`
+	WriteTimeout  *durationpb.Duration   `protobuf:"bytes,5,opt,name=write_timeout,json=writeTimeout,proto3" json:"write_timeout,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -526,18 +575,25 @@ func (*Data_Redis) Descriptor() ([]byte, []int) {
 	return file_conf_conf_proto_rawDescGZIP(), []int{2, 1}
 }
 
-func (x *Data_Redis) GetNetwork() string {
-	if x != nil {
-		return x.Network
-	}
-	return ""
-}
-
 func (x *Data_Redis) GetAddr() string {
 	if x != nil {
 		return x.Addr
 	}
 	return ""
+}
+
+func (x *Data_Redis) GetPassword() string {
+	if x != nil {
+		return x.Password
+	}
+	return ""
+}
+
+func (x *Data_Redis) GetDb() int32 {
+	if x != nil {
+		return x.Db
+	}
+	return 0
 }
 
 func (x *Data_Redis) GetReadTimeout() *durationpb.Duration {
@@ -552,6 +608,50 @@ func (x *Data_Redis) GetWriteTimeout() *durationpb.Duration {
 		return x.WriteTimeout
 	}
 	return nil
+}
+
+type Data_Elasticsearch struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Addr          string                 `protobuf:"bytes,1,opt,name=addr,proto3" json:"addr,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Data_Elasticsearch) Reset() {
+	*x = Data_Elasticsearch{}
+	mi := &file_conf_conf_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Data_Elasticsearch) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Data_Elasticsearch) ProtoMessage() {}
+
+func (x *Data_Elasticsearch) ProtoReflect() protoreflect.Message {
+	mi := &file_conf_conf_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Data_Elasticsearch.ProtoReflect.Descriptor instead.
+func (*Data_Elasticsearch) Descriptor() ([]byte, []int) {
+	return file_conf_conf_proto_rawDescGZIP(), []int{2, 2}
+}
+
+func (x *Data_Elasticsearch) GetAddr() string {
+	if x != nil {
+		return x.Addr
+	}
+	return ""
 }
 
 var File_conf_conf_proto protoreflect.FileDescriptor
@@ -574,27 +674,36 @@ const file_conf_conf_proto_rawDesc = "" +
 	"\x04GRPC\x12\x18\n" +
 	"\anetwork\x18\x01 \x01(\tR\anetwork\x12\x12\n" +
 	"\x04addr\x18\x02 \x01(\tR\x04addr\x123\n" +
-	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\xdd\x02\n" +
+	"\atimeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\atimeout\"\x9e\x04\n" +
 	"\x04Data\x125\n" +
 	"\bdatabase\x18\x01 \x01(\v2\x19.kratos.api.Data.DatabaseR\bdatabase\x12,\n" +
-	"\x05redis\x18\x02 \x01(\v2\x16.kratos.api.Data.RedisR\x05redis\x1a:\n" +
-	"\bDatabase\x12\x16\n" +
-	"\x06driver\x18\x01 \x01(\tR\x06driver\x12\x16\n" +
-	"\x06source\x18\x02 \x01(\tR\x06source\x1a\xb3\x01\n" +
-	"\x05Redis\x12\x18\n" +
-	"\anetwork\x18\x01 \x01(\tR\anetwork\x12\x12\n" +
-	"\x04addr\x18\x02 \x01(\tR\x04addr\x12<\n" +
-	"\fread_timeout\x18\x03 \x01(\v2\x19.google.protobuf.DurationR\vreadTimeout\x12>\n" +
-	"\rwrite_timeout\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\fwriteTimeout\"3\n" +
+	"\x05redis\x18\x02 \x01(\v2\x16.kratos.api.Data.RedisR\x05redis\x12D\n" +
+	"\relasticsearch\x18\x03 \x01(\v2\x1e.kratos.api.Data.ElasticsearchR\relasticsearch\x1a~\n" +
+	"\bDatabase\x12\x12\n" +
+	"\x04user\x18\x01 \x01(\tR\x04user\x12\x1a\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x12\n" +
+	"\x04host\x18\x03 \x01(\tR\x04host\x12\x12\n" +
+	"\x04port\x18\x04 \x01(\x05R\x04port\x12\x1a\n" +
+	"\bdatabase\x18\x05 \x01(\tR\bdatabase\x1a\xc5\x01\n" +
+	"\x05Redis\x12\x12\n" +
+	"\x04addr\x18\x01 \x01(\tR\x04addr\x12\x1a\n" +
+	"\bpassword\x18\x02 \x01(\tR\bpassword\x12\x0e\n" +
+	"\x02db\x18\x03 \x01(\x05R\x02db\x12<\n" +
+	"\fread_timeout\x18\x04 \x01(\v2\x19.google.protobuf.DurationR\vreadTimeout\x12>\n" +
+	"\rwrite_timeout\x18\x05 \x01(\v2\x19.google.protobuf.DurationR\fwriteTimeout\x1a#\n" +
+	"\rElasticsearch\x12\x12\n" +
+	"\x04addr\x18\x01 \x01(\tR\x04addr\"3\n" +
 	"\bRegistry\x12'\n" +
-	"\x05nacos\x18\x01 \x01(\v2\x11.kratos.api.NacosR\x05nacos\"\xa5\x01\n" +
+	"\x05nacos\x18\x01 \x01(\v2\x11.kratos.api.NacosR\x05nacos\"\xd4\x01\n" +
 	"\x05Nacos\x12\x12\n" +
 	"\x04addr\x18\x01 \x01(\tR\x04addr\x12\x12\n" +
 	"\x04port\x18\x02 \x01(\x04R\x04port\x12!\n" +
 	"\fnamespace_id\x18\x03 \x01(\tR\vnamespaceId\x12\x17\n" +
 	"\alog_dir\x18\x04 \x01(\tR\x06logDir\x12\x1b\n" +
 	"\tcache_dir\x18\x05 \x01(\tR\bcacheDir\x12\x1b\n" +
-	"\tlog_level\x18\x06 \x01(\tR\blogLevelB)Z'shunfeng-miniprogram/internal/conf;confb\x06proto3"
+	"\tlog_level\x18\x06 \x01(\tR\blogLevel\x12\x17\n" +
+	"\adata_id\x18\a \x01(\tR\x06dataId\x12\x14\n" +
+	"\x05group\x18\b \x01(\tR\x05groupB)Z'shunfeng-miniprogram/internal/conf;confb\x06proto3"
 
 var (
 	file_conf_conf_proto_rawDescOnce sync.Once
@@ -608,7 +717,7 @@ func file_conf_conf_proto_rawDescGZIP() []byte {
 	return file_conf_conf_proto_rawDescData
 }
 
-var file_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_conf_conf_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_conf_conf_proto_goTypes = []any{
 	(*Bootstrap)(nil),           // 0: kratos.api.Bootstrap
 	(*Server)(nil),              // 1: kratos.api.Server
@@ -619,7 +728,8 @@ var file_conf_conf_proto_goTypes = []any{
 	(*Server_GRPC)(nil),         // 6: kratos.api.Server.GRPC
 	(*Data_Database)(nil),       // 7: kratos.api.Data.Database
 	(*Data_Redis)(nil),          // 8: kratos.api.Data.Redis
-	(*durationpb.Duration)(nil), // 9: google.protobuf.Duration
+	(*Data_Elasticsearch)(nil),  // 9: kratos.api.Data.Elasticsearch
+	(*durationpb.Duration)(nil), // 10: google.protobuf.Duration
 }
 var file_conf_conf_proto_depIdxs = []int32{
 	1,  // 0: kratos.api.Bootstrap.server:type_name -> kratos.api.Server
@@ -629,16 +739,17 @@ var file_conf_conf_proto_depIdxs = []int32{
 	6,  // 4: kratos.api.Server.grpc:type_name -> kratos.api.Server.GRPC
 	7,  // 5: kratos.api.Data.database:type_name -> kratos.api.Data.Database
 	8,  // 6: kratos.api.Data.redis:type_name -> kratos.api.Data.Redis
-	4,  // 7: kratos.api.Registry.nacos:type_name -> kratos.api.Nacos
-	9,  // 8: kratos.api.Server.HTTP.timeout:type_name -> google.protobuf.Duration
-	9,  // 9: kratos.api.Server.GRPC.timeout:type_name -> google.protobuf.Duration
-	9,  // 10: kratos.api.Data.Redis.read_timeout:type_name -> google.protobuf.Duration
-	9,  // 11: kratos.api.Data.Redis.write_timeout:type_name -> google.protobuf.Duration
-	12, // [12:12] is the sub-list for method output_type
-	12, // [12:12] is the sub-list for method input_type
-	12, // [12:12] is the sub-list for extension type_name
-	12, // [12:12] is the sub-list for extension extendee
-	0,  // [0:12] is the sub-list for field type_name
+	9,  // 7: kratos.api.Data.elasticsearch:type_name -> kratos.api.Data.Elasticsearch
+	4,  // 8: kratos.api.Registry.nacos:type_name -> kratos.api.Nacos
+	10, // 9: kratos.api.Server.HTTP.timeout:type_name -> google.protobuf.Duration
+	10, // 10: kratos.api.Server.GRPC.timeout:type_name -> google.protobuf.Duration
+	10, // 11: kratos.api.Data.Redis.read_timeout:type_name -> google.protobuf.Duration
+	10, // 12: kratos.api.Data.Redis.write_timeout:type_name -> google.protobuf.Duration
+	13, // [13:13] is the sub-list for method output_type
+	13, // [13:13] is the sub-list for method input_type
+	13, // [13:13] is the sub-list for extension type_name
+	13, // [13:13] is the sub-list for extension extendee
+	0,  // [0:13] is the sub-list for field type_name
 }
 
 func init() { file_conf_conf_proto_init() }
@@ -652,7 +763,7 @@ func file_conf_conf_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_conf_conf_proto_rawDesc), len(file_conf_conf_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

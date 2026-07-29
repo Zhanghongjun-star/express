@@ -35,7 +35,7 @@ func (s *AddressService) ListAddresses(ctx context.Context, req *v1.ListAddresse
 		req.PageSize = defaultAddressPageSize
 	}
 	addresses, err := s.uc.ListAddresses(ctx, req.GetUserId(),
-		biz.AddressListType(req.GetAddrType()),
+		biz.AddressListType(int32(req.GetAddrType())),
 		biz.AddressListLimit(int(req.GetPageSize())),
 		biz.AddressListOffset(int(pageToken.Offset)),
 	)
@@ -96,7 +96,7 @@ func (s *AddressService) BatchDeleteAddresses(ctx context.Context, req *v1.Batch
 
 // ParseAddress 解析文本为地址。
 func (s *AddressService) ParseAddress(ctx context.Context, req *v1.ParseAddressRequest) (*v1.ParseAddressReply, error) {
-	address, err := s.uc.ParseAddress(req.GetContent())
+	address, err := s.uc.ParseAddress(ctx, req.GetContent())
 	if err != nil {
 		return nil, err
 	}
@@ -111,7 +111,7 @@ func convertAddress(in *v1.Address) *biz.Address {
 	return &biz.Address{
 		ID:            in.GetId(),
 		UserID:        in.GetUserId(),
-		AddrType:      in.GetAddrType(),
+		AddrType:      int32(in.GetAddrType()),
 		ReceiverName:  in.GetReceiverName(),
 		ReceiverPhone: in.GetReceiverPhone(),
 		Province:      in.GetProvince(),
@@ -131,7 +131,7 @@ func convertAddressReply(in *biz.Address) *v1.Address {
 	return &v1.Address{
 		Id:            in.ID,
 		UserId:        in.UserID,
-		AddrType:      in.AddrType,
+		AddrType:      v1.AddressType(in.AddrType),
 		ReceiverName:  in.ReceiverName,
 		ReceiverPhone: in.ReceiverPhone,
 		Province:      in.Province,
@@ -156,7 +156,7 @@ func applyAddressMask(dst *biz.Address, src *v1.Address, paths []string) {
 			*dst = *convertAddress(src)
 			return
 		case "addr_type":
-			dst.AddrType = src.GetAddrType()
+			dst.AddrType = int32(src.GetAddrType())
 		case "receiver_name":
 			dst.ReceiverName = src.GetReceiverName()
 		case "receiver_phone":
