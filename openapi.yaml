@@ -177,6 +177,142 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/user.v1.Profile'
+    /api/v1/account/password:
+        put:
+            tags:
+                - AuthService
+            operationId: AuthService_ChangePassword
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.ChangePasswordRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /api/v1/auth/login:
+        post:
+            tags:
+                - AuthService
+            operationId: AuthService_Login
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.LoginRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.TokenReply'
+    /api/v1/auth/logout:
+        post:
+            tags:
+                - AuthService
+            operationId: AuthService_Logout
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.LogoutRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /api/v1/auth/refresh:
+        post:
+            tags:
+                - AuthService
+            operationId: AuthService_RefreshToken
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.RefreshTokenRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.RefreshTokenReply'
+    /api/v1/auth/register:
+        post:
+            tags:
+                - AuthService
+            operationId: AuthService_Register
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.RegisterRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.TokenReply'
+    /api/v1/auth/verification-codes:
+        post:
+            tags:
+                - AuthService
+            operationId: AuthService_SendVerificationCode
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.SendVerificationCodeRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.VerificationCodeReply'
+    /api/v1/users/me/real-name-auth:
+        get:
+            tags:
+                - AuthService
+            operationId: AuthService_GetRealNameAuth
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.RealNameAuthInfo'
+        post:
+            tags:
+                - AuthService
+            operationId: AuthService_SubmitRealNameAuth
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/auth.v1.SubmitRealNameAuthRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/auth.v1.RealNameAuthReply'
     /v1/todos/create:
         post:
             tags:
@@ -553,6 +689,164 @@ components:
             properties:
                 content:
                     type: string
+        auth.v1.ChangePasswordRequest:
+            required:
+                - userId
+                - oldPassword
+                - newPassword
+            type: object
+            properties:
+                userId:
+                    type: string
+                oldPassword:
+                    type: string
+                newPassword:
+                    type: string
+        auth.v1.LoginRequest:
+            required:
+                - account
+                - password
+                - deviceId
+            type: object
+            properties:
+                account:
+                    type: string
+                password:
+                    type: string
+                deviceId:
+                    type: string
+        auth.v1.LogoutRequest:
+            required:
+                - userId
+                - accessToken
+                - deviceId
+            type: object
+            properties:
+                userId:
+                    type: string
+                accessToken:
+                    type: string
+                refreshToken:
+                    type: string
+                deviceId:
+                    type: string
+                logoutAll:
+                    type: boolean
+        auth.v1.RealNameAuthInfo:
+            type: object
+            properties:
+                authId:
+                    type: string
+                userId:
+                    type: string
+                realNameMask:
+                    type: string
+                idCardMask:
+                    type: string
+                imageUrls:
+                    type: array
+                    items:
+                        type: string
+                status:
+                    type: string
+                rejectReason:
+                    type: string
+        auth.v1.RealNameAuthReply:
+            type: object
+            properties:
+                authId:
+                    type: string
+                status:
+                    type: string
+        auth.v1.RefreshTokenReply:
+            type: object
+            properties:
+                accessToken:
+                    type: string
+                refreshToken:
+                    type: string
+                expiresIn:
+                    type: string
+        auth.v1.RefreshTokenRequest:
+            required:
+                - refreshToken
+                - deviceId
+            type: object
+            properties:
+                refreshToken:
+                    type: string
+                deviceId:
+                    type: string
+        auth.v1.RegisterRequest:
+            required:
+                - verifyCode
+                - password
+                - deviceId
+            type: object
+            properties:
+                phone:
+                    type: string
+                email:
+                    type: string
+                verifyCode:
+                    type: string
+                password:
+                    type: string
+                deviceId:
+                    type: string
+        auth.v1.SendVerificationCodeRequest:
+            required:
+                - target
+                - targetType
+                - scene
+            type: object
+            properties:
+                target:
+                    type: string
+                targetType:
+                    type: string
+                scene:
+                    type: string
+        auth.v1.SubmitRealNameAuthRequest:
+            required:
+                - userId
+                - realName
+                - idCardNo
+            type: object
+            properties:
+                userId:
+                    type: string
+                realName:
+                    type: string
+                idCardNo:
+                    type: string
+                imageUrls:
+                    type: array
+                    items:
+                        type: string
+        auth.v1.TokenReply:
+            type: object
+            properties:
+                userId:
+                    type: string
+                accessToken:
+                    type: string
+                refreshToken:
+                    type: string
+                role:
+                    type: string
+                accountStatus:
+                    type: string
+                expiresIn:
+                    type: string
+        auth.v1.VerificationCodeReply:
+            type: object
+            properties:
+                verificationId:
+                    type: string
+                expiresIn:
+                    type: integer
+                    format: int32
         order.v1.ExportHistoryReply:
             type: object
             properties:
@@ -811,6 +1105,8 @@ components:
                     type: string
 tags:
     - name: AddressService
+    - name: AuthService
+      description: AuthService exposes identity, login, token, password, and real-name auth APIs.
     - name: OrderService
     - name: OrderService
     - name: TodoService
