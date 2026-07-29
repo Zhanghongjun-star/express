@@ -8,6 +8,7 @@ import "google/protobuf/duration.proto";
 message Bootstrap {
   Server server = 1;
   Data data = 2;
+  Registry registry = 3;
 }
 
 message Server {
@@ -27,15 +28,38 @@ message Server {
 
 message Data {
   message Database {
-    string driver = 1;
-    string source = 2;
+    string user = 1;
+    string password = 2;
+    string host = 3;
+    int32 port = 4;
+    string database = 5;
   }
   message Redis {
-    string network = 1;
-    string addr = 2;
-    google.protobuf.Duration read_timeout = 3;
-    google.protobuf.Duration write_timeout = 4;
+    string addr = 1;
+    string password = 2;
+    int32 db = 3;
+    google.protobuf.Duration read_timeout = 4;
+    google.protobuf.Duration write_timeout = 5;
+  }
+  message Elasticsearch {
+    string addr = 1;
   }
   Database database = 1;
   Redis redis = 2;
+  Elasticsearch elasticsearch = 3;
+}
+
+message Registry {
+  Nacos nacos = 1;
+}
+
+message Nacos {
+    string addr = 1;
+    uint64 port = 2;
+    string namespace_id = 3;
+    string log_dir = 4;
+    string cache_dir = 5;
+    string log_level = 6;
+    string data_id = 7;
+    string group = 8;
 }

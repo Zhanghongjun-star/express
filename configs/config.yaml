@@ -1,4 +1,4 @@
-server:
+﻿server:
   http:
     addr: 0.0.0.0:8000
     timeout: 1s
@@ -7,9 +7,27 @@ server:
     timeout: 1s
 data:
   database:
-    driver: mysql
-    source: root:mysql@tcp(115.190.225.153:3306)/express?parseTime=True&loc=Local
+    user: root
+    password: mysql
+    host: 115.190.225.153
+    port: 3306
+    database: express
   redis:
     addr: 115.190.225.153:6379
+    password: "redis"
+    db: 0
     read_timeout: 0.2s
     write_timeout: 0.2s
+  elasticsearch:
+    addr: http://115.190.225.153:9200
+registry:
+  nacos:
+    addr: 115.190.225.153
+    port: 8848
+    namespace_id: public
+    log_dir: cmd/server/tmp/nacos/log
+    cache_dir: cmd/server/tmp/nacos/cache
+    log_level: debug
+    data_id: shunfeng-miniprogram
+    group: DEFAULT_GROUP
+

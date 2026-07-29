@@ -25,7 +25,7 @@ var (
 type Address struct {
 	ID           int64
 	UserID       int64
-	AddrType     v1.AddressType
+	AddrType     int32
 	ReceiverName string
 	ReceiverPhone string
 	Province     string
@@ -53,13 +53,13 @@ type AddressListOption func(*AddressListOptions)
 
 // AddressListOptions 地址列表查询选项。
 type AddressListOptions struct {
-	AddrType v1.AddressType
+	AddrType int32
 	Offset   int
 	Limit    int
 }
 
 // AddressListType 按地址类型筛选。
-func AddressListType(addrType v1.AddressType) AddressListOption {
+func AddressListType(addrType int32) AddressListOption {
 	return func(o *AddressListOptions) { o.AddrType = addrType }
 }
 
@@ -132,7 +132,7 @@ func (uc *AddressUsecase) BatchDeleteAddresses(ctx context.Context, userID int64
 }
 
 // ParseAddress 解析文本内容为地址对象。
-func (uc *AddressUsecase) ParseAddress(content string) (*Address, error) {
+func (uc *AddressUsecase) ParseAddress(ctx context.Context, content string) (*Address, error) {
 	content = strings.TrimSpace(content)
 	if content == "" {
 		return nil, ErrAddressInvalidArgument
@@ -148,7 +148,7 @@ func (uc *AddressUsecase) ParseAddress(content string) (*Address, error) {
 	address := &Address{
 		ReceiverName: strings.TrimSpace(fields[0]),
 		DetailAddr:   strings.TrimSpace(fields[len(fields)-1]),
-		AddrType:     v1.AddressType_ADDRESS_TYPE_MAINLAND,
+		AddrType:     1,
 	}
 
 	if len(fields) >= 3 {
@@ -187,9 +187,7 @@ func validateAddress(address *Address, requireID bool) error {
 	if strings.TrimSpace(address.ReceiverName) == "" || strings.TrimSpace(address.ReceiverPhone) == "" || strings.TrimSpace(address.DetailAddr) == "" {
 		return ErrAddressInvalidArgument
 	}
-	switch address.AddrType {
-	case v1.AddressType_ADDRESS_TYPE_MAINLAND, v1.AddressType_ADDRESS_TYPE_HK_MO_TW, v1.AddressType_ADDRESS_TYPE_INTERNATIONAL:
-	default:
+	if address.AddrType < 1 || address.AddrType > 3 {
 		return ErrAddressInvalidArgument
 	}
 	return nil
