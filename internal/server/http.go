@@ -1,7 +1,10 @@
 ﻿package server
 
 import (
-	v1 "shunfeng-miniprogram/api/todo/v1"
+	addressv1 "shunfeng-miniprogram/api/address/v1"
+	orderv1 "shunfeng-miniprogram/api/order/v1"
+	todov1 "shunfeng-miniprogram/api/todo/v1"
+	userv1 "shunfeng-miniprogram/api/user/v1"
 	"shunfeng-miniprogram/internal/conf"
 	"shunfeng-miniprogram/internal/service"
 	"github.com/go-kratos/kratos/v3/middleware/recovery"
@@ -13,7 +16,8 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, todo *service.TodoService) *http.Server {
+func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService) *http.Server {
+
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
@@ -37,6 +41,11 @@ func NewHTTPServer(c *conf.Server, todo *service.TodoService) *http.Server {
 		opts = append(opts, http.Timeout(c.Http.Timeout.AsDuration()))
 	}
 	srv := http.NewServer(opts...)
-	v1.RegisterTodoServiceHTTPServer(srv, todo)
+	todov1.RegisterTodoServiceHTTPServer(srv, todo)
+	userv1.RegisterUserServiceHTTPServer(srv, user)
+	orderv1.RegisterOrderServiceHTTPServer(srv, order)
+	if address != nil {
+		addressv1.RegisterAddressServiceHTTPServer(srv, address)
+	}
 	return srv
 }

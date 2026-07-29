@@ -7,15 +7,15 @@ import (
 	"github.com/google/wire"
 )
 
-// ProviderSet is data providers.
-var ProviderSet = wire.NewSet(NewData, NewTodoRepo)
+// ProviderSet 数据层依赖注入。
+var ProviderSet = wire.NewSet(NewData, NewTodoRepo, NewAddressRepo, NewUserRepo, NewOrderRepo)
 
-// Data .
+// Data 数据层共享客户端。
 type Data struct {
 	// TODO wrapped database client
 }
 
-// NewData .
+// NewData 创建数据层。
 func NewData(c *conf.Data) (*Data, func(), error) {
 	cleanup := func() {
 		log.Info("closing the data resources")

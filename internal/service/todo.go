@@ -22,19 +22,19 @@ const (
 	defaultPageSize = 20
 )
 
-// TodoService is a todo service.
+// TodoService 待办事项服务。
 type TodoService struct {
 	v1.UnimplementedTodoServiceServer
 
 	uc *biz.TodoUsecase
 }
 
-// NewTodoService new a todo service.
+// NewTodoService 创建待办事项服务。
 func NewTodoService(uc *biz.TodoUsecase) *TodoService {
 	return &TodoService{uc: uc}
 }
 
-// CreateTodo creates a todo item.
+// CreateTodo 创建待办事项。
 func (s *TodoService) CreateTodo(ctx context.Context, req *v1.CreateTodoRequest) (*v1.Todo, error) {
 	todo, err := s.uc.CreateTodo(ctx, convertTodo(req.GetTodo()))
 	if err != nil {
@@ -43,7 +43,7 @@ func (s *TodoService) CreateTodo(ctx context.Context, req *v1.CreateTodoRequest)
 	return convertTodoReply(todo), nil
 }
 
-// GetTodo returns a todo item by ID.
+// GetTodo 根据 ID 获取待办事项。
 func (s *TodoService) GetTodo(ctx context.Context, req *v1.GetTodoRequest) (*v1.Todo, error) {
 	todo, err := s.uc.GetTodo(ctx, req.GetId())
 	if err != nil {
@@ -52,7 +52,7 @@ func (s *TodoService) GetTodo(ctx context.Context, req *v1.GetTodoRequest) (*v1.
 	return convertTodoReply(todo), nil
 }
 
-// ListTodos lists todo items.
+// ListTodos 获取待办事项列表。
 func (s *TodoService) ListTodos(ctx context.Context, req *v1.ListTodosRequest) (*v1.TodoSet, error) {
 	declarations, err := filtering.NewDeclarations(
 		filtering.DeclareStandardFunctions(),
@@ -105,7 +105,7 @@ func (s *TodoService) ListTodos(ctx context.Context, req *v1.ListTodosRequest) (
 	return set, nil
 }
 
-// UpdateTodo updates a todo item.
+// UpdateTodo 更新待办事项。
 func (s *TodoService) UpdateTodo(ctx context.Context, req *v1.UpdateTodoRequest) (*v1.Todo, error) {
 	if req.GetTodo().GetId() <= 0 || req.GetUpdateMask() == nil || len(req.GetUpdateMask().GetPaths()) == 0 {
 		return nil, biz.ErrTodoInvalidArgument
@@ -122,7 +122,7 @@ func (s *TodoService) UpdateTodo(ctx context.Context, req *v1.UpdateTodoRequest)
 	return convertTodoReply(todo), nil
 }
 
-// DeleteTodo deletes a todo item.
+// DeleteTodo 删除待办事项。
 func (s *TodoService) DeleteTodo(ctx context.Context, req *v1.DeleteTodoRequest) (*emptypb.Empty, error) {
 	if err := s.uc.DeleteTodo(ctx, req.GetId()); err != nil {
 		return nil, err
@@ -130,7 +130,7 @@ func (s *TodoService) DeleteTodo(ctx context.Context, req *v1.DeleteTodoRequest)
 	return &emptypb.Empty{}, nil
 }
 
-// WatchTodos streams todo snapshots from the server to the client.
+// WatchTodos 服务端流式推送待办事项快照。
 func (s *TodoService) WatchTodos(req *v1.WatchTodosRequest, stream v1.TodoService_WatchTodosServer) error {
 	declarations, err := filtering.NewDeclarations(
 		filtering.DeclareStandardFunctions(),
@@ -179,7 +179,7 @@ func (s *TodoService) WatchTodos(req *v1.WatchTodosRequest, stream v1.TodoServic
 	return nil
 }
 
-// SyncTodos exchanges todo changes in both directions.
+// SyncTodos 双向流同步待办事项变更。
 func (s *TodoService) SyncTodos(stream v1.TodoService_SyncTodosServer) error {
 	for {
 		req, err := stream.Recv()
@@ -228,6 +228,7 @@ func (s *TodoService) SyncTodos(stream v1.TodoService_SyncTodosServer) error {
 	}
 }
 
+// convertTodo 将 v1.Todo 转换为 biz.Todo（DTO → DO）。
 func convertTodo(in *v1.Todo) *biz.Todo {
 	if in == nil {
 		return nil
@@ -240,6 +241,7 @@ func convertTodo(in *v1.Todo) *biz.Todo {
 	}
 }
 
+// newTodoEvent 创建待办事项事件。
 func newTodoEvent(action string, todo *biz.Todo) *v1.TodoEvent {
 	return &v1.TodoEvent{
 		Action:    action,
@@ -248,6 +250,7 @@ func newTodoEvent(action string, todo *biz.Todo) *v1.TodoEvent {
 	}
 }
 
+// convertTodoReply 将 biz.Todo 转换为 v1.Todo（DO → DTO）。
 func convertTodoReply(in *biz.Todo) *v1.Todo {
 	if in == nil {
 		return nil
