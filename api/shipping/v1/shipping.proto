@@ -1,0 +1,395 @@
+syntax = "proto3";
+
+package shipping.v1;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+
+option go_package = "shunfeng-miniprogram/api/shipping/v1;v1";
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.shipping.v1";
+option java_outer_classname = "ShippingProto";
+
+// ShippingService manages shipping channel selection, locker browsing,
+// service point queries, and pickup appointment scheduling.
+service ShippingService {
+  // ListChannels returns all available shipping channels in the current
+  // region together with their availability status and extra fees.
+  rpc ListChannels (ListChannelsRequest) returns (ListChannelsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/shipping/channels"
+    };
+  }
+
+  // ListLockers returns nearby operational locker cabinets ordered by
+  // distance ascending. Returns INVALID_ARGUMENT when lat/lng are missing.
+  rpc ListLockers (ListLockersRequest) returns (ListLockersResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/shipping/lockers"
+    };
+  }
+
+  // ListBoxTypes returns all box-type specifications, inventory counts,
+  // and extra fees for a given locker cabinet.
+  rpc ListBoxTypes (ListBoxTypesRequest) returns (ListBoxTypesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/shipping/lockers/{locker_id}/box-types"
+    };
+  }
+
+  // ListServicePoints returns nearby SF stations or partner stores
+  // filtered by point_type, ordered by distance ascending.
+  rpc ListServicePoints (ListServicePointsRequest) returns (ListServicePointsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/shipping/service-points"
+    };
+  }
+
+  // ListPickupDates returns the available pickup dates (today, tomorrow,
+  // day-after-tomorrow) for the door-pickup channel. Expired time slots
+  // for today are already excluded.
+  rpc ListPickupDates (ListPickupDatesRequest) returns (ListPickupDatesResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/shipping/pickup-dates"
+    };
+  }
+
+  // ListPickupTimeSlots returns all time slots for a given date together
+  // with their remaining capacity. Slots with zero capacity are marked
+  // unavailable.
+  rpc ListPickupTimeSlots (ListPickupTimeSlotsRequest) returns (ListPickupTimeSlotsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/shipping/pickup-time-slots"
+    };
+  }
+}
+
+// ──────────────────────────────────────────────
+// Enums
+// ──────────────────────────────────────────────
+
+// ChannelCode enumerates the four shipping channel types.
+enum ChannelCode {
+  CHANNEL_UNSPECIFIED = 0;
+  DOOR_PICKUP = 1;
+  LOCKER = 2;
+  SF_STATION = 3;
+  PARTNER_STORE = 4;
+}
+
+// BoxType enumerates the three locker compartment sizes.
+enum BoxType {
+  BOX_TYPE_UNSPECIFIED = 0;
+  SMALL = 1;
+  MEDIUM = 2;
+  LARGE = 3;
+}
+
+// BoxStatus represents the current occupancy state of a locker compartment.
+enum BoxStatus {
+  BOX_STATUS_UNSPECIFIED = 0;
+  BOX_FREE = 1;
+  BOX_OCCUPIED = 2;
+  BOX_FAULT = 3;
+}
+
+// ServicePointType distinguishes an SF-owned station from a partner store.
+enum ServicePointType {
+  SERVICE_POINT_TYPE_UNSPECIFIED = 0;
+  POINT_SF_STATION = 1;
+  POINT_PARTNER_STORE = 2;
+}
+
+// ──────────────────────────────────────────────
+// Channel models
+// ──────────────────────────────────────────────
+
+// Channel describes a single shipping channel and its availability in the
+// current region.
+message Channel {
+  // Enumerated channel code. The frontend MUST use this value rather than
+  // a hard-coded string.
+  ChannelCode channel_code = 1;
+  // Human-readable channel name (e.g. "上门取件", "丰巢自提柜").
+  string name = 2;
+  // Whether the channel is available in the requested region.
+  bool available = 3;
+  // Clear prompt text shown when the channel is unavailable.
+  string tip = 4;
+  // Extra fee charged for this channel in the current region.
+  double extra_fee = 5;
+}
+
+// ──────────────────────────────────────────────
+// Locker models
+// ──────────────────────────────────────────────
+
+// Locker represents a physical locker cabinet.
+message Locker {
+  // Unique locker cabinet identifier.
+  int64 id = 1;
+  // Locker cabinet name displayed to the user.
+  string name = 2;
+  // Human-readable address of the locker location.
+  string address = 3;
+  // Latitude in WGS-84 coordinate system.
+  double latitude = 4;
+  // Longitude in WGS-84 coordinate system.
+  double longitude = 5;
+  // Distance from the user's location in meters.
+  double distance = 6;
+  // Operational status: 1 = normal, 0 = out of service / maintenance.
+  // The frontend MUST filter out lockers where status == 0.
+  int32 status = 7;
+}
+
+// BoxTypeInfo describes a specific compartment type within a locker.
+message BoxTypeInfo {
+  // Compartment size category.
+  BoxType box_type = 1;
+  // Compartment interior length in centimetres.
+  int32 length = 2;
+  // Compartment interior width in centimetres.
+  int32 width = 3;
+  // Compartment interior height in centimetres.
+  int32 height = 4;
+  // Maximum weight this compartment can hold, in kilograms.
+  double max_weight = 5;
+  // Extra fee charged for using this compartment type.
+  double box_fee = 6;
+  // Number of currently free compartments of this type.
+  int32 available_count = 7;
+  // Current compartment status.
+  BoxStatus status = 8;
+}
+
+// ──────────────────────────────────────────────
+// Service-point models
+// ──────────────────────────────────────────────
+
+// ServicePoint represents an SF self-operated station or a partner store.
+message ServicePoint {
+  // Unique service-point identifier.
+  int64 id = 1;
+  // Display name of the service point.
+  string name = 2;
+  // Human-readable address.
+  string address = 3;
+  // Latitude in WGS-84.
+  double latitude = 4;
+  // Longitude in WGS-84.
+  double longitude = 5;
+  // Point category: SF_STATION or PARTNER_STORE.
+  ServicePointType point_type = 6;
+  // Distance from the user's location in meters.
+  double distance = 7;
+  // Operational status: 1 = open, 0 = closed.
+  int32 status = 8;
+}
+
+// ──────────────────────────────────────────────
+// Pickup models
+// ──────────────────────────────────────────────
+
+// PickupDate represents a single date that the user can select for
+// door-pickup.
+message PickupDate {
+  // The date string in "YYYY-MM-DD" format.
+  string date = 1;
+  // Whether this date still has at least one available time slot.
+  bool available = 2;
+}
+
+// PickupTimeSlot describes a single bookable time window on a given date.
+message PickupTimeSlot {
+  // Administrative district code to which this slot belongs.
+  string district_code = 1;
+  // The date this slot belongs to, in "YYYY-MM-DD" format.
+  string pickup_date = 2;
+  // Unique slot identifier within the district+date scope.
+  string slot_code = 3;
+  // Slot start time in "HH:MM" format.
+  string start_time = 4;
+  // Slot end time in "HH:MM" format.
+  string end_time = 5;
+  // Maximum number of reservations allowed for this slot.
+  int32 capacity = 6;
+  // Number of reservations already taken.
+  int32 reserved_count = 7;
+  // Whether the slot can still be selected (reserved_count < capacity and
+  // not expired).
+  bool available = 8;
+  // Optimistic-lock version; the client MUST send this back when creating
+  // an order so the server can detect concurrent updates.
+  int64 version = 9;
+}
+
+// ──────────────────────────────────────────────
+// Channel-specific parameters (oneof union)
+// ──────────────────────────────────────────────
+
+// PickupParams are required when the selected channel is DOOR_PICKUP.
+message PickupParams {
+  // Selected pickup date in "YYYY-MM-DD" format.
+  string pickup_date = 1 [(google.api.field_behavior) = REQUIRED];
+  // Selected time-slot identifier.
+  string slot_code = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+// LockerParams are required when the selected channel is LOCKER.
+message LockerParams {
+  // Selected locker cabinet identifier.
+  int64 locker_id = 1 [(google.api.field_behavior) = REQUIRED];
+  // Selected compartment type.
+  BoxType box_type = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+// ServicePointParams are required when the selected channel is SF_STATION
+// or PARTNER_STORE.
+message ServicePointParams {
+  // Selected service-point identifier.
+  int64 service_point_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+// ShippingParams holds exactly the set of channel-specific parameters that
+// correspond to the selected channel.
+message ShippingParams {
+  oneof params {
+    PickupParams pickup_params = 1;
+    LockerParams locker_params = 2;
+    ServicePointParams service_point_params = 3;
+  }
+}
+
+// ShippingContext is the complete channel-selection result that gets
+// embedded into the order-creation request for downstream validation.
+message ShippingContext {
+  // The channel the user selected.
+  ChannelCode channel_code = 1 [(google.api.field_behavior) = REQUIRED];
+  // Channel-specific mandatory parameters.
+  ShippingParams params = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+// ──────────────────────────────────────────────
+// Request / Response messages
+// ──────────────────────────────────────────────
+
+// ListChannelsRequest carries the region context for determining channel
+// availability.
+message ListChannelsRequest {
+  // Administrative district code of the sender.
+  string district_code = 1;
+  // Sender's latitude in WGS-84. Used together with longitude for
+  // location-based channel evaluation.
+  double latitude = 2;
+  // Sender's longitude in WGS-84.
+  double longitude = 3;
+}
+
+message ListChannelsResponse {
+  // All shipping channels available (or unavailable with reason) for the
+  // requested region. Channels that are globally decommissioned are omitted.
+  repeated Channel channels = 1;
+}
+
+// ListLockersRequest carries the user's location and search radius for
+// finding nearby locker cabinets.
+message ListLockersRequest {
+  // Administrative district code to narrow the search.
+  string district_code = 1;
+  // User's latitude in WGS-84. REQUIRED — returns INVALID_ARGUMENT when
+  // missing.
+  double latitude = 2 [(google.api.field_behavior) = REQUIRED];
+  // User's longitude in WGS-84. REQUIRED — returns INVALID_ARGUMENT when
+  // missing.
+  double longitude = 3 [(google.api.field_behavior) = REQUIRED];
+  // Search radius in meters. Defaults to 1000 when unset.
+  int32 search_radius = 4;
+  // Maximum number of lockers to return per page. Capped at 50 server-side.
+  int32 page_size = 5;
+  // Token from a previous response to fetch the next page.
+  string page_token = 6;
+}
+
+message ListLockersResponse {
+  // Page of operational lockers ordered by distance ascending.
+  repeated Locker lockers = 1;
+  // Token to retrieve the next page. Empty when all results have been
+  // returned.
+  string next_page_token = 2;
+}
+
+// ListBoxTypesRequest identifies the locker cabinet whose compartment
+// types are being queried.
+message ListBoxTypesRequest {
+  // Locker cabinet identifier. REQUIRED — taken from the URL path.
+  int64 locker_id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message ListBoxTypesResponse {
+  // All compartment types available in this locker, each with its own
+  // size, fee, and free-count information.
+  repeated BoxTypeInfo box_types = 1;
+}
+
+// ListServicePointsRequest carries filters and location for querying
+// service points.
+message ListServicePointsRequest {
+  // Optional. Filter by service-point type. When unset both SF_STATION
+  // and PARTNER_STORE are returned.
+  ServicePointType point_type = 1;
+  // Administrative district code.
+  string district_code = 2;
+  // User's latitude in WGS-84. REQUIRED — returns INVALID_ARGUMENT when
+  // missing.
+  double latitude = 3 [(google.api.field_behavior) = REQUIRED];
+  // User's longitude in WGS-84. REQUIRED — returns INVALID_ARGUMENT when
+  // missing.
+  double longitude = 4 [(google.api.field_behavior) = REQUIRED];
+  // Maximum number of points per page. Capped at 50 server-side.
+  int32 page_size = 5;
+  // Token from a previous response to fetch the next page.
+  string page_token = 6;
+}
+
+message ListServicePointsResponse {
+  // Page of service points ordered by distance ascending.
+  repeated ServicePoint service_points = 1;
+  // Token to retrieve the next page. Empty when all results have been
+  // returned.
+  string next_page_token = 2;
+}
+
+// ListPickupDatesRequest specifies the district for which available
+// pickup dates are queried.
+message ListPickupDatesRequest {
+  // Administrative district code of the sender.
+  string district_code = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+message ListPickupDatesResponse {
+  // Available pickup dates. Currently limited to today, tomorrow, and the
+  // day after tomorrow. Expired time slots for today are already excluded.
+  repeated PickupDate pickup_dates = 1;
+}
+
+// ListPickupTimeSlotsRequest selects the date and district whose time
+// slots should be returned.
+message ListPickupTimeSlotsRequest {
+  // Administrative district code.
+  string district_code = 1 [(google.api.field_behavior) = REQUIRED];
+  // Target date in "YYYY-MM-DD". Must be within the next 3 days.
+  // Returns INVALID_ARGUMENT when the date is out of range.
+  string pickup_date = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message ListPickupTimeSlotsResponse {
+  // All time slots for the requested district+date. Slots with remaining
+  // capacity <= 0 are marked unavailable and the frontend MUST prevent
+  // the user from selecting them.
+  repeated PickupTimeSlot time_slots = 1;
+}

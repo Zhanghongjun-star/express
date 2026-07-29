@@ -20,7 +20,7 @@ var (
 )
 
 // ProviderSet 数据层依赖注入。
-var ProviderSet = wire.NewSet(NewTodoRepo, NewAddressRepo, NewUserRepo, NewOrderRepo)
+var ProviderSet = wire.NewSet(NewTodoRepo, NewAddressRepo, NewUserRepo, NewOrderRepo, NewChannelRepo, NewLockerRepo, NewLockerBoxRepo, NewServicePointRepo, NewPickupRepo)
 
 // InitData 初始化所有存储客户端。
 func InitData(c *conf.Data, r *conf.Registry) {
@@ -45,6 +45,13 @@ func newGorm(c *conf.Data_Database) {
 		&Address{},
 		&Order{},
 		&IdentityRealNameAuth{},
+		&ShippingChannel{},
+		&ShippingChannelArea{},
+		&Locker{},
+		&LockerBox{},
+		&ServicePoint{},
+		&PickupTimeSlot{},
+		&PickupReservation{},
 	); err != nil {
 		fmt.Println(fmt.Sprintf("mysql 链接失败: %v", err))
 		return
