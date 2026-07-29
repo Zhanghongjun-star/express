@@ -9,10 +9,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// ──────────────────────────────────────────────
-// Channel repo
-// ──────────────────────────────────────────────
-
 type channelRepo struct{}
 
 func NewChannelRepo() biz.ChannelRepo {
@@ -53,10 +49,6 @@ func (r *channelRepo) ListAreasByDistrict(ctx context.Context, districtCode stri
 	return toChannelAreaBizList(pos), nil
 }
 
-// ──────────────────────────────────────────────
-// Locker repo
-// ──────────────────────────────────────────────
-
 type lockerRepo struct{}
 
 func NewLockerRepo() biz.LockerRepo {
@@ -84,10 +76,6 @@ func (r *lockerRepo) FindByID(ctx context.Context, id int64) (*biz.Locker, error
 	}
 	return toLockerBiz(&po), nil
 }
-
-// ──────────────────────────────────────────────
-// LockerBox repo
-// ──────────────────────────────────────────────
 
 type lockerBoxRepo struct{}
 
@@ -148,10 +136,6 @@ func (r *lockerBoxRepo) ReleaseExpiredBoxes(ctx context.Context) (int64, error) 
 	return result.RowsAffected, result.Error
 }
 
-// ──────────────────────────────────────────────
-// ServicePoint repo
-// ──────────────────────────────────────────────
-
 type servicePointRepo struct{}
 
 func NewServicePointRepo() biz.ServicePointRepo {
@@ -182,10 +166,6 @@ func (r *servicePointRepo) FindByID(ctx context.Context, id int64) (*biz.Service
 	}
 	return toServicePointBiz(&po), nil
 }
-
-// ──────────────────────────────────────────────
-// Pickup repo
-// ──────────────────────────────────────────────
 
 type pickupRepo struct{}
 
@@ -257,28 +237,24 @@ func (r *pickupRepo) ReleaseExpiredSlots(ctx context.Context) (int64, error) {
 	return 0, nil
 }
 
-// ──────────────────────────────────────────────
-// PO → DO 转换函数
-// ──────────────────────────────────────────────
-
 func toChannelBiz(in *ShippingChannel) *biz.ShippingChannel {
 	if in == nil {
 		return nil
 	}
 	return &biz.ShippingChannel{
-		ID:              in.ID,
-		ChannelCode:     in.ChannelCode,
-		ChannelName:     in.ChannelName,
-		ChannelDesc:     in.ChannelDesc,
-		Status:          in.Status,
-		BaseFee:         in.BaseFee,
-		NeedAddressGeo:  in.NeedAddressGeo == 1,
-		NeedPickupSlot:  in.NeedPickupSlot == 1,
-		NeedLockerBox:   in.NeedLockerBox == 1,
+		ID:               in.ID,
+		ChannelCode:      in.ChannelCode,
+		ChannelName:      in.ChannelName,
+		ChannelDesc:      in.ChannelDesc,
+		Status:           in.Status,
+		BaseFee:          in.BaseFee,
+		NeedAddressGeo:   in.NeedAddressGeo == 1,
+		NeedPickupSlot:   in.NeedPickupSlot == 1,
+		NeedLockerBox:    in.NeedLockerBox == 1,
 		NeedServicePoint: in.NeedServicePoint == 1,
-		SortNo:          int(in.SortNo),
-		CreatedAt:       in.CreatedAt,
-		UpdatedAt:       in.UpdatedAt,
+		SortNo:           int(in.SortNo),
+		CreatedAt:        in.CreatedAt,
+		UpdatedAt:        in.UpdatedAt,
 	}
 }
 
@@ -319,23 +295,23 @@ func toLockerBiz(in *Locker) *biz.Locker {
 		return nil
 	}
 	return &biz.Locker{
-		ID:               in.ID,
-		LockerCode:       in.LockerCode,
-		LockerName:       in.LockerName,
-		ProvinceCode:     in.ProvinceCode,
-		ProvinceName:     in.ProvinceName,
-		CityCode:         in.CityCode,
-		CityName:         in.CityName,
-		DistrictCode:     in.DistrictCode,
-		DistrictName:     in.DistrictName,
-		DetailAddress:    in.DetailAddress,
-		Longitude:        in.Longitude,
-		Latitude:         in.Latitude,
+		ID:                in.ID,
+		LockerCode:        in.LockerCode,
+		LockerName:        in.LockerName,
+		ProvinceCode:      in.ProvinceCode,
+		ProvinceName:      in.ProvinceName,
+		CityCode:          in.CityCode,
+		CityName:          in.CityName,
+		DistrictCode:      in.DistrictCode,
+		DistrictName:      in.DistrictName,
+		DetailAddress:     in.DetailAddress,
+		Longitude:         in.Longitude,
+		Latitude:          in.Latitude,
 		BusinessStartTime: in.BusinessStartTime,
-		BusinessEndTime:  in.BusinessEndTime,
-		Status:           in.Status,
-		CreatedAt:        in.CreatedAt,
-		UpdatedAt:        in.UpdatedAt,
+		BusinessEndTime:   in.BusinessEndTime,
+		Status:            in.Status,
+		CreatedAt:         in.CreatedAt,
+		UpdatedAt:         in.UpdatedAt,
 	}
 }
 
@@ -384,26 +360,26 @@ func toServicePointBiz(in *ServicePoint) *biz.ServicePoint {
 		return nil
 	}
 	return &biz.ServicePoint{
-		ID:               in.ID,
-		PointCode:        in.PointCode,
-		PointName:        in.PointName,
-		PointType:        in.PointType,
-		ProvinceCode:     in.ProvinceCode,
-		ProvinceName:     in.ProvinceName,
-		CityCode:         in.CityCode,
-		CityName:         in.CityName,
-		DistrictCode:     in.DistrictCode,
-		DistrictName:     in.DistrictName,
-		DetailAddress:    in.DetailAddress,
-		Longitude:        in.Longitude,
-		Latitude:         in.Latitude,
+		ID:                in.ID,
+		PointCode:         in.PointCode,
+		PointName:         in.PointName,
+		PointType:         in.PointType,
+		ProvinceCode:      in.ProvinceCode,
+		ProvinceName:      in.ProvinceName,
+		CityCode:          in.CityCode,
+		CityName:          in.CityName,
+		DistrictCode:      in.DistrictCode,
+		DistrictName:      in.DistrictName,
+		DetailAddress:     in.DetailAddress,
+		Longitude:         in.Longitude,
+		Latitude:          in.Latitude,
 		BusinessStartTime: in.BusinessStartTime,
-		BusinessEndTime:  in.BusinessEndTime,
-		ContactPhoneMask: in.ContactPhoneMask,
-		Status:           in.Status,
-		ExtraFee:         in.ExtraFee,
-		CreatedAt:        in.CreatedAt,
-		UpdatedAt:        in.UpdatedAt,
+		BusinessEndTime:   in.BusinessEndTime,
+		ContactPhoneMask:  in.ContactPhoneMask,
+		Status:            in.Status,
+		ExtraFee:          in.ExtraFee,
+		CreatedAt:         in.CreatedAt,
+		UpdatedAt:         in.UpdatedAt,
 	}
 }
 
