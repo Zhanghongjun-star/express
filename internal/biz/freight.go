@@ -417,7 +417,7 @@ func (uc *FreightUsecase) determineProvinceZone(p1, p2 string) Zone {
 // getProvinceZone 获取省份的距离分组（3/4），非分组省份返回 4（默认较远）。
 func (uc *FreightUsecase) getProvinceZone(province string) int {
 	normalized := uc.normalizeProvince(province)
-	// 检查经济圈省份是否在分组中
+	// 检查省份是否落入近/远分组表
 	for zone, provinces := range provinceZones {
 		for _, p := range provinces {
 			if uc.normalizeProvince(p) == normalized {
@@ -425,20 +425,8 @@ func (uc *FreightUsecase) getProvinceZone(province string) int {
 			}
 		}
 	}
-	// 经济圈省份本身不在 provinceZones 中，需要特殊处理
-	// 如果不在任何分组中，默认为 Zone 4（较远）
-	for _, circleProvinces := range [][]string{
-		{"上海", "江苏", "浙江", "安徽"},
-		{"广东", "广西", "海南"},
-		{"北京", "天津", "河北"},
-		{"四川", "重庆"},
-	} {
-		for _, p := range circleProvinces {
-			if uc.normalizeProvince(p) == normalized {
-				return 3 // 经济圈省份之间通信默认 Zone 3
-			}
-		}
-	}
+	// 经济圈省份（上海/广东/北京/四川等）未落入上述近/远分组。
+	// 跨经济圈通信默认按远距离处理（Zone 4），避免把相距很远的两地误判为邻近。
 	return 4 // 默认较远
 }
 

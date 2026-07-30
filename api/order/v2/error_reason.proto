@@ -11,4 +11,10 @@ enum ErrorReason {
   ERROR_REASON_UNSPECIFIED = 0;
   ORDER_FREIGHT_CALC_FAILED = 1;
   ORDER_FREIGHT_INVALID_ARGUMENT = 2;
+  // ===== 新增 =====
+  ORDER_NOT_FOUND = 3;            // 订单不存在
+  ORDER_CREATE_DUPLICATE = 4;     // 幂等重复创建
+  ORDER_CANCEL_NOT_ALLOWED = 5;   // 对应业务码 40903 非法取消
+  ORDER_ALREADY_PAID = 6;         // 已支付不可取消
 }
+

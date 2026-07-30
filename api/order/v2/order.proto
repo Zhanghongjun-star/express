@@ -10,11 +10,53 @@ option java_multiple_files = true;
 option java_package = "io.grpc.examples.order.v2";
 option java_outer_classname = "OrderProto";
 
+//订单状态
+enum OrderStatus {
+  ORDER_STATUS_UNSPECIFIED = 0;
+  ORDER_WAITING_PAYMENT = 1;   // 待支付
+  ORDER_WAITING_PICKUP = 2;    // 待揽收
+  ORDER_PICKED_UP = 3;         // 已揽收
+  ORDER_IN_TRANSIT = 4;        // 运输中
+  ORDER_DELIVERED = 5;         // 已签收
+  ORDER_CANCELLED = 6;         // 已取消
+}
+
+enum PaymentStatus {
+  PAYMENT_STATUS_UNSPECIFIED = 0;
+  PAYMENT_UNPAID = 1;
+  PAYMENT_PAID = 2;
+  PAYMENT_CLOSED = 3;
+  PAYMENT_FAILED = 4;
+}
+
+enum PaymentMethod {
+  PAYMENT_METHOD_UNSPECIFIED = 0;
+  PAYMENT_WECHAT = 1;
+  PAYMENT_ALIPAY = 2;
+  PAYMENT_BALANCE = 3;
+}
+
 service OrderService {
   rpc EstimateFreight(EstimateFreightRequest) returns (EstimateFreightReply) {
     option (google.api.http) = {
       post: "/api/order/freight/estimate"
       body: "*"
+    };
+  }
+
+  //创建订单
+  rpc CreateOrder(CreateOrderRequest) returns (CreateOrderReply){
+    option (google.api.http) = {
+      post:"/api/v1/order"
+      body: "*"
+    };
+  }
+
+  //取消订单
+  rpc CancelOrder(CancelOrderRequest) returns (CancelOrderReply){
+    option (google.api.http) = {
+      post:"/api/v1/orders/{order_id}/cancel"
+      body:"*"
     };
   }
 }
@@ -47,4 +89,38 @@ message EstimateFreightReply {
   double total_price = 3;
   double calc_weight = 4;
   string tips = 5;
+}
+
+//这里对应的是上面的订单创建
+message CreateOrderRequest {
+  string user_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string idempotency_key = 2 [(google.api.field_behavior) = REQUIRED]; // 幂等键
+  string sender_addr_id = 3 [(google.api.field_behavior) = REQUIRED];
+  string receiver_addr_id = 4 [(google.api.field_behavior) = REQUIRED];
+  int32 express_type = 5 [(google.api.field_behavior) = REQUIRED];
+  double weight = 6 [(google.api.field_behavior) = REQUIRED];
+  int32 length = 7;
+  int32 width = 8;
+  int32 height = 9;
+  double insure_value = 10;
+  string remark = 11;
+}
+
+message CreateOrderReply {
+  string order_id = 1;
+  string order_no = 2;
+  string waybill_no = 3;
+  OrderStatus status = 4;
+  string payable_amount = 5;   // 金额用 string 传，避免 float 精度丢失
+}
+
+message CancelOrderRequest {
+  string order_id = 1 [(google.api.field_behavior) = REQUIRED];
+  int32 reason_code = 2;
+  string reason = 3;
+}
+
+message CancelOrderReply {
+  string order_id = 1;
+  OrderStatus status = 2;
 }

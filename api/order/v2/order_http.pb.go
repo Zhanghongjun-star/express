@@ -17,15 +17,23 @@ var _ = new(context.Context)
 
 const _ = http.SupportPackageIsVersion3
 
+const OperationOrderServiceCancelOrder = "/order.v2.OrderService/CancelOrder"
+const OperationOrderServiceCreateOrder = "/order.v2.OrderService/CreateOrder"
 const OperationOrderServiceEstimateFreight = "/order.v2.OrderService/EstimateFreight"
 
 type OrderServiceHTTPServer interface {
+	// CancelOrder取消订单
+	CancelOrder(context.Context, *CancelOrderRequest) (*CancelOrderReply, error)
+	// CreateOrder创建订单
+	CreateOrder(context.Context, *CreateOrderRequest) (*CreateOrderReply, error)
 	EstimateFreight(context.Context, *EstimateFreightRequest) (*EstimateFreightReply, error)
 }
 
 func RegisterOrderServiceHTTPServer(s *http.Server, srv OrderServiceHTTPServer) {
 	r := s.Route("/")
 	r.Handle("POST", "/api/order/freight/estimate", _OrderService_EstimateFreight0_HTTP_Handler(srv))
+	r.Handle("POST", "/api/v1/order", _OrderService_CreateOrder0_HTTP_Handler(srv))
+	r.Handle("POST", "/api/v1/orders/{order_id}/cancel", _OrderService_CancelOrder0_HTTP_Handler(srv))
 }
 
 func _OrderService_EstimateFreight0_HTTP_Handler(srv OrderServiceHTTPServer) func(ctx http.Context) error {
@@ -47,7 +55,52 @@ func _OrderService_EstimateFreight0_HTTP_Handler(srv OrderServiceHTTPServer) fun
 	}
 }
 
+func _OrderService_CreateOrder0_HTTP_Handler(srv OrderServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CreateOrderRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationOrderServiceCreateOrder)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CreateOrder(ctx, req.(*CreateOrderRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CreateOrderReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _OrderService_CancelOrder0_HTTP_Handler(srv OrderServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in CancelOrderRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationOrderServiceCancelOrder)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.CancelOrder(ctx, req.(*CancelOrderRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*CancelOrderReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type OrderServiceHTTPClient interface {
+	// CancelOrder取消订单
+	CancelOrder(ctx context.Context, req *CancelOrderRequest, opts ...http.CallOption) (rsp *CancelOrderReply, err error)
+	// CreateOrder创建订单
+	CreateOrder(ctx context.Context, req *CreateOrderRequest, opts ...http.CallOption) (rsp *CreateOrderReply, err error)
 	EstimateFreight(ctx context.Context, req *EstimateFreightRequest, opts ...http.CallOption) (rsp *EstimateFreightReply, err error)
 }
 
@@ -57,6 +110,42 @@ type OrderServiceHTTPClientImpl struct {
 
 func NewOrderServiceHTTPClient(client *http.Client) OrderServiceHTTPClient {
 	return &OrderServiceHTTPClientImpl{client}
+}
+
+// CancelOrder取消订单
+func (c *OrderServiceHTTPClientImpl) CancelOrder(ctx context.Context, in *CancelOrderRequest, opts ...http.CallOption) (*CancelOrderReply, error) {
+	var out CancelOrderReply
+	pattern := "/api/v1/orders/{order_id}/cancel"
+	path := http.BuildPath(pattern, in)
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.ContentType("application/protojson"),
+		http.Operation(OperationOrderServiceCancelOrder),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// CreateOrder创建订单
+func (c *OrderServiceHTTPClientImpl) CreateOrder(ctx context.Context, in *CreateOrderRequest, opts ...http.CallOption) (*CreateOrderReply, error) {
+	var out CreateOrderReply
+	pattern := "/api/v1/order"
+	path := http.BuildPath(pattern, in)
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.ContentType("application/protojson"),
+		http.Operation(OperationOrderServiceCreateOrder),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 func (c *OrderServiceHTTPClientImpl) EstimateFreight(ctx context.Context, in *EstimateFreightRequest, opts ...http.CallOption) (*EstimateFreightReply, error) {

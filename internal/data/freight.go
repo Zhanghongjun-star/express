@@ -13,13 +13,12 @@ import (
 
 // freightRepo 运费预估仓储的内存实现，内嵌一份阶梯定价表。
 type freightRepo struct {
-	data *Data
-	mu   sync.RWMutex
+	mu sync.RWMutex
 }
 
 // NewFreightRepo 创建运费预估仓储，返回接口类型。
-func NewFreightRepo(data *Data) biz.FreightRepo {
-	return &freightRepo{data: data}
+func NewFreightRepo() biz.FreightRepo {
+	return &freightRepo{}
 }
 
 // GetPricingTiers 根据快递类型和区域等级返回阶梯定价档位。

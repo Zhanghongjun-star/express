@@ -27,6 +27,11 @@ const (
 	ErrorReason_ERROR_REASON_UNSPECIFIED       ErrorReason = 0
 	ErrorReason_ORDER_FREIGHT_CALC_FAILED      ErrorReason = 1
 	ErrorReason_ORDER_FREIGHT_INVALID_ARGUMENT ErrorReason = 2
+	// ===== 新增 =====
+	ErrorReason_ORDER_NOT_FOUND          ErrorReason = 3 // 订单不存在
+	ErrorReason_ORDER_CREATE_DUPLICATE   ErrorReason = 4 // 幂等重复创建
+	ErrorReason_ORDER_CANCEL_NOT_ALLOWED ErrorReason = 5 // 对应业务码 40903 非法取消
+	ErrorReason_ORDER_ALREADY_PAID       ErrorReason = 6 // 已支付不可取消
 )
 
 // Enum value maps for ErrorReason.
@@ -35,11 +40,19 @@ var (
 		0: "ERROR_REASON_UNSPECIFIED",
 		1: "ORDER_FREIGHT_CALC_FAILED",
 		2: "ORDER_FREIGHT_INVALID_ARGUMENT",
+		3: "ORDER_NOT_FOUND",
+		4: "ORDER_CREATE_DUPLICATE",
+		5: "ORDER_CANCEL_NOT_ALLOWED",
+		6: "ORDER_ALREADY_PAID",
 	}
 	ErrorReason_value = map[string]int32{
 		"ERROR_REASON_UNSPECIFIED":       0,
 		"ORDER_FREIGHT_CALC_FAILED":      1,
 		"ORDER_FREIGHT_INVALID_ARGUMENT": 2,
+		"ORDER_NOT_FOUND":                3,
+		"ORDER_CREATE_DUPLICATE":         4,
+		"ORDER_CANCEL_NOT_ALLOWED":       5,
+		"ORDER_ALREADY_PAID":             6,
 	}
 )
 
@@ -74,11 +87,15 @@ var File_order_v2_error_reason_proto protoreflect.FileDescriptor
 
 const file_order_v2_error_reason_proto_rawDesc = "" +
 	"\n" +
-	"\x1border/v2/error_reason.proto\x12\border.v2*n\n" +
+	"\x1border/v2/error_reason.proto\x12\border.v2*\xd5\x01\n" +
 	"\vErrorReason\x12\x1c\n" +
 	"\x18ERROR_REASON_UNSPECIFIED\x10\x00\x12\x1d\n" +
 	"\x19ORDER_FREIGHT_CALC_FAILED\x10\x01\x12\"\n" +
-	"\x1eORDER_FREIGHT_INVALID_ARGUMENT\x10\x02BZ\n" +
+	"\x1eORDER_FREIGHT_INVALID_ARGUMENT\x10\x02\x12\x13\n" +
+	"\x0fORDER_NOT_FOUND\x10\x03\x12\x1a\n" +
+	"\x16ORDER_CREATE_DUPLICATE\x10\x04\x12\x1c\n" +
+	"\x18ORDER_CANCEL_NOT_ALLOWED\x10\x05\x12\x16\n" +
+	"\x12ORDER_ALREADY_PAID\x10\x06BZ\n" +
 	"\x19io.grpc.examples.order.v2B\x15OrderErrorReasonProtoP\x01Z$shunfeng-miniprogram/api/order/v2;v2b\x06proto3"
 
 var (
