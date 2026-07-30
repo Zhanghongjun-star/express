@@ -969,6 +969,222 @@ func (x *ShareOrderReply) GetShareUrl() string {
 	return ""
 }
 
+type PayExpressOrderRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	UserId        int64                  `protobuf:"varint,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Id            int64                  `protobuf:"varint,2,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PayExpressOrderRequest) Reset() {
+	*x = PayExpressOrderRequest{}
+	mi := &file_order_v3_order_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PayExpressOrderRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PayExpressOrderRequest) ProtoMessage() {}
+
+func (x *PayExpressOrderRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_order_v3_order_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PayExpressOrderRequest.ProtoReflect.Descriptor instead.
+func (*PayExpressOrderRequest) Descriptor() ([]byte, []int) {
+	return file_order_v3_order_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *PayExpressOrderRequest) GetUserId() int64 {
+	if x != nil {
+		return x.UserId
+	}
+	return 0
+}
+
+func (x *PayExpressOrderRequest) GetId() int64 {
+	if x != nil {
+		return x.Id
+	}
+	return 0
+}
+
+type PayExpressOrderReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	PayUrl        string                 `protobuf:"bytes,1,opt,name=pay_url,json=payUrl,proto3" json:"pay_url,omitempty"`
+	TradeNo       string                 `protobuf:"bytes,2,opt,name=trade_no,json=tradeNo,proto3" json:"trade_no,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PayExpressOrderReply) Reset() {
+	*x = PayExpressOrderReply{}
+	mi := &file_order_v3_order_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PayExpressOrderReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PayExpressOrderReply) ProtoMessage() {}
+
+func (x *PayExpressOrderReply) ProtoReflect() protoreflect.Message {
+	mi := &file_order_v3_order_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PayExpressOrderReply.ProtoReflect.Descriptor instead.
+func (*PayExpressOrderReply) Descriptor() ([]byte, []int) {
+	return file_order_v3_order_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *PayExpressOrderReply) GetPayUrl() string {
+	if x != nil {
+		return x.PayUrl
+	}
+	return ""
+}
+
+func (x *PayExpressOrderReply) GetTradeNo() string {
+	if x != nil {
+		return x.TradeNo
+	}
+	return ""
+}
+
+type PaymentCallbackRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	TradeNo       string                 `protobuf:"bytes,1,opt,name=trade_no,json=tradeNo,proto3" json:"trade_no,omitempty"`
+	OrderNo       string                 `protobuf:"bytes,2,opt,name=order_no,json=orderNo,proto3" json:"order_no,omitempty"`
+	PaymentStatus string                 `protobuf:"bytes,3,opt,name=payment_status,json=paymentStatus,proto3" json:"payment_status,omitempty"` // "paid" / "failed"
+	Signature     string                 `protobuf:"bytes,4,opt,name=signature,proto3" json:"signature,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PaymentCallbackRequest) Reset() {
+	*x = PaymentCallbackRequest{}
+	mi := &file_order_v3_order_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PaymentCallbackRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PaymentCallbackRequest) ProtoMessage() {}
+
+func (x *PaymentCallbackRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_order_v3_order_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PaymentCallbackRequest.ProtoReflect.Descriptor instead.
+func (*PaymentCallbackRequest) Descriptor() ([]byte, []int) {
+	return file_order_v3_order_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *PaymentCallbackRequest) GetTradeNo() string {
+	if x != nil {
+		return x.TradeNo
+	}
+	return ""
+}
+
+func (x *PaymentCallbackRequest) GetOrderNo() string {
+	if x != nil {
+		return x.OrderNo
+	}
+	return ""
+}
+
+func (x *PaymentCallbackRequest) GetPaymentStatus() string {
+	if x != nil {
+		return x.PaymentStatus
+	}
+	return ""
+}
+
+func (x *PaymentCallbackRequest) GetSignature() string {
+	if x != nil {
+		return x.Signature
+	}
+	return ""
+}
+
+type PaymentCallbackReply struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PaymentCallbackReply) Reset() {
+	*x = PaymentCallbackReply{}
+	mi := &file_order_v3_order_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PaymentCallbackReply) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PaymentCallbackReply) ProtoMessage() {}
+
+func (x *PaymentCallbackReply) ProtoReflect() protoreflect.Message {
+	mi := &file_order_v3_order_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PaymentCallbackReply.ProtoReflect.Descriptor instead.
+func (*PaymentCallbackReply) Descriptor() ([]byte, []int) {
+	return file_order_v3_order_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *PaymentCallbackReply) GetSuccess() bool {
+	if x != nil {
+		return x.Success
+	}
+	return false
+}
+
 type ExpressOrderReply struct {
 	state             protoimpl.MessageState `protogen:"open.v1"`
 	Id                int64                  `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
@@ -1007,6 +1223,7 @@ type ExpressOrderReply struct {
 	Tag               string                 `protobuf:"bytes,34,opt,name=tag,proto3" json:"tag,omitempty"`
 	IsFollowed        bool                   `protobuf:"varint,35,opt,name=is_followed,json=isFollowed,proto3" json:"is_followed,omitempty"`
 	ShareUrl          string                 `protobuf:"bytes,36,opt,name=share_url,json=shareUrl,proto3" json:"share_url,omitempty"`
+	PayUrl            string                 `protobuf:"bytes,39,opt,name=pay_url,json=payUrl,proto3" json:"pay_url,omitempty"`
 	CreatedAt         *timestamppb.Timestamp `protobuf:"bytes,37,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt         *timestamppb.Timestamp `protobuf:"bytes,38,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	unknownFields     protoimpl.UnknownFields
@@ -1015,7 +1232,7 @@ type ExpressOrderReply struct {
 
 func (x *ExpressOrderReply) Reset() {
 	*x = ExpressOrderReply{}
-	mi := &file_order_v3_order_proto_msgTypes[9]
+	mi := &file_order_v3_order_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1027,7 +1244,7 @@ func (x *ExpressOrderReply) String() string {
 func (*ExpressOrderReply) ProtoMessage() {}
 
 func (x *ExpressOrderReply) ProtoReflect() protoreflect.Message {
-	mi := &file_order_v3_order_proto_msgTypes[9]
+	mi := &file_order_v3_order_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1040,7 +1257,7 @@ func (x *ExpressOrderReply) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExpressOrderReply.ProtoReflect.Descriptor instead.
 func (*ExpressOrderReply) Descriptor() ([]byte, []int) {
-	return file_order_v3_order_proto_rawDescGZIP(), []int{9}
+	return file_order_v3_order_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ExpressOrderReply) GetId() int64 {
@@ -1295,6 +1512,13 @@ func (x *ExpressOrderReply) GetShareUrl() string {
 	return ""
 }
 
+func (x *ExpressOrderReply) GetPayUrl() string {
+	if x != nil {
+		return x.PayUrl
+	}
+	return ""
+}
+
 func (x *ExpressOrderReply) GetCreatedAt() *timestamppb.Timestamp {
 	if x != nil {
 		return x.CreatedAt
@@ -1320,7 +1544,7 @@ type ExpressOrderSet struct {
 
 func (x *ExpressOrderSet) Reset() {
 	*x = ExpressOrderSet{}
-	mi := &file_order_v3_order_proto_msgTypes[10]
+	mi := &file_order_v3_order_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1332,7 +1556,7 @@ func (x *ExpressOrderSet) String() string {
 func (*ExpressOrderSet) ProtoMessage() {}
 
 func (x *ExpressOrderSet) ProtoReflect() protoreflect.Message {
-	mi := &file_order_v3_order_proto_msgTypes[10]
+	mi := &file_order_v3_order_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1345,7 +1569,7 @@ func (x *ExpressOrderSet) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExpressOrderSet.ProtoReflect.Descriptor instead.
 func (*ExpressOrderSet) Descriptor() ([]byte, []int) {
-	return file_order_v3_order_proto_rawDescGZIP(), []int{10}
+	return file_order_v3_order_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ExpressOrderSet) GetOrders() []*ExpressOrderReply {
@@ -1436,7 +1660,20 @@ const file_order_v3_order_proto_rawDesc = "" +
 	"\auser_id\x18\x01 \x01(\x03B\x03\xe0A\x02R\x06userId\x12\x13\n" +
 	"\x02id\x18\x02 \x01(\x03B\x03\xe0A\x02R\x02id\".\n" +
 	"\x0fShareOrderReply\x12\x1b\n" +
-	"\tshare_url\x18\x01 \x01(\tR\bshareUrl\"\x96\v\n" +
+	"\tshare_url\x18\x01 \x01(\tR\bshareUrl\"K\n" +
+	"\x16PayExpressOrderRequest\x12\x1c\n" +
+	"\auser_id\x18\x01 \x01(\x03B\x03\xe0A\x02R\x06userId\x12\x13\n" +
+	"\x02id\x18\x02 \x01(\x03B\x03\xe0A\x02R\x02id\"J\n" +
+	"\x14PayExpressOrderReply\x12\x17\n" +
+	"\apay_url\x18\x01 \x01(\tR\x06payUrl\x12\x19\n" +
+	"\btrade_no\x18\x02 \x01(\tR\atradeNo\"\x93\x01\n" +
+	"\x16PaymentCallbackRequest\x12\x19\n" +
+	"\btrade_no\x18\x01 \x01(\tR\atradeNo\x12\x19\n" +
+	"\border_no\x18\x02 \x01(\tR\aorderNo\x12%\n" +
+	"\x0epayment_status\x18\x03 \x01(\tR\rpaymentStatus\x12\x1c\n" +
+	"\tsignature\x18\x04 \x01(\tR\tsignature\"0\n" +
+	"\x14PaymentCallbackReply\x12\x18\n" +
+	"\asuccess\x18\x01 \x01(\bR\asuccess\"\xaf\v\n" +
 	"\x11ExpressOrderReply\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x03R\x02id\x12\x17\n" +
 	"\auser_id\x18\x02 \x01(\x03R\x06userId\x12\x19\n" +
@@ -1480,7 +1717,8 @@ const file_order_v3_order_proto_rawDesc = "" +
 	"\x03tag\x18\" \x01(\tR\x03tag\x12\x1f\n" +
 	"\vis_followed\x18# \x01(\bR\n" +
 	"isFollowed\x12\x1b\n" +
-	"\tshare_url\x18$ \x01(\tR\bshareUrl\x129\n" +
+	"\tshare_url\x18$ \x01(\tR\bshareUrl\x12\x17\n" +
+	"\apay_url\x18' \x01(\tR\x06payUrl\x129\n" +
 	"\n" +
 	"created_at\x18% \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x129\n" +
 	"\n" +
@@ -1521,7 +1759,7 @@ const file_order_v3_order_proto_rawDesc = "" +
 	"\x06LOCKER\x10\x02\x12\x0e\n" +
 	"\n" +
 	"SF_STATION\x10\x03\x12\x11\n" +
-	"\rPARTNER_STORE\x10\x042\x82\a\n" +
+	"\rPARTNER_STORE\x10\x042\xfb\b\n" +
 	"\fOrderService\x12t\n" +
 	"\x12CreateExpressOrder\x12#.order.v3.CreateExpressOrderRequest\x1a\x1b.order.v3.ExpressOrderReply\"\x1c\x82\xd3\xe4\x93\x02\x16:\x01*\"\x11/api/order/create\x12i\n" +
 	"\x0fGetExpressOrder\x12 .order.v3.GetExpressOrderRequest\x1a\x1b.order.v3.ExpressOrderReply\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/api/order/{id}\x12c\n" +
@@ -1531,7 +1769,9 @@ const file_order_v3_order_proto_rawDesc = "" +
 	"\vSetOrderTag\x12\x1c.order.v3.SetOrderTagRequest\x1a\x1b.order.v3.ExpressOrderReply\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\x1a\x13/api/order/{id}/tag\x12k\n" +
 	"\vFollowOrder\x12\x1c.order.v3.FollowOrderRequest\x1a\x1b.order.v3.ExpressOrderReply\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\x1a\x16/api/order/{id}/follow\x12f\n" +
 	"\n" +
-	"ShareOrder\x12\x1b.order.v3.ShareOrderRequest\x1a\x19.order.v3.ShareOrderReply\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/order/{id}/shareBO\n" +
+	"ShareOrder\x12\x1b.order.v3.ShareOrderRequest\x1a\x19.order.v3.ShareOrderReply\" \x82\xd3\xe4\x93\x02\x1a:\x01*\"\x15/api/order/{id}/share\x12s\n" +
+	"\x0fPayExpressOrder\x12 .order.v3.PayExpressOrderRequest\x1a\x1e.order.v3.PayExpressOrderReply\"\x1e\x82\xd3\xe4\x93\x02\x18:\x01*\"\x13/api/order/{id}/pay\x12\x81\x01\n" +
+	"\x15HandlePaymentCallback\x12 .order.v3.PaymentCallbackRequest\x1a\x1e.order.v3.PaymentCallbackReply\"&\x82\xd3\xe4\x93\x02 :\x01*\"\x1b/api/order/payment/callbackBO\n" +
 	"\x19io.grpc.examples.order.v3B\n" +
 	"OrderProtoP\x01Z$shunfeng-miniprogram/api/order/v3;v3b\x06proto3"
 
@@ -1548,7 +1788,7 @@ func file_order_v3_order_proto_rawDescGZIP() []byte {
 }
 
 var file_order_v3_order_proto_enumTypes = make([]protoimpl.EnumInfo, 4)
-var file_order_v3_order_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
+var file_order_v3_order_proto_msgTypes = make([]protoimpl.MessageInfo, 15)
 var file_order_v3_order_proto_goTypes = []any{
 	(PaymentMethod)(0),                  // 0: order.v3.PaymentMethod
 	(PaymentStatus)(0),                  // 1: order.v3.PaymentStatus
@@ -1563,10 +1803,14 @@ var file_order_v3_order_proto_goTypes = []any{
 	(*FollowOrderRequest)(nil),          // 10: order.v3.FollowOrderRequest
 	(*ShareOrderRequest)(nil),           // 11: order.v3.ShareOrderRequest
 	(*ShareOrderReply)(nil),             // 12: order.v3.ShareOrderReply
-	(*ExpressOrderReply)(nil),           // 13: order.v3.ExpressOrderReply
-	(*ExpressOrderSet)(nil),             // 14: order.v3.ExpressOrderSet
-	(*timestamppb.Timestamp)(nil),       // 15: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),               // 16: google.protobuf.Empty
+	(*PayExpressOrderRequest)(nil),      // 13: order.v3.PayExpressOrderRequest
+	(*PayExpressOrderReply)(nil),        // 14: order.v3.PayExpressOrderReply
+	(*PaymentCallbackRequest)(nil),      // 15: order.v3.PaymentCallbackRequest
+	(*PaymentCallbackReply)(nil),        // 16: order.v3.PaymentCallbackReply
+	(*ExpressOrderReply)(nil),           // 17: order.v3.ExpressOrderReply
+	(*ExpressOrderSet)(nil),             // 18: order.v3.ExpressOrderSet
+	(*timestamppb.Timestamp)(nil),       // 19: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),               // 20: google.protobuf.Empty
 }
 var file_order_v3_order_proto_depIdxs = []int32{
 	3,  // 0: order.v3.CreateExpressOrderRequest.channel_code:type_name -> order.v3.ChannelCode
@@ -1575,9 +1819,9 @@ var file_order_v3_order_proto_depIdxs = []int32{
 	0,  // 3: order.v3.ExpressOrderReply.payment_method:type_name -> order.v3.PaymentMethod
 	1,  // 4: order.v3.ExpressOrderReply.payment_status:type_name -> order.v3.PaymentStatus
 	2,  // 5: order.v3.ExpressOrderReply.status:type_name -> order.v3.OrderStatus
-	15, // 6: order.v3.ExpressOrderReply.created_at:type_name -> google.protobuf.Timestamp
-	15, // 7: order.v3.ExpressOrderReply.updated_at:type_name -> google.protobuf.Timestamp
-	13, // 8: order.v3.ExpressOrderSet.orders:type_name -> order.v3.ExpressOrderReply
+	19, // 6: order.v3.ExpressOrderReply.created_at:type_name -> google.protobuf.Timestamp
+	19, // 7: order.v3.ExpressOrderReply.updated_at:type_name -> google.protobuf.Timestamp
+	17, // 8: order.v3.ExpressOrderSet.orders:type_name -> order.v3.ExpressOrderReply
 	4,  // 9: order.v3.OrderService.CreateExpressOrder:input_type -> order.v3.CreateExpressOrderRequest
 	5,  // 10: order.v3.OrderService.GetExpressOrder:input_type -> order.v3.GetExpressOrderRequest
 	6,  // 11: order.v3.OrderService.SearchOrders:input_type -> order.v3.SearchOrdersRequest
@@ -1586,16 +1830,20 @@ var file_order_v3_order_proto_depIdxs = []int32{
 	9,  // 14: order.v3.OrderService.SetOrderTag:input_type -> order.v3.SetOrderTagRequest
 	10, // 15: order.v3.OrderService.FollowOrder:input_type -> order.v3.FollowOrderRequest
 	11, // 16: order.v3.OrderService.ShareOrder:input_type -> order.v3.ShareOrderRequest
-	13, // 17: order.v3.OrderService.CreateExpressOrder:output_type -> order.v3.ExpressOrderReply
-	13, // 18: order.v3.OrderService.GetExpressOrder:output_type -> order.v3.ExpressOrderReply
-	14, // 19: order.v3.OrderService.SearchOrders:output_type -> order.v3.ExpressOrderSet
-	14, // 20: order.v3.OrderService.ListOrdersByCategory:output_type -> order.v3.ExpressOrderSet
-	16, // 21: order.v3.OrderService.DeleteExpressOrder:output_type -> google.protobuf.Empty
-	13, // 22: order.v3.OrderService.SetOrderTag:output_type -> order.v3.ExpressOrderReply
-	13, // 23: order.v3.OrderService.FollowOrder:output_type -> order.v3.ExpressOrderReply
-	12, // 24: order.v3.OrderService.ShareOrder:output_type -> order.v3.ShareOrderReply
-	17, // [17:25] is the sub-list for method output_type
-	9,  // [9:17] is the sub-list for method input_type
+	13, // 17: order.v3.OrderService.PayExpressOrder:input_type -> order.v3.PayExpressOrderRequest
+	15, // 18: order.v3.OrderService.HandlePaymentCallback:input_type -> order.v3.PaymentCallbackRequest
+	17, // 19: order.v3.OrderService.CreateExpressOrder:output_type -> order.v3.ExpressOrderReply
+	17, // 20: order.v3.OrderService.GetExpressOrder:output_type -> order.v3.ExpressOrderReply
+	18, // 21: order.v3.OrderService.SearchOrders:output_type -> order.v3.ExpressOrderSet
+	18, // 22: order.v3.OrderService.ListOrdersByCategory:output_type -> order.v3.ExpressOrderSet
+	20, // 23: order.v3.OrderService.DeleteExpressOrder:output_type -> google.protobuf.Empty
+	17, // 24: order.v3.OrderService.SetOrderTag:output_type -> order.v3.ExpressOrderReply
+	17, // 25: order.v3.OrderService.FollowOrder:output_type -> order.v3.ExpressOrderReply
+	12, // 26: order.v3.OrderService.ShareOrder:output_type -> order.v3.ShareOrderReply
+	14, // 27: order.v3.OrderService.PayExpressOrder:output_type -> order.v3.PayExpressOrderReply
+	16, // 28: order.v3.OrderService.HandlePaymentCallback:output_type -> order.v3.PaymentCallbackReply
+	19, // [19:29] is the sub-list for method output_type
+	9,  // [9:19] is the sub-list for method input_type
 	9,  // [9:9] is the sub-list for extension type_name
 	9,  // [9:9] is the sub-list for extension extendee
 	0,  // [0:9] is the sub-list for field type_name
@@ -1612,7 +1860,7 @@ func file_order_v3_order_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_order_v3_order_proto_rawDesc), len(file_order_v3_order_proto_rawDesc)),
 			NumEnums:      4,
-			NumMessages:   11,
+			NumMessages:   15,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

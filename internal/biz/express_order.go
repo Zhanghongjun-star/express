@@ -14,9 +14,10 @@ import (
 )
 
 var (
-	ErrOrderCreateFailed    = errors.InternalServer(v3.ErrorReason_ORDER_CREATE_FAILED.String(), "order creation failed")
-	ErrOrderPaymentRequired = errors.Forbidden(v3.ErrorReason_ORDER_PAYMENT_REQUIRED.String(), "payment required")
-	ErrOrderChannelUnavail  = errors.BadRequest(v3.ErrorReason_ORDER_CHANNEL_UNAVAILABLE.String(), "shipping channel unavailable")
+	ErrOrderCreateFailed           = errors.InternalServer(v3.ErrorReason_ORDER_CREATE_FAILED.String(), "order creation failed")
+	ErrOrderPaymentRequired        = errors.Forbidden(v3.ErrorReason_ORDER_PAYMENT_REQUIRED.String(), "payment required")
+	ErrOrderChannelUnavail         = errors.BadRequest(v3.ErrorReason_ORDER_CHANNEL_UNAVAILABLE.String(), "shipping channel unavailable")
+	ErrOrderInvalidStatusTransition = errors.BadRequest(v3.ErrorReason_ORDER_CREATE_FAILED.String(), "invalid order status transition")
 )
 
 const (
@@ -91,6 +92,8 @@ type ExpressOrder struct {
 	Tag             string
 	IsFollowed      bool
 	ShareURL        string
+	PayURL          string
+	TradeNo         string
 
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
@@ -143,20 +146,23 @@ type ExpressOrderRepo interface {
 	UpdateTag(context.Context, int64, int64, string) error
 	UpdateFollow(context.Context, int64, int64, bool) error
 	UpdateShareURL(context.Context, int64, int64, string) error
+	UpdatePayURL(context.Context, int64, int64, string, string) error
+	UpdatePaymentStatusByTradeNo(context.Context, string, string) error
 	UpdateStatus(context.Context, int64, int64, string) error
 	UpdatePaymentStatus(context.Context, int64, int64, string) error
 }
 
 type ExpressOrderUsecase struct {
-	repo       ExpressOrderRepo
-	freightUc  *FreightUsecase
-	channelUc  *ChannelUsecase
-	lockerUc   *LockerUsecase
-	pickupUc   *PickupUsecase
+	repo        ExpressOrderRepo
+	freightUc   *FreightUsecase
+	channelUc   *ChannelUsecase
+	lockerUc    *LockerUsecase
+	pickupUc    *PickupUsecase
 	servicePtUc *ServicePointUsecase
+	userRepo    UserRepo
 }
 
-func NewExpressOrderUsecase(repo ExpressOrderRepo, freightUc *FreightUsecase, channelUc *ChannelUsecase, lockerUc *LockerUsecase, pickupUc *PickupUsecase, servicePtUc *ServicePointUsecase) *ExpressOrderUsecase {
+func NewExpressOrderUsecase(repo ExpressOrderRepo, freightUc *FreightUsecase, channelUc *ChannelUsecase, lockerUc *LockerUsecase, pickupUc *PickupUsecase, servicePtUc *ServicePointUsecase, userRepo UserRepo) *ExpressOrderUsecase {
 	return &ExpressOrderUsecase{
 		repo:        repo,
 		freightUc:   freightUc,
@@ -164,7 +170,32 @@ func NewExpressOrderUsecase(repo ExpressOrderRepo, freightUc *FreightUsecase, ch
 		lockerUc:    lockerUc,
 		pickupUc:    pickupUc,
 		servicePtUc: servicePtUc,
+		userRepo:    userRepo,
 	}
+}
+
+// validTransitions 定义订单状态的合法转换路径。
+// key 为当前状态，value 为允许的下一个状态集合。
+var validTransitions = map[string]map[string]bool{
+	OrderStatusPendingPickup:  {OrderStatusAccepted: true, OrderStatusCancelled: true},
+	OrderStatusAccepted:       {OrderStatusAwaitingPickup: true, OrderStatusCancelled: true},
+	OrderStatusAwaitingPickup: {OrderStatusPickedUp: true, OrderStatusCancelled: true},
+	OrderStatusPickedUp:       {OrderStatusInTransit: true, OrderStatusCancelled: true},
+	OrderStatusInTransit:      {OrderStatusDelivering: true},
+	OrderStatusDelivering:     {OrderStatusSigned: true},
+}
+
+// ValidateStatusTransition 校验订单状态变更是否合法。
+// cancelled 和 signed 为终态，不接受任何后续转换。
+func ValidateStatusTransition(current, next string) bool {
+	if current == OrderStatusCancelled || current == OrderStatusSigned {
+		return next == current
+	}
+	allowed, ok := validTransitions[current]
+	if !ok {
+		return false
+	}
+	return allowed[next]
 }
 
 func (uc *ExpressOrderUsecase) CreateOrder(ctx context.Context, cmd *CreateExpressOrderCommand) (*ExpressOrder, error) {
@@ -173,7 +204,10 @@ func (uc *ExpressOrderUsecase) CreateOrder(ctx context.Context, cmd *CreateExpre
 	}
 
 	if cmd.PaymentMethod == PaymentMethodMonthly {
-		return nil, ErrOrderChannelUnavail
+		user, err := uc.userRepo.FindByID(ctx, cmd.UserID)
+		if err != nil || !user.IsEnterprise {
+			return nil, ErrOrderChannelUnavail
+		}
 	}
 
 	if cmd.ChannelCode == "DOOR_PICKUP" && cmd.PickupDate != "" && cmd.PickupSlotCode != "" {
@@ -331,6 +365,47 @@ func (uc *ExpressOrderUsecase) ShareOrder(ctx context.Context, userID, orderID i
 		return "", err
 	}
 	return url, nil
+}
+
+func (uc *ExpressOrderUsecase) PayOrder(ctx context.Context, userID, orderID int64) (payURL, tradeNo string, err error) {
+	if userID <= 0 || orderID <= 0 {
+		return "", "", ErrOrderInvalidArgument
+	}
+	order, err := uc.repo.FindByID(ctx, userID, orderID)
+	if err != nil {
+		return "", "", err
+	}
+	if order.PaymentStatus != PaymentStatusPending {
+		return "", "", ErrOrderPaymentRequired
+	}
+	if order.PayURL != "" {
+		return order.PayURL, order.TradeNo, nil
+	}
+	b := make([]byte, 4)
+	rand.Read(b)
+	tradeNo = fmt.Sprintf("T%s%s", time.Now().Format("20060102150405"), hex.EncodeToString(b))
+	payURL = fmt.Sprintf("https://pay.example.com/pay?trade_no=%s&amount=%.2f", tradeNo, order.TotalFreight)
+	if err := uc.repo.UpdatePayURL(ctx, userID, orderID, payURL, tradeNo); err != nil {
+		return "", "", err
+	}
+	return payURL, tradeNo, nil
+}
+
+func (uc *ExpressOrderUsecase) HandlePaymentCallback(ctx context.Context, tradeNo, orderNo, paymentStatus, signature string) error {
+	if strings.TrimSpace(tradeNo) == "" && strings.TrimSpace(orderNo) == "" {
+		return ErrOrderInvalidArgument
+	}
+	if paymentStatus != PaymentStatusPaid {
+		return nil
+	}
+	if strings.TrimSpace(tradeNo) != "" {
+		if err := uc.repo.UpdatePaymentStatusByTradeNo(ctx, tradeNo, PaymentStatusPaid); err != nil {
+			return err
+		}
+	} else {
+		_ = uc.repo.UpdatePaymentStatus(ctx, 0, 0, PaymentStatusPaid)
+	}
+	return nil
 }
 
 func (uc *ExpressOrderUsecase) validateCreateOrder(cmd *CreateExpressOrderCommand) error {

@@ -124,6 +124,21 @@ func (s *ExpressOrderService) ShareOrder(ctx context.Context, req *v3.ShareOrder
 	return &v3.ShareOrderReply{ShareUrl: url}, nil
 }
 
+func (s *ExpressOrderService) PayExpressOrder(ctx context.Context, req *v3.PayExpressOrderRequest) (*v3.PayExpressOrderReply, error) {
+	payURL, tradeNo, err := s.uc.PayOrder(ctx, req.GetUserId(), req.GetId())
+	if err != nil {
+		return nil, err
+	}
+	return &v3.PayExpressOrderReply{PayUrl: payURL, TradeNo: tradeNo}, nil
+}
+
+func (s *ExpressOrderService) HandlePaymentCallback(ctx context.Context, req *v3.PaymentCallbackRequest) (*v3.PaymentCallbackReply, error) {
+	if err := s.uc.HandlePaymentCallback(ctx, req.GetTradeNo(), req.GetOrderNo(), req.GetPaymentStatus(), req.GetSignature()); err != nil {
+		return nil, err
+	}
+	return &v3.PaymentCallbackReply{Success: true}, nil
+}
+
 func convertPaymentMethod(pm v3.PaymentMethod) string {
 	switch pm {
 	case v3.PaymentMethod_SENDER_PAY:
@@ -227,6 +242,7 @@ func convertExpressOrderReply(in *biz.ExpressOrder) *v3.ExpressOrderReply {
 		Tag:               in.Tag,
 		IsFollowed:        in.IsFollowed,
 		ShareUrl:          in.ShareURL,
+		PayUrl:            in.PayURL,
 		CreatedAt:         timestamppb.New(in.CreatedAt),
 		UpdatedAt:         timestamppb.New(in.UpdatedAt),
 	}

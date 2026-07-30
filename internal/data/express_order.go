@@ -113,6 +113,22 @@ func (r *expressOrderRepo) UpdateShareURL(ctx context.Context, userID, orderID i
 		Updates(map[string]any{"share_url": url, "updated_at": time.Now()}).Error
 }
 
+func (r *expressOrderRepo) UpdatePayURL(ctx context.Context, userID, orderID int64, payURL, tradeNo string) error {
+	return DB.WithContext(ctx).Model(&ExpressOrder{}).
+		Where("id = ? AND user_id = ?", orderID, userID).
+		Updates(map[string]any{"pay_url": payURL, "trade_no": tradeNo, "updated_at": time.Now()}).Error
+}
+
+func (r *expressOrderRepo) UpdatePaymentStatusByTradeNo(ctx context.Context, tradeNo, paymentStatus string) error {
+	updates := map[string]any{"payment_status": paymentStatus, "updated_at": time.Now()}
+	if paymentStatus == biz.PaymentStatusPaid {
+		updates["paid_at"] = time.Now()
+	}
+	return DB.WithContext(ctx).Model(&ExpressOrder{}).
+		Where("trade_no = ?", tradeNo).
+		Updates(updates).Error
+}
+
 func (r *expressOrderRepo) UpdateStatus(ctx context.Context, userID, orderID int64, status string) error {
 	return DB.WithContext(ctx).Model(&ExpressOrder{}).
 		Where("id = ? AND user_id = ?", orderID, userID).
@@ -174,6 +190,8 @@ func toExpressOrderPO(in *biz.ExpressOrder) *ExpressOrder {
 		Tag:              in.Tag,
 		IsFollowed:       in.IsFollowed,
 		ShareURL:         in.ShareURL,
+		PayURL:           in.PayURL,
+		TradeNo:          in.TradeNo,
 		CreatedAt:        in.CreatedAt,
 		UpdatedAt:        in.UpdatedAt,
 	}
@@ -225,6 +243,8 @@ func toExpressOrderBiz(in *ExpressOrder) *biz.ExpressOrder {
 		Tag:              in.Tag,
 		IsFollowed:       in.IsFollowed,
 		ShareURL:         in.ShareURL,
+		PayURL:           in.PayURL,
+		TradeNo:          in.TradeNo,
 		CreatedAt:        in.CreatedAt,
 		UpdatedAt:        in.UpdatedAt,
 	}

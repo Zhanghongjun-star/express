@@ -402,6 +402,10 @@ type ExpressOrder struct {
 	// 分享链接
 	ShareURL                string    `gorm:"column:share_url;type:varchar(512)" db:"share_url" json:"share_url"`
 
+	// 支付
+	PayURL                  string    `gorm:"column:pay_url;type:varchar(512)" db:"pay_url" json:"pay_url"`
+	TradeNo                 string    `gorm:"column:trade_no;type:varchar(64)" db:"trade_no" json:"trade_no"`
+
 	CreatedAt               time.Time `gorm:"column:created_at" db:"created_at" json:"created_at"`
 	UpdatedAt               time.Time `gorm:"column:updated_at" db:"updated_at" json:"updated_at"`
 }

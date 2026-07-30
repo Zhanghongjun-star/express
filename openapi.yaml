@@ -6,6 +6,243 @@ info:
     title: ""
     version: 0.0.1
 paths:
+    /api/express/orders/search:
+        post:
+            tags:
+                - ExpressService
+            description: '--- 订单搜索 ---'
+            operationId: ExpressService_SearchOrders
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/express.v1.SearchOrdersRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.SearchOrdersReply'
+    /api/express/orders/{id}/follow:
+        post:
+            tags:
+                - ExpressService
+            description: '--- 关注/取消关注 ---'
+            operationId: ExpressService_FollowOrder
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.FollowOrderReply'
+        delete:
+            tags:
+                - ExpressService
+            operationId: ExpressService_UnfollowOrder
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.UnfollowOrderReply'
+    /api/express/orders/{id}/label:
+        get:
+            tags:
+                - ExpressService
+            operationId: ExpressService_GetOrderLabel
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.GetOrderLabelReply'
+        put:
+            tags:
+                - ExpressService
+            description: '--- 标签 ---'
+            operationId: ExpressService_SetOrderLabel
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/express.v1.SetOrderLabelRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.SetOrderLabelReply'
+        delete:
+            tags:
+                - ExpressService
+            operationId: ExpressService_ClearOrderLabel
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.ClearOrderLabelReply'
+    /api/express/orders/{id}/shares:
+        post:
+            tags:
+                - ExpressService
+            description: '--- 分享 ---'
+            operationId: ExpressService_CreateOrderShare
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/express.v1.CreateOrderShareRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.CreateOrderShareReply'
+    /api/express/public/order-shares/{code}:
+        get:
+            tags:
+                - ExpressService
+            operationId: ExpressService_GetOrderShare
+            parameters:
+                - name: code
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.GetOrderShareReply'
+    /api/express/users/me/messages:
+        get:
+            tags:
+                - ExpressService
+            description: '--- 消息 ---'
+            operationId: ExpressService_ListUserMessages
+            parameters:
+                - name: messageType
+                  in: query
+                  schema:
+                    type: string
+                - name: readStatus
+                  in: query
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.ListUserMessagesReply'
+    /api/express/users/me/messages/read-all:
+        put:
+            tags:
+                - ExpressService
+            operationId: ExpressService_MarkAllMessagesRead
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.MarkAllMessagesReadReply'
+    /api/express/users/me/messages/{id}:
+        delete:
+            tags:
+                - ExpressService
+            operationId: ExpressService_DeleteUserMessage
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.DeleteUserMessageReply'
+    /api/express/users/me/messages/{id}/read:
+        put:
+            tags:
+                - ExpressService
+            operationId: ExpressService_MarkMessageRead
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.MarkMessageReadReply'
     /api/order/category/{category}:
         get:
             tags:
@@ -141,6 +378,25 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/order.v1.HistoryRecordSet'
+    /api/order/payment/callback:
+        post:
+            tags:
+                - OrderService
+            description: HandlePaymentCallback 处理支付回调，更新支付状态
+            operationId: OrderService_HandlePaymentCallback
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v3.PaymentCallbackRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.PaymentCallbackReply'
     /api/order/search:
         get:
             tags:
@@ -239,6 +495,31 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/order.v3.ExpressOrderReply'
+    /api/order/{id}/pay:
+        post:
+            tags:
+                - OrderService
+            description: PayExpressOrder 发起支付，返回支付链接
+            operationId: OrderService_PayExpressOrder
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v3.PayExpressOrderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.PayExpressOrderReply'
     /api/order/{id}/share:
         post:
             tags:
@@ -1308,6 +1589,199 @@ components:
                 expiresIn:
                     type: integer
                     format: int32
+        express.v1.ClearOrderLabelReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+        express.v1.CreateOrderShareReply:
+            type: object
+            properties:
+                shareCode:
+                    type: string
+                shareUrl:
+                    type: string
+                expireAt:
+                    type: string
+                    format: date-time
+        express.v1.CreateOrderShareRequest:
+            required:
+                - id
+                - expireHours
+            type: object
+            properties:
+                id:
+                    type: string
+                expireHours:
+                    type: integer
+                    format: int32
+                showSender:
+                    type: boolean
+                showReceiver:
+                    type: boolean
+                showPhone:
+                    type: boolean
+                showStatus:
+                    type: boolean
+            description: '--- 分享 ---'
+        express.v1.DeleteUserMessageReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                unreadCount:
+                    type: integer
+                    format: int32
+        express.v1.FollowOrderReply:
+            type: object
+            properties:
+                followed:
+                    type: boolean
+        express.v1.GetOrderLabelReply:
+            type: object
+            properties:
+                content:
+                    type: string
+                hasLabel:
+                    type: boolean
+        express.v1.GetOrderShareReply:
+            type: object
+            properties:
+                orderId:
+                    type: string
+                senderName:
+                    type: string
+                receiverName:
+                    type: string
+                phone:
+                    type: string
+                status:
+                    type: string
+                orderStatus:
+                    type: string
+        express.v1.ListUserMessagesReply:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/express.v1.UserMessageItem'
+                total:
+                    type: integer
+                    format: int32
+                unreadCount:
+                    type: integer
+                    format: int32
+        express.v1.MarkAllMessagesReadReply:
+            type: object
+            properties:
+                updatedCount:
+                    type: integer
+                    format: int32
+                unreadCount:
+                    type: integer
+                    format: int32
+        express.v1.MarkMessageReadReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                unreadCount:
+                    type: integer
+                    format: int32
+        express.v1.OrderItem:
+            type: object
+            properties:
+                id:
+                    type: string
+                orderNo:
+                    type: string
+                expressNo:
+                    type: string
+                senderName:
+                    type: string
+                receiverName:
+                    type: string
+                status:
+                    type: string
+                hasFollowed:
+                    type: boolean
+                label:
+                    type: string
+                createTime:
+                    type: string
+                    format: date-time
+        express.v1.SearchOrdersReply:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/express.v1.OrderItem'
+                total:
+                    type: integer
+                    format: int32
+        express.v1.SearchOrdersRequest:
+            required:
+                - keyword
+            type: object
+            properties:
+                keyword:
+                    type: string
+                page:
+                    type: integer
+                    format: int32
+                pageSize:
+                    type: integer
+                    format: int32
+            description: '--- 搜索 ---'
+        express.v1.SetOrderLabelReply:
+            type: object
+            properties:
+                content:
+                    type: string
+        express.v1.SetOrderLabelRequest:
+            required:
+                - id
+                - content
+            type: object
+            properties:
+                id:
+                    type: string
+                content:
+                    type: string
+            description: '--- 标签 ---'
+        express.v1.UnfollowOrderReply:
+            type: object
+            properties:
+                followed:
+                    type: boolean
+        express.v1.UserMessageItem:
+            type: object
+            properties:
+                id:
+                    type: string
+                messageType:
+                    type: string
+                title:
+                    type: string
+                content:
+                    type: string
+                businessType:
+                    type: string
+                businessId:
+                    type: string
+                priority:
+                    type: integer
+                    format: int32
+                isRead:
+                    type: boolean
+                readAt:
+                    type: string
+                    format: date-time
+                createdAt:
+                    type: string
+                    format: date-time
         order.v1.ExportHistoryReply:
             type: object
             properties:
@@ -1589,6 +2063,8 @@ components:
                     type: boolean
                 shareUrl:
                     type: string
+                payUrl:
+                    type: string
                 createdAt:
                     type: string
                     format: date-time
@@ -1619,6 +2095,39 @@ components:
                     type: string
                 follow:
                     type: boolean
+        order.v3.PayExpressOrderReply:
+            type: object
+            properties:
+                payUrl:
+                    type: string
+                tradeNo:
+                    type: string
+        order.v3.PayExpressOrderRequest:
+            required:
+                - userId
+                - id
+            type: object
+            properties:
+                userId:
+                    type: string
+                id:
+                    type: string
+        order.v3.PaymentCallbackReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+        order.v3.PaymentCallbackRequest:
+            type: object
+            properties:
+                tradeNo:
+                    type: string
+                orderNo:
+                    type: string
+                paymentStatus:
+                    type: string
+                signature:
+                    type: string
         order.v3.SetOrderTagRequest:
             required:
                 - userId
@@ -2049,6 +2558,7 @@ tags:
     - name: AddressService
     - name: AuthService
       description: AuthService exposes identity, login, token, password, and real-name auth APIs.
+    - name: ExpressService
     - name: OrderService
     - name: OrderService
     - name: OrderService

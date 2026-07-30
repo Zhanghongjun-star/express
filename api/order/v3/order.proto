@@ -72,6 +72,22 @@ service OrderService {
       body: "*"
     };
   }
+
+  // PayExpressOrder 发起支付，返回支付链接
+  rpc PayExpressOrder(PayExpressOrderRequest) returns (PayExpressOrderReply) {
+    option (google.api.http) = {
+      post: "/api/order/{id}/pay"
+      body: "*"
+    };
+  }
+
+  // HandlePaymentCallback 处理支付回调，更新支付状态
+  rpc HandlePaymentCallback(PaymentCallbackRequest) returns (PaymentCallbackReply) {
+    option (google.api.http) = {
+      post: "/api/order/payment/callback"
+      body: "*"
+    };
+  }
 }
 
 // ──────────────────────────────────────────────
@@ -209,6 +225,27 @@ message ShareOrderReply {
   string share_url = 1;
 }
 
+message PayExpressOrderRequest {
+  int64 user_id = 1 [(google.api.field_behavior) = REQUIRED];
+  int64 id = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message PayExpressOrderReply {
+  string pay_url = 1;
+  string trade_no = 2;
+}
+
+message PaymentCallbackRequest {
+  string trade_no = 1;
+  string order_no = 2;
+  string payment_status = 3; // "paid" / "failed"
+  string signature = 4;
+}
+
+message PaymentCallbackReply {
+  bool success = 1;
+}
+
 // ──────────────────────────────────────────────
 // 共用响应
 // ──────────────────────────────────────────────
@@ -257,6 +294,7 @@ message ExpressOrderReply {
   string tag = 34;
   bool is_followed = 35;
   string share_url = 36;
+  string pay_url = 39;
 
   google.protobuf.Timestamp created_at = 37;
   google.protobuf.Timestamp updated_at = 38;

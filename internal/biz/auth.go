@@ -312,6 +312,7 @@ func (uc *AuthUsecase) RefreshToken(ctx context.Context, refreshToken, deviceID 
 }
 
 // ValidateAccessToken 校验 access token 有效性，返回会话信息。
+// 同时检查账号状态，封禁账号拒绝所有请求。
 func (uc *AuthUsecase) ValidateAccessToken(ctx context.Context, accessToken string) (*TokenSession, error) {
 	if strings.TrimSpace(accessToken) == "" {
 		return nil, ErrAuthInvalidArgument
@@ -322,6 +323,13 @@ func (uc *AuthUsecase) ValidateAccessToken(ctx context.Context, accessToken stri
 	}
 	if time.Now().After(session.ExpiresAt) {
 		return nil, ErrAuthUnauthenticated
+	}
+	user, err := uc.repo.FindUserByID(ctx, session.UserID)
+	if err != nil {
+		return nil, ErrAuthUnauthenticated
+	}
+	if user.AccountStatus == AccountStatusDisabled {
+		return nil, ErrAuthAccountDisabled
 	}
 	return session, nil
 }

@@ -20,14 +20,16 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	OrderService_CreateExpressOrder_FullMethodName   = "/order.v3.OrderService/CreateExpressOrder"
-	OrderService_GetExpressOrder_FullMethodName      = "/order.v3.OrderService/GetExpressOrder"
-	OrderService_SearchOrders_FullMethodName         = "/order.v3.OrderService/SearchOrders"
-	OrderService_ListOrdersByCategory_FullMethodName = "/order.v3.OrderService/ListOrdersByCategory"
-	OrderService_DeleteExpressOrder_FullMethodName   = "/order.v3.OrderService/DeleteExpressOrder"
-	OrderService_SetOrderTag_FullMethodName          = "/order.v3.OrderService/SetOrderTag"
-	OrderService_FollowOrder_FullMethodName          = "/order.v3.OrderService/FollowOrder"
-	OrderService_ShareOrder_FullMethodName           = "/order.v3.OrderService/ShareOrder"
+	OrderService_CreateExpressOrder_FullMethodName    = "/order.v3.OrderService/CreateExpressOrder"
+	OrderService_GetExpressOrder_FullMethodName       = "/order.v3.OrderService/GetExpressOrder"
+	OrderService_SearchOrders_FullMethodName          = "/order.v3.OrderService/SearchOrders"
+	OrderService_ListOrdersByCategory_FullMethodName  = "/order.v3.OrderService/ListOrdersByCategory"
+	OrderService_DeleteExpressOrder_FullMethodName    = "/order.v3.OrderService/DeleteExpressOrder"
+	OrderService_SetOrderTag_FullMethodName           = "/order.v3.OrderService/SetOrderTag"
+	OrderService_FollowOrder_FullMethodName           = "/order.v3.OrderService/FollowOrder"
+	OrderService_ShareOrder_FullMethodName            = "/order.v3.OrderService/ShareOrder"
+	OrderService_PayExpressOrder_FullMethodName       = "/order.v3.OrderService/PayExpressOrder"
+	OrderService_HandlePaymentCallback_FullMethodName = "/order.v3.OrderService/HandlePaymentCallback"
 )
 
 // OrderServiceClient is the client API for OrderService service.
@@ -50,6 +52,10 @@ type OrderServiceClient interface {
 	FollowOrder(ctx context.Context, in *FollowOrderRequest, opts ...grpc.CallOption) (*ExpressOrderReply, error)
 	// ShareOrder 生成物流分享链接
 	ShareOrder(ctx context.Context, in *ShareOrderRequest, opts ...grpc.CallOption) (*ShareOrderReply, error)
+	// PayExpressOrder 发起支付，返回支付链接
+	PayExpressOrder(ctx context.Context, in *PayExpressOrderRequest, opts ...grpc.CallOption) (*PayExpressOrderReply, error)
+	// HandlePaymentCallback 处理支付回调，更新支付状态
+	HandlePaymentCallback(ctx context.Context, in *PaymentCallbackRequest, opts ...grpc.CallOption) (*PaymentCallbackReply, error)
 }
 
 type orderServiceClient struct {
@@ -140,6 +146,26 @@ func (c *orderServiceClient) ShareOrder(ctx context.Context, in *ShareOrderReque
 	return out, nil
 }
 
+func (c *orderServiceClient) PayExpressOrder(ctx context.Context, in *PayExpressOrderRequest, opts ...grpc.CallOption) (*PayExpressOrderReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PayExpressOrderReply)
+	err := c.cc.Invoke(ctx, OrderService_PayExpressOrder_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *orderServiceClient) HandlePaymentCallback(ctx context.Context, in *PaymentCallbackRequest, opts ...grpc.CallOption) (*PaymentCallbackReply, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PaymentCallbackReply)
+	err := c.cc.Invoke(ctx, OrderService_HandlePaymentCallback_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // OrderServiceServer is the server API for OrderService service.
 // All implementations must embed UnimplementedOrderServiceServer
 // for forward compatibility.
@@ -160,6 +186,10 @@ type OrderServiceServer interface {
 	FollowOrder(context.Context, *FollowOrderRequest) (*ExpressOrderReply, error)
 	// ShareOrder 生成物流分享链接
 	ShareOrder(context.Context, *ShareOrderRequest) (*ShareOrderReply, error)
+	// PayExpressOrder 发起支付，返回支付链接
+	PayExpressOrder(context.Context, *PayExpressOrderRequest) (*PayExpressOrderReply, error)
+	// HandlePaymentCallback 处理支付回调，更新支付状态
+	HandlePaymentCallback(context.Context, *PaymentCallbackRequest) (*PaymentCallbackReply, error)
 	mustEmbedUnimplementedOrderServiceServer()
 }
 
@@ -193,6 +223,12 @@ func (UnimplementedOrderServiceServer) FollowOrder(context.Context, *FollowOrder
 }
 func (UnimplementedOrderServiceServer) ShareOrder(context.Context, *ShareOrderRequest) (*ShareOrderReply, error) {
 	return nil, status.Error(codes.Unimplemented, "method ShareOrder not implemented")
+}
+func (UnimplementedOrderServiceServer) PayExpressOrder(context.Context, *PayExpressOrderRequest) (*PayExpressOrderReply, error) {
+	return nil, status.Error(codes.Unimplemented, "method PayExpressOrder not implemented")
+}
+func (UnimplementedOrderServiceServer) HandlePaymentCallback(context.Context, *PaymentCallbackRequest) (*PaymentCallbackReply, error) {
+	return nil, status.Error(codes.Unimplemented, "method HandlePaymentCallback not implemented")
 }
 func (UnimplementedOrderServiceServer) mustEmbedUnimplementedOrderServiceServer() {}
 func (UnimplementedOrderServiceServer) testEmbeddedByValue()                      {}
@@ -359,6 +395,42 @@ func _OrderService_ShareOrder_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _OrderService_PayExpressOrder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PayExpressOrderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).PayExpressOrder(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_PayExpressOrder_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).PayExpressOrder(ctx, req.(*PayExpressOrderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _OrderService_HandlePaymentCallback_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PaymentCallbackRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(OrderServiceServer).HandlePaymentCallback(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: OrderService_HandlePaymentCallback_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(OrderServiceServer).HandlePaymentCallback(ctx, req.(*PaymentCallbackRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // OrderService_ServiceDesc is the grpc.ServiceDesc for OrderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -397,6 +469,14 @@ var OrderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ShareOrder",
 			Handler:    _OrderService_ShareOrder_Handler,
+		},
+		{
+			MethodName: "PayExpressOrder",
+			Handler:    _OrderService_PayExpressOrder_Handler,
+		},
+		{
+			MethodName: "HandlePaymentCallback",
+			Handler:    _OrderService_HandlePaymentCallback_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -51,7 +51,7 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger *slog.Logger, 
 	authUsecase := biz.NewAuthUsecase(authRepo)
 	authService := service.NewAuthService(authUsecase)
 	expressOrderRepo := data.NewExpressOrderRepo()
-	expressOrderUsecase := biz.NewExpressOrderUsecase(expressOrderRepo, freightUsecase, channelUsecase, lockerUsecase, pickupUsecase, servicePointUsecase)
+	expressOrderUsecase := biz.NewExpressOrderUsecase(expressOrderRepo, freightUsecase, channelUsecase, lockerUsecase, pickupUsecase, servicePointUsecase, userRepo)
 	expressOrderService := service.NewExpressOrderService(expressOrderUsecase)
 	grpcServer := server.NewGRPCServer(confServer, todoService, userService, addressService, orderService, shippingService, freightService, authService, expressOrderService, authUsecase)
 	httpServer := server.NewHTTPServer(confServer, todoService, userService, addressService, orderService, shippingService, freightService, authService, expressOrderService, authUsecase)

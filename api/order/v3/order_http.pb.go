@@ -22,7 +22,9 @@ const OperationOrderServiceCreateExpressOrder = "/order.v3.OrderService/CreateEx
 const OperationOrderServiceDeleteExpressOrder = "/order.v3.OrderService/DeleteExpressOrder"
 const OperationOrderServiceFollowOrder = "/order.v3.OrderService/FollowOrder"
 const OperationOrderServiceGetExpressOrder = "/order.v3.OrderService/GetExpressOrder"
+const OperationOrderServiceHandlePaymentCallback = "/order.v3.OrderService/HandlePaymentCallback"
 const OperationOrderServiceListOrdersByCategory = "/order.v3.OrderService/ListOrdersByCategory"
+const OperationOrderServicePayExpressOrder = "/order.v3.OrderService/PayExpressOrder"
 const OperationOrderServiceSearchOrders = "/order.v3.OrderService/SearchOrders"
 const OperationOrderServiceSetOrderTag = "/order.v3.OrderService/SetOrderTag"
 const OperationOrderServiceShareOrder = "/order.v3.OrderService/ShareOrder"
@@ -36,8 +38,12 @@ type OrderServiceHTTPServer interface {
 	FollowOrder(context.Context, *FollowOrderRequest) (*ExpressOrderReply, error)
 	// GetExpressOrder GetExpressOrder 获取订单详情
 	GetExpressOrder(context.Context, *GetExpressOrderRequest) (*ExpressOrderReply, error)
+	// HandlePaymentCallback HandlePaymentCallback 处理支付回调，更新支付状态
+	HandlePaymentCallback(context.Context, *PaymentCallbackRequest) (*PaymentCallbackReply, error)
 	// ListOrdersByCategory ListOrdersByCategory 按分类查看订单（寄件/收件/关注/待支付）
 	ListOrdersByCategory(context.Context, *ListOrdersByCategoryRequest) (*ExpressOrderSet, error)
+	// PayExpressOrder PayExpressOrder 发起支付，返回支付链接
+	PayExpressOrder(context.Context, *PayExpressOrderRequest) (*PayExpressOrderReply, error)
 	// SearchOrders SearchOrders 搜索订单（按单号/姓名/手机号）
 	SearchOrders(context.Context, *SearchOrdersRequest) (*ExpressOrderSet, error)
 	// SetOrderTag SetOrderTag 设置订单标签
@@ -56,6 +62,8 @@ func RegisterOrderServiceHTTPServer(s *http.Server, srv OrderServiceHTTPServer) 
 	r.Handle("PUT", "/api/order/{id}/tag", _OrderService_SetOrderTag0_HTTP_Handler(srv))
 	r.Handle("PUT", "/api/order/{id}/follow", _OrderService_FollowOrder0_HTTP_Handler(srv))
 	r.Handle("POST", "/api/order/{id}/share", _OrderService_ShareOrder0_HTTP_Handler(srv))
+	r.Handle("POST", "/api/order/{id}/pay", _OrderService_PayExpressOrder0_HTTP_Handler(srv))
+	r.Handle("POST", "/api/order/payment/callback", _OrderService_HandlePaymentCallback0_HTTP_Handler(srv))
 }
 
 func _OrderService_CreateExpressOrder0_HTTP_Handler(srv OrderServiceHTTPServer) func(ctx http.Context) error {
@@ -228,6 +236,47 @@ func _OrderService_ShareOrder0_HTTP_Handler(srv OrderServiceHTTPServer) func(ctx
 	}
 }
 
+func _OrderService_PayExpressOrder0_HTTP_Handler(srv OrderServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PayExpressOrderRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		if err := ctx.BindVars(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationOrderServicePayExpressOrder)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.PayExpressOrder(ctx, req.(*PayExpressOrderRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*PayExpressOrderReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _OrderService_HandlePaymentCallback0_HTTP_Handler(srv OrderServiceHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in PaymentCallbackRequest
+		if err := ctx.Bind(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationOrderServiceHandlePaymentCallback)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.HandlePaymentCallback(ctx, req.(*PaymentCallbackRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*PaymentCallbackReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 type OrderServiceHTTPClient interface {
 	// CreateExpressOrder CreateExpressOrder 创建寄件订单
 	CreateExpressOrder(ctx context.Context, req *CreateExpressOrderRequest, opts ...http.CallOption) (rsp *ExpressOrderReply, err error)
@@ -237,8 +286,12 @@ type OrderServiceHTTPClient interface {
 	FollowOrder(ctx context.Context, req *FollowOrderRequest, opts ...http.CallOption) (rsp *ExpressOrderReply, err error)
 	// GetExpressOrder GetExpressOrder 获取订单详情
 	GetExpressOrder(ctx context.Context, req *GetExpressOrderRequest, opts ...http.CallOption) (rsp *ExpressOrderReply, err error)
+	// HandlePaymentCallback HandlePaymentCallback 处理支付回调，更新支付状态
+	HandlePaymentCallback(ctx context.Context, req *PaymentCallbackRequest, opts ...http.CallOption) (rsp *PaymentCallbackReply, err error)
 	// ListOrdersByCategory ListOrdersByCategory 按分类查看订单（寄件/收件/关注/待支付）
 	ListOrdersByCategory(ctx context.Context, req *ListOrdersByCategoryRequest, opts ...http.CallOption) (rsp *ExpressOrderSet, err error)
+	// PayExpressOrder PayExpressOrder 发起支付，返回支付链接
+	PayExpressOrder(ctx context.Context, req *PayExpressOrderRequest, opts ...http.CallOption) (rsp *PayExpressOrderReply, err error)
 	// SearchOrders SearchOrders 搜索订单（按单号/姓名/手机号）
 	SearchOrders(ctx context.Context, req *SearchOrdersRequest, opts ...http.CallOption) (rsp *ExpressOrderSet, err error)
 	// SetOrderTag SetOrderTag 设置订单标签
@@ -325,6 +378,24 @@ func (c *OrderServiceHTTPClientImpl) GetExpressOrder(ctx context.Context, in *Ge
 	return &out, nil
 }
 
+// HandlePaymentCallback HandlePaymentCallback 处理支付回调，更新支付状态
+func (c *OrderServiceHTTPClientImpl) HandlePaymentCallback(ctx context.Context, in *PaymentCallbackRequest, opts ...http.CallOption) (*PaymentCallbackReply, error) {
+	var out PaymentCallbackReply
+	pattern := "/api/order/payment/callback"
+	path := http.BuildPath(pattern, in)
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.ContentType("application/protojson"),
+		http.Operation(OperationOrderServiceHandlePaymentCallback),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
 // ListOrdersByCategory ListOrdersByCategory 按分类查看订单（寄件/收件/关注/待支付）
 func (c *OrderServiceHTTPClientImpl) ListOrdersByCategory(ctx context.Context, in *ListOrdersByCategoryRequest, opts ...http.CallOption) (*ExpressOrderSet, error) {
 	var out ExpressOrderSet
@@ -336,6 +407,24 @@ func (c *OrderServiceHTTPClientImpl) ListOrdersByCategory(ctx context.Context, i
 		http.PathTemplate(pattern),
 	}, opts...)
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+// PayExpressOrder PayExpressOrder 发起支付，返回支付链接
+func (c *OrderServiceHTTPClientImpl) PayExpressOrder(ctx context.Context, in *PayExpressOrderRequest, opts ...http.CallOption) (*PayExpressOrderReply, error) {
+	var out PayExpressOrderReply
+	pattern := "/api/order/{id}/pay"
+	path := http.BuildPath(pattern, in)
+	opts = append([]http.CallOption{
+		http.Accept("application/protojson"),
+		http.ContentType("application/protojson"),
+		http.Operation(OperationOrderServicePayExpressOrder),
+		http.PathTemplate(pattern),
+	}, opts...)
+	err := c.cc.Invoke(ctx, "POST", path, in, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

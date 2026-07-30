@@ -9,6 +9,8 @@ import (
 	"github.com/go-kratos/kratos/v3/errors"
 	"github.com/go-kratos/kratos/v3/middleware"
 	"github.com/go-kratos/kratos/v3/transport"
+
+	gerrors "errors"
 )
 
 type contextKey string
@@ -24,6 +26,7 @@ var publicPaths = map[string]bool{
 	"/api.v1.AuthService/Login":                true,
 	"/api.v1.AuthService/RefreshToken":         true,
 	"/api.v1.AuthService/Logout":               true,
+	"/order.v3.OrderService/HandlePaymentCallback": true,
 }
 
 func isPublicPath(path string) bool {
@@ -54,6 +57,9 @@ func AuthMiddleware(uc *biz.AuthUsecase) middleware.Middleware {
 			}
 			session, err := uc.ValidateAccessToken(ctx, parts[1])
 			if err != nil {
+				if gerrors.Is(err, biz.ErrAuthAccountDisabled) {
+					return nil, err
+				}
 				return nil, errors.Unauthorized("AUTH", "invalid or expired token")
 			}
 			ctx = context.WithValue(ctx, CtxKeyUserID, session.UserID)
