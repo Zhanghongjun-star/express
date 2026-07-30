@@ -32,8 +32,16 @@ var ProviderSet = wire.NewSet(
 	NewOrderLabelRepo,
 	NewOrderShareRepo,
 	NewUserMessageRepo,
+	// 寄件模块仓储
+	NewChannelRepo,
+	NewLockerRepo,
+	NewLockerBoxRepo,
+	NewServicePointRepo,
+	NewPickupRepo,
+	NewAuthRepo,
+	NewFreightRepo,
+	NewAmapGeocoder,
 )
-var ProviderSet = wire.NewSet(NewTodoRepo, NewAddressRepo, NewUserRepo, NewOrderRepo, NewChannelRepo, NewLockerRepo, NewLockerBoxRepo, NewServicePointRepo, NewPickupRepo, NewAuthRepo, NewFreightRepo, NewAmapGeocoder)
 
 // InitData 初始化所有存储客户端。
 func InitData(r *conf.Registry) {
