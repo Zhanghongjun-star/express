@@ -375,6 +375,9 @@ func (uc *ExpressOrderUsecase) PayOrder(ctx context.Context, userID, orderID int
 	if err != nil {
 		return "", "", err
 	}
+	if order.PaymentStatus == PaymentStatusPaid {
+		return order.PayURL, order.TradeNo, nil
+	}
 	if order.PaymentStatus != PaymentStatusPending {
 		return "", "", ErrOrderPaymentRequired
 	}
@@ -398,14 +401,10 @@ func (uc *ExpressOrderUsecase) HandlePaymentCallback(ctx context.Context, tradeN
 	if paymentStatus != PaymentStatusPaid {
 		return nil
 	}
-	if strings.TrimSpace(tradeNo) != "" {
-		if err := uc.repo.UpdatePaymentStatusByTradeNo(ctx, tradeNo, PaymentStatusPaid); err != nil {
-			return err
-		}
-	} else {
-		_ = uc.repo.UpdatePaymentStatus(ctx, 0, 0, PaymentStatusPaid)
+	if strings.TrimSpace(tradeNo) == "" {
+		return nil
 	}
-	return nil
+	return uc.repo.UpdatePaymentStatusByTradeNo(ctx, tradeNo, PaymentStatusPaid)
 }
 
 func (uc *ExpressOrderUsecase) validateCreateOrder(cmd *CreateExpressOrderCommand) error {
