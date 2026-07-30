@@ -11,3 +11,4 @@ var ProviderSet = wire.NewSet(
 	// 查快递模块服务
 	NewExpressService,
 )
+var ProviderSet = wire.NewSet(NewTodoService, NewAddressService, NewUserService, NewOrderService, NewShippingService, NewFreightService, NewAuthService)

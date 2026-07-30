@@ -248,6 +248,8 @@ type Nacos struct {
 	LogLevel      string                 `protobuf:"bytes,6,opt,name=log_level,json=logLevel,proto3" json:"log_level,omitempty"`
 	DataId        string                 `protobuf:"bytes,7,opt,name=data_id,json=dataId,proto3" json:"data_id,omitempty"`
 	Group         string                 `protobuf:"bytes,8,opt,name=group,proto3" json:"group,omitempty"`
+	Username      string                 `protobuf:"bytes,9,opt,name=username,proto3" json:"username,omitempty"`
+	Password      string                 `protobuf:"bytes,10,opt,name=password,proto3" json:"password,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -334,6 +336,20 @@ func (x *Nacos) GetDataId() string {
 func (x *Nacos) GetGroup() string {
 	if x != nil {
 		return x.Group
+	}
+	return ""
+}
+
+func (x *Nacos) GetUsername() string {
+	if x != nil {
+		return x.Username
+	}
+	return ""
+}
+
+func (x *Nacos) GetPassword() string {
+	if x != nil {
+		return x.Password
 	}
 	return ""
 }
@@ -694,7 +710,7 @@ const file_conf_conf_proto_rawDesc = "" +
 	"\rElasticsearch\x12\x12\n" +
 	"\x04addr\x18\x01 \x01(\tR\x04addr\"3\n" +
 	"\bRegistry\x12'\n" +
-	"\x05nacos\x18\x01 \x01(\v2\x11.kratos.api.NacosR\x05nacos\"\xd4\x01\n" +
+	"\x05nacos\x18\x01 \x01(\v2\x11.kratos.api.NacosR\x05nacos\"\x8c\x02\n" +
 	"\x05Nacos\x12\x12\n" +
 	"\x04addr\x18\x01 \x01(\tR\x04addr\x12\x12\n" +
 	"\x04port\x18\x02 \x01(\x04R\x04port\x12!\n" +
@@ -703,7 +719,10 @@ const file_conf_conf_proto_rawDesc = "" +
 	"\tcache_dir\x18\x05 \x01(\tR\bcacheDir\x12\x1b\n" +
 	"\tlog_level\x18\x06 \x01(\tR\blogLevel\x12\x17\n" +
 	"\adata_id\x18\a \x01(\tR\x06dataId\x12\x14\n" +
-	"\x05group\x18\b \x01(\tR\x05groupB)Z'shunfeng-miniprogram/internal/conf;confb\x06proto3"
+	"\x05group\x18\b \x01(\tR\x05group\x12\x1a\n" +
+	"\busername\x18\t \x01(\tR\busername\x12\x1a\n" +
+	"\bpassword\x18\n" +
+	" \x01(\tR\bpasswordB)Z'shunfeng-miniprogram/internal/conf;confb\x06proto3"
 
 var (
 	file_conf_conf_proto_rawDescOnce sync.Once

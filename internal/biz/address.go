@@ -2,6 +2,7 @@ package biz
 
 import (
 	"context"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -33,6 +34,8 @@ type Address struct {
 	District     string
 	DetailAddr   string
 	IsDefault    bool
+	Latitude     float64
+	Longitude    float64
 	CreateTime   time.Time
 	UpdateTime   time.Time
 	DelFlag      bool
@@ -46,6 +49,15 @@ type AddressRepo interface {
 	UpdateAddress(context.Context, *Address) (*Address, error)
 	DeleteAddress(context.Context, int64, int64) error
 	BatchDeleteAddresses(context.Context, int64, []int64) (int32, error)
+}
+
+// Geocoder 地址反查经纬度的能力抽象。
+// 在添加/更新地址时，若调用方未提供经纬度但提供了地址文本，
+// 用例会调用它把地址转换为经纬度再落库。data 层基于高德（amap）SDK 实现该接口，
+// biz 不直接依赖具体地图厂商，符合 AGENTS.md 的分层契约。
+type Geocoder interface {
+	// GeocodeAddress 将文本地址转换为经纬度，返回纬度 lat、经度 lng。
+	GeocodeAddress(ctx context.Context, province, city, district, detail string) (lat, lng float64, err error)
 }
 
 // AddressListOption 地址列表查询选项函数。
@@ -76,11 +88,30 @@ func AddressListLimit(limit int) AddressListOption {
 // AddressUsecase 地址用例。
 type AddressUsecase struct {
 	repo AddressRepo
+	geo  Geocoder
 }
 
-// NewAddressUsecase 创建地址用例。
-func NewAddressUsecase(repo AddressRepo) *AddressUsecase {
-	return &AddressUsecase{repo: repo}
+// NewAddressUsecase 创建地址用例。geo 用于按地址反查经纬度。
+func NewAddressUsecase(repo AddressRepo, geo Geocoder) *AddressUsecase {
+	return &AddressUsecase{repo: repo, geo: geo}
+}
+
+// resolveCoords 在经纬度缺失且地址文本存在时，调用 Geocoder 反查坐标。
+// 反查失败属非致命错误，仅记录日志，不影响地址的创建/更新。
+func (uc *AddressUsecase) resolveCoords(ctx context.Context, address *Address) {
+	if address.Latitude != 0 || address.Longitude != 0 {
+		return // 已提供坐标，无需反查
+	}
+	if strings.TrimSpace(address.DetailAddr) == "" {
+		return // 无可反查的地址文本
+	}
+	lat, lng, err := uc.geo.GeocodeAddress(ctx, address.Province, address.City, address.District, address.DetailAddr)
+	if err != nil {
+		slog.Warn("geocode address failed, skip coords", "err", err, "detail", address.DetailAddr)
+		return
+	}
+	address.Latitude = lat
+	address.Longitude = lng
 }
 
 // GetAddress 根据 ID 获取地址。
@@ -99,19 +130,21 @@ func (uc *AddressUsecase) ListAddresses(ctx context.Context, userID int64, opts 
 	return uc.repo.ListAddresses(ctx, userID, opts...)
 }
 
-// CreateAddress 创建地址。
+// CreateAddress 创建地址（缺失经纬度时按地址反查填充后再落库）。
 func (uc *AddressUsecase) CreateAddress(ctx context.Context, address *Address) (*Address, error) {
 	if err := validateAddress(address, false); err != nil {
 		return nil, err
 	}
+	uc.resolveCoords(ctx, address)
 	return uc.repo.CreateAddress(ctx, address)
 }
 
-// UpdateAddress 更新地址。
+// UpdateAddress 更新地址（地址变更时按新地址反查坐标）。
 func (uc *AddressUsecase) UpdateAddress(ctx context.Context, address *Address) (*Address, error) {
 	if err := validateAddress(address, true); err != nil {
 		return nil, err
 	}
+	uc.resolveCoords(ctx, address)
 	return uc.repo.UpdateAddress(ctx, address)
 }
 

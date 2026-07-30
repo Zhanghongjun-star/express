@@ -1,16 +1,20 @@
-﻿package server
+package server
 
 import (
+	"github.com/go-kratos/kratos/v3/middleware/recovery"
+	"github.com/go-kratos/kratos/v3/middleware/validate"
+	"github.com/go-kratos/kratos/v3/transport/http"
 	addressv1 "shunfeng-miniprogram/api/address/v1"
 	expressv1 "shunfeng-miniprogram/api/express/v1" // 查快递模块 HTTP 路由注册
+	authv1 "shunfeng-miniprogram/api/auth/v1"
 	orderv1 "shunfeng-miniprogram/api/order/v1"
+	orderv2 "shunfeng-miniprogram/api/order/v2"
+	shippingv1 "shunfeng-miniprogram/api/shipping/v1"
 	todov1 "shunfeng-miniprogram/api/todo/v1"
 	userv1 "shunfeng-miniprogram/api/user/v1"
 	"shunfeng-miniprogram/internal/conf"
 	"shunfeng-miniprogram/internal/service"
-	"github.com/go-kratos/kratos/v3/middleware/recovery"
-	"github.com/go-kratos/kratos/v3/middleware/validate"
-	"github.com/go-kratos/kratos/v3/transport/http"
+
 
 	"go.einride.tech/aip/fieldbehavior"
 	"google.golang.org/protobuf/proto"
@@ -19,6 +23,8 @@ import (
 // NewHTTPServer new an HTTP server。
 // express 参数为查快递模块服务，可为 nil。
 func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, express *service.ExpressService) *http.Server {
+// NewHTTPServer new an HTTP server.
+func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, shipping *service.ShippingService, freight *service.FreightService, auth *service.AuthService) *http.Server {
 
 	var opts = []http.ServerOption{
 		http.Middleware(
@@ -46,6 +52,9 @@ func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.User
 	todov1.RegisterTodoServiceHTTPServer(srv, todo)
 	userv1.RegisterUserServiceHTTPServer(srv, user)
 	orderv1.RegisterOrderServiceHTTPServer(srv, order)
+	shippingv1.RegisterShippingServiceHTTPServer(srv, shipping)
+	orderv2.RegisterOrderServiceHTTPServer(srv, freight)
+	authv1.RegisterAuthServiceHTTPServer(srv, auth)
 	if address != nil {
 		addressv1.RegisterAddressServiceHTTPServer(srv, address)
 	}

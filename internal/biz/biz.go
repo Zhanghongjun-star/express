@@ -14,3 +14,4 @@ var ProviderSet = wire.NewSet(
 	NewOrderShareUsecase,
 	NewUserMessageUsecase,
 )
+var ProviderSet = wire.NewSet(NewTodoUsecase, NewAddressUsecase, NewUserUsecase, NewOrderUsecase, NewChannelUsecase, NewLockerUsecase, NewServicePointUsecase, NewPickupUsecase, NewFreightUsecase, NewAuthUsecase)
