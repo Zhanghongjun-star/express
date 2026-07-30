@@ -1,4 +1,4 @@
-# Binaries for programs and plugins
+﻿# Binaries for programs and plugins
 *.exe
 *.exe~
 *.dll
@@ -13,3 +13,8 @@
 
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+# Nacos runtime artifacts
+cmd/server/tmp/nacos/log/
+cmd/server/tmp/nacos/cache/
+

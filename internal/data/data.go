@@ -3,12 +3,14 @@ package data
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"shunfeng-miniprogram/internal/conf"
 
 	"github.com/elastic/go-elasticsearch/v8"
 	"github.com/google/wire"
 	"github.com/redis/go-redis/v9"
+	"google.golang.org/protobuf/types/known/durationpb"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -20,14 +22,34 @@ var (
 )
 
 // ProviderSet 数据层依赖注入。
-var ProviderSet = wire.NewSet(NewTodoRepo, NewAddressRepo, NewUserRepo, NewOrderRepo, NewChannelRepo, NewLockerRepo, NewLockerBoxRepo, NewServicePointRepo, NewPickupRepo)
+var ProviderSet = wire.NewSet(NewTodoRepo, NewAddressRepo, NewUserRepo, NewOrderRepo, NewChannelRepo, NewLockerRepo, NewLockerBoxRepo, NewServicePointRepo, NewPickupRepo, NewAuthRepo, NewFreightRepo, NewAmapGeocoder)
 
 // InitData 初始化所有存储客户端。
-func InitData(c *conf.Data, r *conf.Registry) {
-	newGorm(c.Database)
-	newRedis(c.Redis)
-	newES(c.Elasticsearch)
-	newNacos(r)
+func InitData(r *conf.Registry) {
+	if r == nil || r.Nacos == nil {
+		return
+	}
+	nc := r.Nacos
+	newNacos(nc.Addr, nc.Port, nc.NamespaceId, nc.Username, nc.Password, nc.LogDir, nc.CacheDir, nc.LogLevel, nc.DataId, nc.Group)
+
+	d := RemoteConfig.Data
+	newGorm(&conf.Data_Database{
+		User:     d.Database.User,
+		Password: d.Database.Password,
+		Host:     d.Database.Host,
+		Port:     int32(d.Database.Port),
+		Database: d.Database.Database,
+	})
+	newRedis(&conf.Data_Redis{
+		Addr:         d.Redis.Addr,
+		Password:     d.Redis.Password,
+		Db:           int32(d.Redis.DB),
+		ReadTimeout:  durationpb.New(parseDuration(d.Redis.ReadTimeout, 200*time.Millisecond)),
+		WriteTimeout: durationpb.New(parseDuration(d.Redis.WriteTimeout, 200*time.Millisecond)),
+	})
+	newES(&conf.Data_Elasticsearch{
+		Addr: d.Elasticsearch.Addr,
+	})
 }
 
 // newGorm 初始化 MySQL 连接
@@ -44,6 +66,7 @@ func newGorm(c *conf.Data_Database) {
 		&User{},
 		&Address{},
 		&Order{},
+		&IdentityUser{},
 		&IdentityRealNameAuth{},
 		&ShippingChannel{},
 		&ShippingChannelArea{},
@@ -52,6 +75,7 @@ func newGorm(c *conf.Data_Database) {
 		&ServicePoint{},
 		&PickupTimeSlot{},
 		&PickupReservation{},
+		&IdentitySecurityLog{},
 	); err != nil {
 		fmt.Println(fmt.Sprintf("mysql 链接失败: %v", err))
 		return

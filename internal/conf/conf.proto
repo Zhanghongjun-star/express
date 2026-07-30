@@ -62,4 +62,6 @@ message Nacos {
     string log_level = 6;
     string data_id = 7;
     string group = 8;
+    string username = 9;
+    string password = 10;
 }
