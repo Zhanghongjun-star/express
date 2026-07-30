@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package order.v3;
+
+option go_package = "shunfeng-miniprogram/api/order/v3;v3";
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.order.v3";
+option java_outer_classname = "ErrorReasonProto";
+
+// ErrorReason 订单错误原因枚举。
+enum ErrorReason {
+  ERROR_REASON_UNSPECIFIED = 0;
+  EXPRESS_ORDER_NOT_FOUND = 1;
+  EXPRESS_ORDER_INVALID_ARGUMENT = 2;
+}

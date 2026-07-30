@@ -10,7 +10,7 @@ func TestFreightEstimateIntegration(t *testing.T) {
 	repo := &freightRepoWithPricing{
 		pricing: getFullPricingTable(),
 	}
-	uc := NewFreightUsecase(repo)
+	uc := NewFreightUsecase(repo, nil)
 
 	tests := []struct {
 		name                                   string

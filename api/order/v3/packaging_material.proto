@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package order.v3;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "shunfeng-miniprogram/api/order/v3;v3";
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.order.v3";
+option java_outer_classname = "PackagingMaterialProto";
+
+// PackagingMaterial 包装材料（打包费计费数据源）。
+message PackagingMaterial {
+  int64 id = 1;                       // 主键
+  string name = 2;                   // 材料名称（唯一）
+  double unit_price = 3;             // 单价（元）
+  string unit = 4;                   // 计价单位（个/卷/张/件）
+  string description = 5;            // 说明
+  google.protobuf.Timestamp created_at = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+// ListPackagingMaterialsRequest 包装材料列表请求。
+message ListPackagingMaterialsRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+// PackagingMaterialSet 包装材料列表响应。
+message PackagingMaterialSet {
+  repeated PackagingMaterial materials = 1;
+  int32 total_count = 2;
+  string next_page_token = 3;
+}
+
+// CreatePackagingMaterialRequest 创建包装材料请求。
+message CreatePackagingMaterialRequest {
+  PackagingMaterial material = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+// UpdatePackagingMaterialRequest 更新包装材料请求。
+message UpdatePackagingMaterialRequest {
+  PackagingMaterial material = 1 [(google.api.field_behavior) = REQUIRED];
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+// DeletePackagingMaterialRequest 删除包装材料请求。
+message DeletePackagingMaterialRequest {
+  int64 id = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+// PackagingMaterialService 包装材料服务，提供材料的增删改查与下单计费数据源。
+service PackagingMaterialService {
+  // ListPackagingMaterials 列出可选包装材料（前端下单时下拉选择）。
+  rpc ListPackagingMaterials(ListPackagingMaterialsRequest) returns (PackagingMaterialSet) {
+    option (google.api.http) = {
+      get: "/api/order/v3/packaging-materials"
+    };
+  }
+  // CreatePackagingMaterial 新增包装材料。
+  rpc CreatePackagingMaterial(CreatePackagingMaterialRequest) returns (PackagingMaterial) {
+    option (google.api.http) = {
+      post: "/api/order/v3/packaging-materials"
+      body: "*"
+    };
+  }
+  // UpdatePackagingMaterial 更新包装材料。
+  rpc UpdatePackagingMaterial(UpdatePackagingMaterialRequest) returns (PackagingMaterial) {
+    option (google.api.http) = {
+      patch: "/api/order/v3/packaging-materials/{material.id}"
+      body: "*"
+    };
+  }
+  // DeletePackagingMaterial 删除包装材料。
+  rpc DeletePackagingMaterial(DeletePackagingMaterialRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/order/v3/packaging-materials/{id}"
+    };
+  }
+}

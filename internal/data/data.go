@@ -22,7 +22,7 @@ var (
 )
 
 // ProviderSet 数据层依赖注入。
-var ProviderSet = wire.NewSet(NewTodoRepo, NewAddressRepo, NewUserRepo, NewOrderRepo, NewChannelRepo, NewLockerRepo, NewLockerBoxRepo, NewServicePointRepo, NewPickupRepo, NewAuthRepo, NewFreightRepo, NewAmapGeocoder)
+var ProviderSet = wire.NewSet(NewTodoRepo, NewAddressRepo, NewUserRepo, NewOrderRepo, NewExpressOrderRepo, NewPackagingMaterialRepo, NewChannelRepo, NewLockerRepo, NewLockerBoxRepo, NewServicePointRepo, NewPickupRepo, NewAuthRepo, NewFreightRepo, NewAmapGeocoder, NewAmapDistanceCalculator)
 
 // InitData 初始化所有存储客户端。
 func InitData(r *conf.Registry) {
@@ -76,12 +76,16 @@ func newGorm(c *conf.Data_Database) {
 		&PickupTimeSlot{},
 		&PickupReservation{},
 		&IdentitySecurityLog{},
+		&ExpressOrder{},
+		&PackagingMaterial{},
 	); err != nil {
 		fmt.Println(fmt.Sprintf("mysql 链接失败: %v", err))
 		return
 	}
 	fmt.Println("mysql 链接成功")
 	DB = db
+	// 连接成功后，若包装材料表为空则写入默认示例数据（幂等）。
+	seedPackagingMaterials(context.Background())
 }
 
 // newRedis 初始化 Redis 连接

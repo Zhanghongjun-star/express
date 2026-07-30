@@ -1,0 +1,148 @@
+syntax = "proto3";
+
+package order.v3;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/field_mask.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "shunfeng-miniprogram/api/order/v3;v3";
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.order.v3";
+option java_outer_classname = "OrderProto";
+
+// OrderService 订单服务，提供寄件订单的增删改查。
+service OrderService {
+  // CreateExpressOrder 创建寄件订单。
+  rpc CreateExpressOrder(CreateExpressOrderRequest) returns (ExpressOrder) {
+    option (google.api.http) = {
+      post: "/api/order/v3/express-orders"
+      body: "*"
+    };
+  }
+
+  // GetExpressOrder 根据订单编号获取订单详情。
+  rpc GetExpressOrder(GetExpressOrderRequest) returns (ExpressOrder) {
+    option (google.api.http) = {
+      get: "/api/order/v3/express-orders/{order_no}"
+    };
+  }
+
+  // ListExpressOrders 列出当前用户的寄件订单。
+  rpc ListExpressOrders(ListExpressOrdersRequest) returns (ExpressOrderSet) {
+    option (google.api.http) = {
+      get: "/api/order/v3/express-orders"
+    };
+  }
+
+  // UpdateExpressOrder 更新寄件订单（支持字段掩码局部更新）。
+  rpc UpdateExpressOrder(UpdateExpressOrderRequest) returns (ExpressOrder) {
+    option (google.api.http) = {
+      patch: "/api/order/v3/express-orders/{order.order_no}"
+      body: "*"
+    };
+  }
+
+  // DeleteExpressOrder 删除寄件订单。
+  rpc DeleteExpressOrder(DeleteExpressOrderRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/order/v3/express-orders/{order_no}"
+    };
+  }
+}
+
+// PackageItem 选用的包装材料及数量。
+message PackageItem {
+  int64 material_id = 1;  // 包装材料ID，对应 packaging_material 表的 ID（前端从下拉列表选择）
+  int32 quantity = 2;     // 数量
+}
+
+// ExpressOrder 寄件订单资源。
+message ExpressOrder {
+  int64 id = 1;
+  string order_no = 2;          // 内部订单号
+  string tracking_no = 3;       // 快递运单号
+  string user_no = 4;           // 关联用户编号
+  string express_company = 5;   // 快递公司
+
+  string sender_name = 6;       // 寄件人姓名
+  string sender_phone = 7;      // 寄件人电话
+  string sender_province = 8;   // 寄件省
+  string sender_city = 9;       // 寄件市
+  string sender_district = 10;  // 寄件区
+  string sender_address = 11;   // 寄件详细地址
+
+  string receiver_name = 12;       // 收件人姓名
+  string receiver_phone = 13;      // 收件人电话
+  string receiver_province = 14;   // 收件省
+  string receiver_city = 15;       // 收件市
+  string receiver_district = 16;   // 收件区
+  string receiver_address = 17;    // 收件详细地址
+
+  string item_name = 18;      // 物品名称
+  string item_category = 19;  // 物品分类
+  int32 item_quantity = 20;   // 物品数量
+  double weight = 21;         // 重量(kg)
+  double length = 22;         // 长(cm)
+  double width = 23;          // 宽(cm)
+  double height = 24;         // 高(cm)
+  double declared_value = 25; // 申报价值
+  bool is_fragile = 26;       // 是否易碎
+  bool is_battery = 27;       // 是否含电池
+
+  double freight_fee = 28;    // 基础运费
+  double insurance_fee = 29;  // 保价费
+  double package_fee = 30;    // 打包费
+  double total_fee = 31;      // 总费用
+  string pay_method = 32;     // 支付方式
+  string pay_status = 33;     // 支付状态
+
+  string order_status = 34;           // 订单状态
+  google.protobuf.Timestamp pickup_time = 35;     // 揽收时间
+  google.protobuf.Timestamp delivered_time = 36;  // 签收时间
+  string signed_by = 37;                       // 签收人
+  string remark = 38;                         // 备注
+  repeated PackageItem packages = 41;         // 选用包装材料及数量
+  string package_detail = 42;                 // 费用计算过程(JSON)
+
+  google.protobuf.Timestamp created_at = 39;
+  google.protobuf.Timestamp updated_at = 40;
+}
+
+// CreateExpressOrderRequest 创建订单请求。
+message CreateExpressOrderRequest {
+  ExpressOrder order = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+// GetExpressOrderRequest 获取订单请求。
+message GetExpressOrderRequest {
+  string order_no = 1 [(google.api.field_behavior) = REQUIRED];
+}
+
+// ListExpressOrdersRequest 列表订单请求。
+message ListExpressOrdersRequest {
+  string user_no = 1 [(google.api.field_behavior) = REQUIRED];
+  string order_status = 2;  // 可选：按订单状态过滤
+  int32 page_size = 3;
+  string page_token = 4;
+}
+
+// ExpressOrderSet 订单列表响应。
+message ExpressOrderSet {
+  repeated ExpressOrder orders = 1;
+  int32 total_count = 2;
+  string next_page_token = 3;
+}
+
+// UpdateExpressOrderRequest 更新订单请求。
+message UpdateExpressOrderRequest {
+  ExpressOrder order = 1 [(google.api.field_behavior) = REQUIRED];
+  google.protobuf.FieldMask update_mask = 2;
+}
+
+// DeleteExpressOrderRequest 删除订单请求。
+message DeleteExpressOrderRequest {
+  string order_no = 1 [(google.api.field_behavior) = REQUIRED];
+}

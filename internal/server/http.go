@@ -8,6 +8,7 @@ import (
 	authv1 "shunfeng-miniprogram/api/auth/v1"
 	orderv1 "shunfeng-miniprogram/api/order/v1"
 	orderv2 "shunfeng-miniprogram/api/order/v2"
+	orderv3 "shunfeng-miniprogram/api/order/v3"
 	shippingv1 "shunfeng-miniprogram/api/shipping/v1"
 	todov1 "shunfeng-miniprogram/api/todo/v1"
 	userv1 "shunfeng-miniprogram/api/user/v1"
@@ -20,7 +21,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, shipping *service.ShippingService, freight *service.FreightService, auth *service.AuthService) *http.Server {
+func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, shipping *service.ShippingService, freight *service.FreightService, auth *service.AuthService, expressOrder *service.ExpressOrderService, packagingMaterial *service.PackagingMaterialService) *http.Server {
 
 	var opts = []http.ServerOption{
 		http.Middleware(
@@ -50,6 +51,8 @@ func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.User
 	orderv1.RegisterOrderServiceHTTPServer(srv, order)
 	shippingv1.RegisterShippingServiceHTTPServer(srv, shipping)
 	orderv2.RegisterOrderServiceHTTPServer(srv, freight)
+	orderv3.RegisterOrderServiceHTTPServer(srv, expressOrder)
+	orderv3.RegisterPackagingMaterialServiceHTTPServer(srv, packagingMaterial)
 	authv1.RegisterAuthServiceHTTPServer(srv, auth)
 	if address != nil {
 		addressv1.RegisterAddressServiceHTTPServer(srv, address)

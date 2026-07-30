@@ -1,6 +1,7 @@
 package biz
 
 import (
+	"context"
 	"testing"
 )
 
@@ -46,7 +47,7 @@ func TestDetermineZone(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := uc.determineZone(tt.sendProvince, tt.sendCity, tt.recvProvince, tt.recvCity)
+			got := uc.determineZone(context.Background(), tt.sendProvince, tt.sendCity, tt.recvProvince, tt.recvCity)
 			if got != tt.expected {
 				t.Errorf("determineZone = %d, want %d", got, tt.expected)
 			}

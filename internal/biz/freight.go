@@ -123,6 +123,16 @@ type FreightRepo interface {
 	GetPricingTiers(ctx context.Context, expressType ExpressType, zone Zone) ([]PricingTier, error)
 }
 
+// DistanceCalculator 计算两城市间运距（公里），用于精确的区域等级判定。
+// data 层基于高德地图 SDK 实现该接口；biz 不直接依赖地图厂商，符合分层契约。
+// 当无法计算距离（如未配置 Key、地理编码或路径规划失败）时返回错误，
+// 调用方应回退到基于省份的分区逻辑。
+type DistanceCalculator interface {
+	// CityDistanceKM 返回两城市之间的驾车距离（公里）。
+	// province/city 为标准中文省、市名（如 "广东省"、"深圳市"）。
+	CityDistanceKM(ctx context.Context, fromProvince, fromCity, toProvince, toCity string) (float64, error)
+}
+
 // =============================================================================
 // 用例（Usecase）
 // =============================================================================
@@ -130,11 +140,13 @@ type FreightRepo interface {
 // FreightUsecase 运费预估用例，包含核心计价算法。
 type FreightUsecase struct {
 	repo FreightRepo
+	dist DistanceCalculator // 可选，为 nil 时回退省份分区逻辑
 }
 
 // NewFreightUsecase 创建运费预估用例。
-func NewFreightUsecase(repo FreightRepo) *FreightUsecase {
-	return &FreightUsecase{repo: repo}
+// dist 用于按真实运距精算区域等级，可为 nil（此时回退省份分区）。
+func NewFreightUsecase(repo FreightRepo, dist DistanceCalculator) *FreightUsecase {
+	return &FreightUsecase{repo: repo, dist: dist}
 }
 
 // Estimate 执行运费预估。
@@ -151,8 +163,8 @@ func (uc *FreightUsecase) Estimate(ctx context.Context, req *FreightRequest) (*F
 		return nil, err
 	}
 
-	// 2. 确定收发件双方区域等级
-	zone := uc.determineZone(req.SenderProvince, req.SenderCity, req.ReceiverProvince, req.ReceiverCity)
+	// 2. 确定收发件双方区域等级（优先地图距离，失败回退省份分区）
+	zone := uc.determineZone(ctx, req.SenderProvince, req.SenderCity, req.ReceiverProvince, req.ReceiverCity)
 
 	// 3. 计算体积重量与计费重量
 	calcWeight := uc.calcVolumetricWeight(req.Weight, float64(req.Length), float64(req.Width), float64(req.Height), req.ExpressType)
@@ -232,21 +244,19 @@ var specialRegions = map[string]bool{
 // determineZone 根据收发件省份和城市确定区域等级。
 //
 // 判定逻辑（优先级从高到低）：
-//   1. 任意一方是港澳台 → Zone 6
-//   2. 任意一方是偏远省份 → Zone 5
+//   1. 任意一方是港澳台 → Zone 6（政策优先，不受距离影响）
+//   2. 任意一方是偏远省份 → Zone 5（政策优先，不受距离影响）
 //   3. 同城 → Zone 0
 //   4. 同省 → Zone 1
-//   5. 同经济圈 → Zone 2
-//   6. 较近省份 → Zone 3
-//   7. 较远省份 → Zone 4
-//   8. 默认 → Zone 4
-func (uc *FreightUsecase) determineZone(sendProvince, sendCity, recvProvince, recvCity string) Zone {
-	// 港澳台判定
+//   5. 若配置了距离计算器：用真实驾车距离映射区域（解决"跨省相邻比同省更远"等偏差）
+//   6. 回退：同经济圈 → Zone 2，否则按省份距离分组 Zone 3/4
+func (uc *FreightUsecase) determineZone(ctx context.Context, sendProvince, sendCity, recvProvince, recvCity string) Zone {
+	// 港澳台判定（政策优先）
 	if specialRegions[sendProvince] || specialRegions[recvProvince] {
 		return ZoneSpecial
 	}
 
-	// 偏远省份判定
+	// 偏远省份判定（政策优先）
 	sendRemote := uc.isRemoteProvince(sendProvince)
 	recvRemote := uc.isRemoteProvince(recvProvince)
 	if sendRemote || recvRemote {
@@ -263,13 +273,44 @@ func (uc *FreightUsecase) determineZone(sendProvince, sendCity, recvProvince, re
 		return ZoneSameProvince
 	}
 
-	// 同经济圈判定
+	// 尝试用真实地图距离精算区域（解决"跨省相邻比同省更远更贵"等问题）
+	if uc.dist != nil {
+		if km, err := uc.dist.CityDistanceKM(ctx, sendProvince, sendCity, recvProvince, recvCity); err == nil && km > 0 {
+			return zoneByDistance(km)
+		}
+		// 计算失败：回退省份分区逻辑
+	}
+
+	// 回退：省份分区逻辑（经济圈 / 距离分组）
 	if uc.isSameEconomicCircle(sendProvince, recvProvince) {
 		return ZoneSameCircle
 	}
-
-	// 省份距离判定
 	return uc.determineProvinceZone(sendProvince, recvProvince)
+}
+
+// zoneByDistance 将两城市间驾车距离（公里）映射为区域等级。
+// 阈值与定价表分区对齐：
+//   - <=50km    同城/极近        Zone 0
+//   - <=300km   同省/邻市        Zone 1
+//   - <=800km   同经济圈/邻近     Zone 2
+//   - <=1500km  邻近省份         Zone 3
+//   - <=2500km  远距离省份       Zone 4
+//   - >2500km   极远            Zone 5
+func zoneByDistance(km float64) Zone {
+	switch {
+	case km <= 50:
+		return ZoneSameCity
+	case km <= 300:
+		return ZoneSameProvince
+	case km <= 800:
+		return ZoneSameCircle
+	case km <= 1500:
+		return ZoneNearby
+	case km <= 2500:
+		return ZoneDistant
+	default:
+		return ZoneRemote
+	}
 }
 
 // normalizeProvince 标准化省份名称，去除"省"、"市"、"自治区"等后缀。

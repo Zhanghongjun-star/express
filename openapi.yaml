@@ -90,6 +90,196 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/order.v1.HistoryRecordSet'
+    /api/order/v3/express-orders:
+        get:
+            tags:
+                - OrderService
+            description: ListExpressOrders 列出当前用户的寄件订单。
+            operationId: OrderService_ListExpressOrders
+            parameters:
+                - name: userNo
+                  in: query
+                  schema:
+                    type: string
+                - name: orderStatus
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.ExpressOrderSet'
+        post:
+            tags:
+                - OrderService
+            description: CreateExpressOrder 创建寄件订单。
+            operationId: OrderService_CreateExpressOrder
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v3.CreateExpressOrderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.ExpressOrder'
+    /api/order/v3/express-orders/{order.order_no}:
+        patch:
+            tags:
+                - OrderService
+            description: UpdateExpressOrder 更新寄件订单（支持字段掩码局部更新）。
+            operationId: OrderService_UpdateExpressOrder
+            parameters:
+                - name: order.order_no
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v3.UpdateExpressOrderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.ExpressOrder'
+    /api/order/v3/express-orders/{orderNo}:
+        get:
+            tags:
+                - OrderService
+            description: GetExpressOrder 根据订单编号获取订单详情。
+            operationId: OrderService_GetExpressOrder
+            parameters:
+                - name: orderNo
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.ExpressOrder'
+        delete:
+            tags:
+                - OrderService
+            description: DeleteExpressOrder 删除寄件订单。
+            operationId: OrderService_DeleteExpressOrder
+            parameters:
+                - name: orderNo
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /api/order/v3/packaging-materials:
+        get:
+            tags:
+                - PackagingMaterialService
+            description: ListPackagingMaterials 列出可选包装材料（前端下单时下拉选择）。
+            operationId: PackagingMaterialService_ListPackagingMaterials
+            parameters:
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.PackagingMaterialSet'
+        post:
+            tags:
+                - PackagingMaterialService
+            description: CreatePackagingMaterial 新增包装材料。
+            operationId: PackagingMaterialService_CreatePackagingMaterial
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v3.CreatePackagingMaterialRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.PackagingMaterial'
+    /api/order/v3/packaging-materials/{id}:
+        delete:
+            tags:
+                - PackagingMaterialService
+            description: DeletePackagingMaterial 删除包装材料。
+            operationId: PackagingMaterialService_DeletePackagingMaterial
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /api/order/v3/packaging-materials/{material.id}:
+        patch:
+            tags:
+                - PackagingMaterialService
+            description: UpdatePackagingMaterial 更新包装材料。
+            operationId: PackagingMaterialService_UpdatePackagingMaterial
+            parameters:
+                - name: material.id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v3.UpdatePackagingMaterialRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.PackagingMaterial'
     /api/user/account/status:
         get:
             tags:
@@ -279,6 +469,196 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.VerificationCodeReply'
+    /api/v1/shipping/channels:
+        get:
+            tags:
+                - ShippingService
+            description: "ListChannels returns all available shipping channels in the current\r\n region together with their availability status and extra fees."
+            operationId: ShippingService_ListChannels
+            parameters:
+                - name: districtCode
+                  in: query
+                  description: Administrative district code of the sender.
+                  schema:
+                    type: string
+                - name: latitude
+                  in: query
+                  description: "Sender's latitude in WGS-84. Used together with longitude for\r\n location-based channel evaluation."
+                  schema:
+                    type: number
+                    format: double
+                - name: longitude
+                  in: query
+                  description: Sender's longitude in WGS-84.
+                  schema:
+                    type: number
+                    format: double
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/shipping.v1.ListChannelsResponse'
+    /api/v1/shipping/lockers:
+        get:
+            tags:
+                - ShippingService
+            description: "ListLockers returns nearby operational locker cabinets ordered by\r\n distance ascending. Returns INVALID_ARGUMENT when lat/lng are missing."
+            operationId: ShippingService_ListLockers
+            parameters:
+                - name: districtCode
+                  in: query
+                  description: Administrative district code to narrow the search.
+                  schema:
+                    type: string
+                - name: latitude
+                  in: query
+                  description: "User's latitude in WGS-84. REQUIRED — returns INVALID_ARGUMENT when\r\n missing."
+                  schema:
+                    type: number
+                    format: double
+                - name: longitude
+                  in: query
+                  description: "User's longitude in WGS-84. REQUIRED — returns INVALID_ARGUMENT when\r\n missing."
+                  schema:
+                    type: number
+                    format: double
+                - name: searchRadius
+                  in: query
+                  description: Search radius in meters. Defaults to 1000 when unset.
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  description: Maximum number of lockers to return per page. Capped at 50 server-side.
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  description: Token from a previous response to fetch the next page.
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/shipping.v1.ListLockersResponse'
+    /api/v1/shipping/lockers/{lockerId}/box-types:
+        get:
+            tags:
+                - ShippingService
+            description: "ListBoxTypes returns all box-type specifications, inventory counts,\r\n and extra fees for a given locker cabinet."
+            operationId: ShippingService_ListBoxTypes
+            parameters:
+                - name: lockerId
+                  in: path
+                  description: Locker cabinet identifier. REQUIRED — taken from the URL path.
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/shipping.v1.ListBoxTypesResponse'
+    /api/v1/shipping/pickup-dates:
+        get:
+            tags:
+                - ShippingService
+            description: "ListPickupDates returns the available pickup dates (today, tomorrow,\r\n day-after-tomorrow) for the door-pickup channel. Expired time slots\r\n for today are already excluded."
+            operationId: ShippingService_ListPickupDates
+            parameters:
+                - name: districtCode
+                  in: query
+                  description: Administrative district code of the sender.
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/shipping.v1.ListPickupDatesResponse'
+    /api/v1/shipping/pickup-time-slots:
+        get:
+            tags:
+                - ShippingService
+            description: "ListPickupTimeSlots returns all time slots for a given date together\r\n with their remaining capacity. Slots with zero capacity are marked\r\n unavailable."
+            operationId: ShippingService_ListPickupTimeSlots
+            parameters:
+                - name: districtCode
+                  in: query
+                  description: Administrative district code.
+                  schema:
+                    type: string
+                - name: pickupDate
+                  in: query
+                  description: "Target date in \"YYYY-MM-DD\". Must be within the next 3 days.\r\n Returns INVALID_ARGUMENT when the date is out of range."
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/shipping.v1.ListPickupTimeSlotsResponse'
+    /api/v1/shipping/service-points:
+        get:
+            tags:
+                - ShippingService
+            description: "ListServicePoints returns nearby SF stations or partner stores\r\n filtered by point_type, ordered by distance ascending."
+            operationId: ShippingService_ListServicePoints
+            parameters:
+                - name: pointType
+                  in: query
+                  description: "Optional. Filter by service-point type. When unset both SF_STATION\r\n and PARTNER_STORE are returned."
+                  schema:
+                    type: integer
+                    format: enum
+                - name: districtCode
+                  in: query
+                  description: Administrative district code.
+                  schema:
+                    type: string
+                - name: latitude
+                  in: query
+                  description: "User's latitude in WGS-84. REQUIRED — returns INVALID_ARGUMENT when\r\n missing."
+                  schema:
+                    type: number
+                    format: double
+                - name: longitude
+                  in: query
+                  description: "User's longitude in WGS-84. REQUIRED — returns INVALID_ARGUMENT when\r\n missing."
+                  schema:
+                    type: number
+                    format: double
+                - name: pageSize
+                  in: query
+                  description: Maximum number of points per page. Capped at 50 server-side.
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  description: Token from a previous response to fetch the next page.
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/shipping.v1.ListServicePointsResponse'
     /api/v1/users/me/real-name-auth:
         get:
             tags:
@@ -955,6 +1335,420 @@ components:
                     description: 保价金额 0=不保价
                     format: double
             description: 运费预估请求
+        order.v3.CreateExpressOrderRequest:
+            required:
+                - order
+            type: object
+            properties:
+                order:
+                    $ref: '#/components/schemas/order.v3.ExpressOrder'
+            description: CreateExpressOrderRequest 创建订单请求。
+        order.v3.CreatePackagingMaterialRequest:
+            required:
+                - material
+            type: object
+            properties:
+                material:
+                    $ref: '#/components/schemas/order.v3.PackagingMaterial'
+            description: CreatePackagingMaterialRequest 创建包装材料请求。
+        order.v3.ExpressOrder:
+            type: object
+            properties:
+                id:
+                    type: string
+                orderNo:
+                    type: string
+                trackingNo:
+                    type: string
+                userNo:
+                    type: string
+                expressCompany:
+                    type: string
+                senderName:
+                    type: string
+                senderPhone:
+                    type: string
+                senderProvince:
+                    type: string
+                senderCity:
+                    type: string
+                senderDistrict:
+                    type: string
+                senderAddress:
+                    type: string
+                receiverName:
+                    type: string
+                receiverPhone:
+                    type: string
+                receiverProvince:
+                    type: string
+                receiverCity:
+                    type: string
+                receiverDistrict:
+                    type: string
+                receiverAddress:
+                    type: string
+                itemName:
+                    type: string
+                itemCategory:
+                    type: string
+                itemQuantity:
+                    type: integer
+                    format: int32
+                weight:
+                    type: number
+                    format: double
+                length:
+                    type: number
+                    format: double
+                width:
+                    type: number
+                    format: double
+                height:
+                    type: number
+                    format: double
+                declaredValue:
+                    type: number
+                    format: double
+                isFragile:
+                    type: boolean
+                isBattery:
+                    type: boolean
+                freightFee:
+                    type: number
+                    format: double
+                insuranceFee:
+                    type: number
+                    format: double
+                packageFee:
+                    type: number
+                    format: double
+                totalFee:
+                    type: number
+                    format: double
+                payMethod:
+                    type: string
+                payStatus:
+                    type: string
+                orderStatus:
+                    type: string
+                pickupTime:
+                    type: string
+                    format: date-time
+                deliveredTime:
+                    type: string
+                    format: date-time
+                signedBy:
+                    type: string
+                remark:
+                    type: string
+                packages:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/order.v3.PackageItem'
+                packageDetail:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+            description: ExpressOrder 寄件订单资源。
+        order.v3.ExpressOrderSet:
+            type: object
+            properties:
+                orders:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/order.v3.ExpressOrder'
+                totalCount:
+                    type: integer
+                    format: int32
+                nextPageToken:
+                    type: string
+            description: ExpressOrderSet 订单列表响应。
+        order.v3.PackageItem:
+            type: object
+            properties:
+                materialId:
+                    type: string
+                quantity:
+                    type: integer
+                    format: int32
+            description: PackageItem 选用的包装材料及数量。
+        order.v3.PackagingMaterial:
+            type: object
+            properties:
+                id:
+                    type: string
+                name:
+                    type: string
+                unitPrice:
+                    type: number
+                    format: double
+                unit:
+                    type: string
+                description:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+            description: PackagingMaterial 包装材料（打包费计费数据源）。
+        order.v3.PackagingMaterialSet:
+            type: object
+            properties:
+                materials:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/order.v3.PackagingMaterial'
+                totalCount:
+                    type: integer
+                    format: int32
+                nextPageToken:
+                    type: string
+            description: PackagingMaterialSet 包装材料列表响应。
+        order.v3.UpdateExpressOrderRequest:
+            required:
+                - order
+            type: object
+            properties:
+                order:
+                    $ref: '#/components/schemas/order.v3.ExpressOrder'
+                updateMask:
+                    type: string
+                    format: field-mask
+            description: UpdateExpressOrderRequest 更新订单请求。
+        order.v3.UpdatePackagingMaterialRequest:
+            required:
+                - material
+            type: object
+            properties:
+                material:
+                    $ref: '#/components/schemas/order.v3.PackagingMaterial'
+                updateMask:
+                    type: string
+                    format: field-mask
+            description: UpdatePackagingMaterialRequest 更新包装材料请求。
+        shipping.v1.BoxTypeInfo:
+            type: object
+            properties:
+                boxType:
+                    type: integer
+                    description: Compartment size category.
+                    format: enum
+                length:
+                    type: integer
+                    description: Compartment interior length in centimetres.
+                    format: int32
+                width:
+                    type: integer
+                    description: Compartment interior width in centimetres.
+                    format: int32
+                height:
+                    type: integer
+                    description: Compartment interior height in centimetres.
+                    format: int32
+                maxWeight:
+                    type: number
+                    description: Maximum weight this compartment can hold, in kilograms.
+                    format: double
+                boxFee:
+                    type: number
+                    description: Extra fee charged for using this compartment type.
+                    format: double
+                availableCount:
+                    type: integer
+                    description: Number of currently free compartments of this type.
+                    format: int32
+                status:
+                    type: integer
+                    description: Current compartment status.
+                    format: enum
+            description: BoxTypeInfo describes a specific compartment type within a locker.
+        shipping.v1.Channel:
+            type: object
+            properties:
+                channelCode:
+                    type: integer
+                    description: "Enumerated channel code. The frontend MUST use this value rather than\r\n a hard-coded string."
+                    format: enum
+                name:
+                    type: string
+                    description: Human-readable channel name (e.g. "上门取件", "丰巢自提柜").
+                available:
+                    type: boolean
+                    description: Whether the channel is available in the requested region.
+                tip:
+                    type: string
+                    description: Clear prompt text shown when the channel is unavailable.
+                extraFee:
+                    type: number
+                    description: Extra fee charged for this channel in the current region.
+                    format: double
+            description: "Channel describes a single shipping channel and its availability in the\r\n current region."
+        shipping.v1.ListBoxTypesResponse:
+            type: object
+            properties:
+                boxTypes:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/shipping.v1.BoxTypeInfo'
+                    description: "All compartment types available in this locker, each with its own\r\n size, fee, and free-count information."
+        shipping.v1.ListChannelsResponse:
+            type: object
+            properties:
+                channels:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/shipping.v1.Channel'
+                    description: "All shipping channels available (or unavailable with reason) for the\r\n requested region. Channels that are globally decommissioned are omitted."
+        shipping.v1.ListLockersResponse:
+            type: object
+            properties:
+                lockers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/shipping.v1.Locker'
+                    description: Page of operational lockers ordered by distance ascending.
+                nextPageToken:
+                    type: string
+                    description: "Token to retrieve the next page. Empty when all results have been\r\n returned."
+        shipping.v1.ListPickupDatesResponse:
+            type: object
+            properties:
+                pickupDates:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/shipping.v1.PickupDate'
+                    description: "Available pickup dates. Currently limited to today, tomorrow, and the\r\n day after tomorrow. Expired time slots for today are already excluded."
+        shipping.v1.ListPickupTimeSlotsResponse:
+            type: object
+            properties:
+                timeSlots:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/shipping.v1.PickupTimeSlot'
+                    description: "All time slots for the requested district+date. Slots with remaining\r\n capacity <= 0 are marked unavailable and the frontend MUST prevent\r\n the user from selecting them."
+        shipping.v1.ListServicePointsResponse:
+            type: object
+            properties:
+                servicePoints:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/shipping.v1.ServicePoint'
+                    description: Page of service points ordered by distance ascending.
+                nextPageToken:
+                    type: string
+                    description: "Token to retrieve the next page. Empty when all results have been\r\n returned."
+        shipping.v1.Locker:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: Unique locker cabinet identifier.
+                name:
+                    type: string
+                    description: Locker cabinet name displayed to the user.
+                address:
+                    type: string
+                    description: Human-readable address of the locker location.
+                latitude:
+                    type: number
+                    description: Latitude in WGS-84 coordinate system.
+                    format: double
+                longitude:
+                    type: number
+                    description: Longitude in WGS-84 coordinate system.
+                    format: double
+                distance:
+                    type: number
+                    description: Distance from the user's location in meters.
+                    format: double
+                status:
+                    type: integer
+                    description: "Operational status: 1 = normal, 0 = out of service / maintenance.\r\n The frontend MUST filter out lockers where status == 0."
+                    format: int32
+            description: Locker represents a physical locker cabinet.
+        shipping.v1.PickupDate:
+            type: object
+            properties:
+                date:
+                    type: string
+                    description: The date string in "YYYY-MM-DD" format.
+                available:
+                    type: boolean
+                    description: Whether this date still has at least one available time slot.
+            description: "PickupDate represents a single date that the user can select for\r\n door-pickup."
+        shipping.v1.PickupTimeSlot:
+            type: object
+            properties:
+                districtCode:
+                    type: string
+                    description: Administrative district code to which this slot belongs.
+                pickupDate:
+                    type: string
+                    description: The date this slot belongs to, in "YYYY-MM-DD" format.
+                slotCode:
+                    type: string
+                    description: Unique slot identifier within the district+date scope.
+                startTime:
+                    type: string
+                    description: Slot start time in "HH:MM" format.
+                endTime:
+                    type: string
+                    description: Slot end time in "HH:MM" format.
+                capacity:
+                    type: integer
+                    description: Maximum number of reservations allowed for this slot.
+                    format: int32
+                reservedCount:
+                    type: integer
+                    description: Number of reservations already taken.
+                    format: int32
+                available:
+                    type: boolean
+                    description: "Whether the slot can still be selected (reserved_count < capacity and\r\n not expired)."
+                version:
+                    type: string
+                    description: "Optimistic-lock version; the client MUST send this back when creating\r\n an order so the server can detect concurrent updates."
+            description: PickupTimeSlot describes a single bookable time window on a given date.
+        shipping.v1.ServicePoint:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: Unique service-point identifier.
+                name:
+                    type: string
+                    description: Display name of the service point.
+                address:
+                    type: string
+                    description: Human-readable address.
+                latitude:
+                    type: number
+                    description: Latitude in WGS-84.
+                    format: double
+                longitude:
+                    type: number
+                    description: Longitude in WGS-84.
+                    format: double
+                pointType:
+                    type: integer
+                    description: 'Point category: SF_STATION or PARTNER_STORE.'
+                    format: enum
+                distance:
+                    type: number
+                    description: Distance from the user's location in meters.
+                    format: double
+                status:
+                    type: integer
+                    description: 'Operational status: 1 = open, 0 = closed.'
+                    format: int32
+            description: ServicePoint represents an SF self-operated station or a partner store.
         todo.v1.SyncTodoRequest:
             type: object
             properties:
@@ -1109,6 +1903,12 @@ tags:
       description: AuthService exposes identity, login, token, password, and real-name auth APIs.
     - name: OrderService
     - name: OrderService
+    - name: OrderService
+      description: OrderService 订单服务，提供寄件订单的增删改查。
+    - name: PackagingMaterialService
+      description: PackagingMaterialService 包装材料服务，提供材料的增删改查与下单计费数据源。
+    - name: ShippingService
+      description: "ShippingService manages shipping channel selection, locker browsing,\r\n service point queries, and pickup appointment scheduling."
     - name: TodoService
       description: "TodoService provides a simple CRUD example for managing todo items.\r\n It demonstrates unary, server-streaming, and bidirectional-streaming RPCs\r\n together with AIP-style list filtering, ordering, and pagination."
     - name: UserService
