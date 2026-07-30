@@ -24,13 +24,14 @@ const (
 type ErrorReason int32
 
 const (
-	ErrorReason_ORDER_INVALID_ARGUMENT     ErrorReason = 0
-	ErrorReason_ORDER_NOT_FOUND            ErrorReason = 1
-	ErrorReason_ORDER_EXPORT_FORBIDDEN     ErrorReason = 2
-	ErrorReason_ORDER_QUERY_LIMIT_EXCEEDED ErrorReason = 3
-	ErrorReason_ORDER_CREATE_FAILED        ErrorReason = 4
-	ErrorReason_ORDER_CHANNEL_UNAVAILABLE  ErrorReason = 5
-	ErrorReason_ORDER_PAYMENT_REQUIRED     ErrorReason = 6
+	ErrorReason_ORDER_INVALID_ARGUMENT          ErrorReason = 0
+	ErrorReason_ORDER_NOT_FOUND                 ErrorReason = 1
+	ErrorReason_ORDER_EXPORT_FORBIDDEN          ErrorReason = 2
+	ErrorReason_ORDER_QUERY_LIMIT_EXCEEDED      ErrorReason = 3
+	ErrorReason_ORDER_CREATE_FAILED             ErrorReason = 4
+	ErrorReason_ORDER_CHANNEL_UNAVAILABLE       ErrorReason = 5
+	ErrorReason_ORDER_PAYMENT_REQUIRED          ErrorReason = 6
+	ErrorReason_ORDER_INVALID_STATUS_TRANSITION ErrorReason = 7
 )
 
 // Enum value maps for ErrorReason.
@@ -43,15 +44,17 @@ var (
 		4: "ORDER_CREATE_FAILED",
 		5: "ORDER_CHANNEL_UNAVAILABLE",
 		6: "ORDER_PAYMENT_REQUIRED",
+		7: "ORDER_INVALID_STATUS_TRANSITION",
 	}
 	ErrorReason_value = map[string]int32{
-		"ORDER_INVALID_ARGUMENT":     0,
-		"ORDER_NOT_FOUND":            1,
-		"ORDER_EXPORT_FORBIDDEN":     2,
-		"ORDER_QUERY_LIMIT_EXCEEDED": 3,
-		"ORDER_CREATE_FAILED":        4,
-		"ORDER_CHANNEL_UNAVAILABLE":  5,
-		"ORDER_PAYMENT_REQUIRED":     6,
+		"ORDER_INVALID_ARGUMENT":          0,
+		"ORDER_NOT_FOUND":                 1,
+		"ORDER_EXPORT_FORBIDDEN":          2,
+		"ORDER_QUERY_LIMIT_EXCEEDED":      3,
+		"ORDER_CREATE_FAILED":             4,
+		"ORDER_CHANNEL_UNAVAILABLE":       5,
+		"ORDER_PAYMENT_REQUIRED":          6,
+		"ORDER_INVALID_STATUS_TRANSITION": 7,
 	}
 )
 
@@ -86,7 +89,7 @@ var File_order_v3_error_reason_proto protoreflect.FileDescriptor
 
 const file_order_v3_error_reason_proto_rawDesc = "" +
 	"\n" +
-	"\x1border/v3/error_reason.proto\x12\border.v3*\xce\x01\n" +
+	"\x1border/v3/error_reason.proto\x12\border.v3*\xf3\x01\n" +
 	"\vErrorReason\x12\x1a\n" +
 	"\x16ORDER_INVALID_ARGUMENT\x10\x00\x12\x13\n" +
 	"\x0fORDER_NOT_FOUND\x10\x01\x12\x1a\n" +
@@ -94,7 +97,8 @@ const file_order_v3_error_reason_proto_rawDesc = "" +
 	"\x1aORDER_QUERY_LIMIT_EXCEEDED\x10\x03\x12\x17\n" +
 	"\x13ORDER_CREATE_FAILED\x10\x04\x12\x1d\n" +
 	"\x19ORDER_CHANNEL_UNAVAILABLE\x10\x05\x12\x1a\n" +
-	"\x16ORDER_PAYMENT_REQUIRED\x10\x06B&Z$shunfeng-miniprogram/api/order/v3;v3b\x06proto3"
+	"\x16ORDER_PAYMENT_REQUIRED\x10\x06\x12#\n" +
+	"\x1fORDER_INVALID_STATUS_TRANSITION\x10\aB&Z$shunfeng-miniprogram/api/order/v3;v3b\x06proto3"
 
 var (
 	file_order_v3_error_reason_proto_rawDescOnce sync.Once

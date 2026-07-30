@@ -17,7 +17,7 @@ var (
 	ErrOrderCreateFailed           = errors.InternalServer(v3.ErrorReason_ORDER_CREATE_FAILED.String(), "order creation failed")
 	ErrOrderPaymentRequired        = errors.Forbidden(v3.ErrorReason_ORDER_PAYMENT_REQUIRED.String(), "payment required")
 	ErrOrderChannelUnavail         = errors.BadRequest(v3.ErrorReason_ORDER_CHANNEL_UNAVAILABLE.String(), "shipping channel unavailable")
-	ErrOrderInvalidStatusTransition = errors.BadRequest(v3.ErrorReason_ORDER_CREATE_FAILED.String(), "invalid order status transition")
+	ErrOrderInvalidStatusTransition = errors.BadRequest(v3.ErrorReason_ORDER_INVALID_STATUS_TRANSITION.String(), "invalid order status transition")
 )
 
 const (
