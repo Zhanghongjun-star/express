@@ -1,10 +1,11 @@
-﻿package server
+package server
 
 import (
 	"github.com/go-kratos/kratos/v3/middleware/recovery"
 	"github.com/go-kratos/kratos/v3/middleware/validate"
 	"github.com/go-kratos/kratos/v3/transport/http"
 	addressv1 "shunfeng-miniprogram/api/address/v1"
+	expressv1 "shunfeng-miniprogram/api/express/v1" // 查快递模块 HTTP 路由注册
 	authv1 "shunfeng-miniprogram/api/auth/v1"
 	orderv1 "shunfeng-miniprogram/api/order/v1"
 	orderv2 "shunfeng-miniprogram/api/order/v2"
@@ -19,6 +20,9 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
+// NewHTTPServer new an HTTP server。
+// express 参数为查快递模块服务，可为 nil。
+func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, express *service.ExpressService) *http.Server {
 // NewHTTPServer new an HTTP server.
 func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, shipping *service.ShippingService, freight *service.FreightService, auth *service.AuthService) *http.Server {
 
@@ -53,6 +57,10 @@ func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.User
 	authv1.RegisterAuthServiceHTTPServer(srv, auth)
 	if address != nil {
 		addressv1.RegisterAddressServiceHTTPServer(srv, address)
+	}
+	// 查快递模块: 注册 12 个 HTTP 接口（搜索/关注/标签/分享/消息）
+	if express != nil {
+		expressv1.RegisterExpressServiceHTTPServer(srv, express)
 	}
 	return srv
 }

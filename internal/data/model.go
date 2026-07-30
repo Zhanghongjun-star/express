@@ -117,6 +117,75 @@ func (IdentityRealNameAuth) TableName() string {
 	return "identity_real_name_auth"
 }
 
+// OrderFollow 对应 sf_order_follow 表，记录用户关注的订单。
+// 用户+订单唯一索引(uk_user_order)防重复关注，deleted_at 支持逻辑删除。
+type OrderFollow struct {
+	ID        int64     `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	UserID    int64     `gorm:"column:user_id;index:idx_user_id;uniqueIndex:uk_user_order;not null" db:"user_id" json:"user_id"`
+	OrderID   int64     `gorm:"column:order_id;uniqueIndex:uk_user_order;not null" db:"order_id" json:"order_id"`
+	CreatedAt time.Time `gorm:"column:created_at;not null" db:"created_at" json:"created_at"`
+	DeletedAt *time.Time `gorm:"column:deleted_at;index;default:null" db:"deleted_at" json:"deleted_at"`
+}
+
+func (OrderFollow) TableName() string {
+	return "sf_order_follow"
+}
+
+// OrderLabel 对应 sf_order_label 表，记录用户给订单设置的自定义标签。
+// upsert 写入：相同 user_id+order_id 覆盖旧标签内容。
+type OrderLabel struct {
+	ID        int64     `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	UserID    int64     `gorm:"column:user_id;index:idx_user_id;uniqueIndex:uk_user_order;not null" db:"user_id" json:"user_id"`
+	OrderID   int64     `gorm:"column:order_id;uniqueIndex:uk_user_order;not null" db:"order_id" json:"order_id"`
+	Content   string    `gorm:"column:content;type:varchar(100);not null" db:"content" json:"content"`
+	CreatedAt time.Time `gorm:"column:created_at;not null" db:"created_at" json:"created_at"`
+	UpdatedAt time.Time `gorm:"column:updated_at;not null" db:"updated_at" json:"updated_at"`
+	DeletedAt *time.Time `gorm:"column:deleted_at;index;default:null" db:"deleted_at" json:"deleted_at"`
+}
+
+func (OrderLabel) TableName() string {
+	return "sf_order_label"
+}
+
+// OrderShare 对应 sf_order_share 表，记录用户生成的订单分享。
+// share_code 为 32 字符高熵随机码，公开查看时按 code 查询。
+type OrderShare struct {
+	ID           int64     `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	ShareCode    string    `gorm:"column:share_code;type:varchar(32);uniqueIndex;not null" db:"share_code" json:"share_code"`
+	UserID       int64     `gorm:"column:user_id;not null" db:"user_id" json:"user_id"`
+	OrderID      int64     `gorm:"column:order_id;not null" db:"order_id" json:"order_id"`
+	ShowSender   bool      `gorm:"column:show_sender;type:tinyint(1);default:0" db:"show_sender" json:"show_sender"`
+	ShowReceiver bool      `gorm:"column:show_receiver;type:tinyint(1);default:0" db:"show_receiver" json:"show_receiver"`
+	ShowPhone    bool      `gorm:"column:show_phone;type:tinyint(1);default:0" db:"show_phone" json:"show_phone"`
+	ShowStatus   bool      `gorm:"column:show_status;type:tinyint(1);default:1" db:"show_status" json:"show_status"`
+	Status       int32     `gorm:"column:status;type:tinyint;default:1" db:"status" json:"status"`
+	ExpiresAt    time.Time `gorm:"column:expires_at;index;not null" db:"expires_at" json:"expires_at"`
+	CreatedAt    time.Time `gorm:"column:created_at;not null" db:"created_at" json:"created_at"`
+}
+
+func (OrderShare) TableName() string {
+	return "sf_order_share"
+}
+
+// UserMessage 对应 sf_user_message 表，记录用户收到的业务消息。
+// uk_business_msg(business_type+business_id+message_type) 保证幂等。
+type UserMessage struct {
+	ID           int64      `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	UserID       int64      `gorm:"column:user_id;not null;index:idx_user_read_time" db:"user_id" json:"user_id"`
+	MessageType  string     `gorm:"column:message_type;type:varchar(32);not null;uniqueIndex:uk_business_msg;priority:3" db:"message_type" json:"message_type"`
+	Title        string     `gorm:"column:title;type:varchar(128);not null" db:"title" json:"title"`
+	Content      string     `gorm:"column:content;type:text;not null" db:"content" json:"content"`
+	BusinessType string     `gorm:"column:business_type;type:varchar(32);not null;uniqueIndex:uk_business_msg;priority:1" db:"business_type" json:"business_type"`
+	BusinessID   string     `gorm:"column:business_id;type:varchar(64);not null;uniqueIndex:uk_business_msg;priority:2" db:"business_id" json:"business_id"`
+	Priority     int32      `gorm:"column:priority;type:tinyint;default:0" db:"priority" json:"priority"`
+	IsRead       bool       `gorm:"column:is_read;type:tinyint(1);default:0;index:idx_user_read_time" db:"is_read" json:"is_read"`
+	ReadAt       *time.Time `gorm:"column:read_at;default:null" db:"read_at" json:"read_at"`
+	DeletedAt    *time.Time `gorm:"column:deleted_at;index;default:null" db:"deleted_at" json:"deleted_at"`
+	CreatedAt    time.Time  `gorm:"column:created_at;not null;index:idx_user_read_time" db:"created_at" json:"created_at"`
+}
+
+func (UserMessage) TableName() string {
+	return "sf_user_message"
 // ──────────────────────────────────────────────
 // 寄件渠道
 // ──────────────────────────────────────────────
