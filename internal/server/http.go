@@ -2,6 +2,7 @@
 
 import (
 	addressv1 "shunfeng-miniprogram/api/address/v1"
+	expressv1 "shunfeng-miniprogram/api/express/v1" // 查快递模块 HTTP 路由注册
 	orderv1 "shunfeng-miniprogram/api/order/v1"
 	todov1 "shunfeng-miniprogram/api/todo/v1"
 	userv1 "shunfeng-miniprogram/api/user/v1"
@@ -15,8 +16,9 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-// NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService) *http.Server {
+// NewHTTPServer new an HTTP server。
+// express 参数为查快递模块服务，可为 nil。
+func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, express *service.ExpressService) *http.Server {
 
 	var opts = []http.ServerOption{
 		http.Middleware(
@@ -46,6 +48,10 @@ func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.User
 	orderv1.RegisterOrderServiceHTTPServer(srv, order)
 	if address != nil {
 		addressv1.RegisterAddressServiceHTTPServer(srv, address)
+	}
+	// 查快递模块: 注册 12 个 HTTP 接口（搜索/关注/标签/分享/消息）
+	if express != nil {
+		expressv1.RegisterExpressServiceHTTPServer(srv, express)
 	}
 	return srv
 }

@@ -20,7 +20,17 @@ var (
 )
 
 // ProviderSet 数据层依赖注入。
-var ProviderSet = wire.NewSet(NewTodoRepo, NewAddressRepo, NewUserRepo, NewOrderRepo)
+var ProviderSet = wire.NewSet(
+	NewTodoRepo,
+	NewAddressRepo,
+	NewUserRepo,
+	NewOrderRepo,
+	// 查快递模块仓储
+	NewOrderFollowRepo,
+	NewOrderLabelRepo,
+	NewOrderShareRepo,
+	NewUserMessageRepo,
+)
 
 // InitData 初始化所有存储客户端。
 func InitData(c *conf.Data, r *conf.Registry) {
@@ -39,12 +49,18 @@ func newGorm(c *conf.Data_Database) {
 		fmt.Println(fmt.Sprintf("mysql 链接失败: %v", err))
 		return
 	}
+	// 自动建表/迁移：包含已有表和查快递模块新增的 4 张表
 	if err = db.AutoMigrate(
 		&Todo{},
 		&User{},
 		&Address{},
 		&Order{},
 		&IdentityRealNameAuth{},
+		// 查快递模块：关注·标签·分享·消息
+		&OrderFollow{},
+		&OrderLabel{},
+		&OrderShare{},
+		&UserMessage{},
 	); err != nil {
 		fmt.Println(fmt.Sprintf("mysql 链接失败: %v", err))
 		return

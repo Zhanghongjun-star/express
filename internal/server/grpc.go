@@ -2,6 +2,7 @@
 
 import (
 	addressv1 "shunfeng-miniprogram/api/address/v1"
+	expressv1 "shunfeng-miniprogram/api/express/v1" // 查快递模块 gRPC 服务注册
 	orderv1 "shunfeng-miniprogram/api/order/v1"
 	todov1 "shunfeng-miniprogram/api/todo/v1"
 	userv1 "shunfeng-miniprogram/api/user/v1"
@@ -13,7 +14,8 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService) *grpc.Server {
+// express 参数为查快递模块服务，可为 nil。
+func NewGRPCServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, express *service.ExpressService) *grpc.Server {
 
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
@@ -35,6 +37,10 @@ func NewGRPCServer(c *conf.Server, todo *service.TodoService, user *service.User
 	orderv1.RegisterOrderServiceServer(srv, order)
 	if address != nil {
 		addressv1.RegisterAddressServiceServer(srv, address)
+	}
+	// 查快递模块: 注册 gRPC 服务（含 CreateBusinessMessage 内部接口）
+	if express != nil {
+		expressv1.RegisterExpressServiceServer(srv, express)
 	}
 	return srv
 }
