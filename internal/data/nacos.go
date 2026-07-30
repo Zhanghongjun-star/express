@@ -26,13 +26,19 @@ var RemoteConfig struct {
 		Redis struct {
 			Addr         string
 			Password     string
-			DB           int
-			ReadTimeout  string
-			WriteTimeout string
+			DB           int          `mapstructure:"db"`
+			ReadTimeout  string       `mapstructure:"read_timeout"`
+			WriteTimeout string       `mapstructure:"write_timeout"`
 		}
 		Elasticsearch struct {
 			Addr string
 		}
+		AmapKey string `mapstructure:"amap_key"`
+		SMS     struct {
+			URL      string `mapstructure:"url"`
+			Account  string `mapstructure:"account"`
+			Password string `mapstructure:"password"`
+		} `mapstructure:"sms"`
 	}
 }
 

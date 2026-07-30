@@ -1,0 +1,307 @@
+syntax = "proto3";
+
+package order.v3;
+
+import "google/api/annotations.proto";
+import "google/api/field_behavior.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "shunfeng-miniprogram/api/order/v3;v3";
+option java_multiple_files = true;
+option java_package = "io.grpc.examples.order.v3";
+option java_outer_classname = "OrderProto";
+
+service OrderService {
+  // CreateExpressOrder 创建寄件订单
+  rpc CreateExpressOrder(CreateExpressOrderRequest) returns (ExpressOrderReply) {
+    option (google.api.http) = {
+      post: "/api/order/create"
+      body: "*"
+    };
+  }
+
+  // GetExpressOrder 获取订单详情
+  rpc GetExpressOrder(GetExpressOrderRequest) returns (ExpressOrderReply) {
+    option (google.api.http) = {
+      get: "/api/order/{id}"
+    };
+  }
+
+  // SearchOrders 搜索订单（按单号/姓名/手机号）
+  rpc SearchOrders(SearchOrdersRequest) returns (ExpressOrderSet) {
+    option (google.api.http) = {
+      get: "/api/order/search"
+    };
+  }
+
+  // ListOrdersByCategory 按分类查看订单（寄件/收件/关注/待支付）
+  rpc ListOrdersByCategory(ListOrdersByCategoryRequest) returns (ExpressOrderSet) {
+    option (google.api.http) = {
+      get: "/api/order/category/{category}"
+    };
+  }
+
+  // DeleteExpressOrder 删除订单记录（逻辑删除，弹窗确认由前端处理）
+  rpc DeleteExpressOrder(DeleteExpressOrderRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      delete: "/api/order/{id}"
+    };
+  }
+
+  // SetOrderTag 设置订单标签
+  rpc SetOrderTag(SetOrderTagRequest) returns (ExpressOrderReply) {
+    option (google.api.http) = {
+      put: "/api/order/{id}/tag"
+      body: "*"
+    };
+  }
+
+  // FollowOrder 关注/取消关注订单
+  rpc FollowOrder(FollowOrderRequest) returns (ExpressOrderReply) {
+    option (google.api.http) = {
+      put: "/api/order/{id}/follow"
+      body: "*"
+    };
+  }
+
+  // ShareOrder 生成物流分享链接
+  rpc ShareOrder(ShareOrderRequest) returns (ShareOrderReply) {
+    option (google.api.http) = {
+      post: "/api/order/{id}/share"
+      body: "*"
+    };
+  }
+
+  // PayExpressOrder 发起支付，返回支付链接
+  rpc PayExpressOrder(PayExpressOrderRequest) returns (PayExpressOrderReply) {
+    option (google.api.http) = {
+      post: "/api/order/{id}/pay"
+      body: "*"
+    };
+  }
+
+  // HandlePaymentCallback 处理支付回调，更新支付状态
+  rpc HandlePaymentCallback(PaymentCallbackRequest) returns (PaymentCallbackReply) {
+    option (google.api.http) = {
+      post: "/api/order/payment/callback"
+      body: "*"
+    };
+  }
+}
+
+// ──────────────────────────────────────────────
+// Enums
+// ──────────────────────────────────────────────
+
+// PaymentMethod 付款方式
+enum PaymentMethod {
+  PAYMENT_METHOD_UNSPECIFIED = 0;
+  SENDER_PAY = 1;      // 寄付现结
+  RECEIVER_PAY = 2;    // 到付
+  MONTHLY_SETTLE = 3;  // 月结
+}
+
+// PaymentStatus 支付状态
+enum PaymentStatus {
+  PAYMENT_STATUS_UNSPECIFIED = 0;
+  PENDING = 1;    // 待支付
+  PAID = 2;       // 已支付
+  EXPIRED = 3;    // 已过期
+}
+
+// OrderStatus 订单状态
+enum OrderStatus {
+  ORDER_STATUS_UNSPECIFIED = 0;
+  PENDING_PICKUP = 1;    // 待揽收
+  ACCEPTED = 2;          // 已接单
+  AWAITING_PICKUP = 3;   // 待上门
+  PICKED_UP = 4;         // 已取件
+  IN_TRANSIT = 5;        // 运输中
+  DELIVERING = 6;        // 派送中
+  SIGNED = 7;            // 已签收
+  CANCELLED = 8;         // 已取消
+}
+
+// ChannelCode 寄件渠道
+enum ChannelCode {
+  CHANNEL_UNSPECIFIED = 0;
+  DOOR_PICKUP = 1;    // 上门取件
+  LOCKER = 2;         // 丰巢柜
+  SF_STATION = 3;     // 顺丰网点
+  PARTNER_STORE = 4;  // 合作门店
+}
+
+// ──────────────────────────────────────────────
+// Request / Response
+// ──────────────────────────────────────────────
+
+message CreateExpressOrderRequest {
+  int64 user_id = 1 [(google.api.field_behavior) = REQUIRED];
+
+  // 寄件人
+  string sender_name = 2 [(google.api.field_behavior) = REQUIRED];
+  string sender_phone = 3 [(google.api.field_behavior) = REQUIRED];
+  string sender_province = 4 [(google.api.field_behavior) = REQUIRED];
+  string sender_city = 5 [(google.api.field_behavior) = REQUIRED];
+  string sender_district = 6;
+  string sender_detail = 7 [(google.api.field_behavior) = REQUIRED];
+
+  // 收件人
+  string receiver_name = 8 [(google.api.field_behavior) = REQUIRED];
+  string receiver_phone = 9 [(google.api.field_behavior) = REQUIRED];
+  string receiver_province = 10 [(google.api.field_behavior) = REQUIRED];
+  string receiver_city = 11 [(google.api.field_behavior) = REQUIRED];
+  string receiver_district = 12;
+  string receiver_detail = 13 [(google.api.field_behavior) = REQUIRED];
+
+  // 包裹
+  double weight = 14 [(google.api.field_behavior) = REQUIRED];
+  int32 length = 15;
+  int32 width = 16;
+  int32 height = 17;
+
+  // 寄件渠道
+  ChannelCode channel_code = 18 [(google.api.field_behavior) = REQUIRED];
+  int64 locker_id = 19;          // 丰巢时必填
+  string box_type = 20;          // 丰巢时必填 (SMALL/MEDIUM/LARGE)
+  int64 service_point_id = 21;   // 网点/门店时必填
+  string pickup_date = 22;       // 上门取件时必填
+  string pickup_slot_code = 23;  // 上门取件时必填
+
+  // 付款方式
+  PaymentMethod payment_method = 24 [(google.api.field_behavior) = REQUIRED];
+
+  // 隐私保护
+  bool privacy_protection = 25;
+
+  // 快递类型（与运费预估一致：1标快 2特快 3特惠）
+  int32 express_type = 26;
+  double insure_value = 27; // 保价金额
+}
+
+message GetExpressOrderRequest {
+  int64 user_id = 1 [(google.api.field_behavior) = REQUIRED];
+  int64 id = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message SearchOrdersRequest {
+  int64 user_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string keyword = 2;
+  int32 page_size = 3;
+  string page_token = 4;
+}
+
+message ListOrdersByCategoryRequest {
+  int64 user_id = 1 [(google.api.field_behavior) = REQUIRED];
+  string category = 2 [(google.api.field_behavior) = REQUIRED]; // "sent" / "received" / "followed" / "unpaid"
+  int32 page_size = 3;
+  string page_token = 4;
+}
+
+message DeleteExpressOrderRequest {
+  int64 user_id = 1 [(google.api.field_behavior) = REQUIRED];
+  int64 id = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message SetOrderTagRequest {
+  int64 user_id = 1 [(google.api.field_behavior) = REQUIRED];
+  int64 id = 2 [(google.api.field_behavior) = REQUIRED];
+  string tag = 3;
+}
+
+message FollowOrderRequest {
+  int64 user_id = 1 [(google.api.field_behavior) = REQUIRED];
+  int64 id = 2 [(google.api.field_behavior) = REQUIRED];
+  bool follow = 3;
+}
+
+message ShareOrderRequest {
+  int64 user_id = 1 [(google.api.field_behavior) = REQUIRED];
+  int64 id = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message ShareOrderReply {
+  string share_url = 1;
+}
+
+message PayExpressOrderRequest {
+  int64 user_id = 1 [(google.api.field_behavior) = REQUIRED];
+  int64 id = 2 [(google.api.field_behavior) = REQUIRED];
+}
+
+message PayExpressOrderReply {
+  string pay_url = 1;
+  string trade_no = 2;
+}
+
+message PaymentCallbackRequest {
+  string trade_no = 1;
+  string order_no = 2;
+  string payment_status = 3; // "paid" / "failed"
+  string signature = 4;
+}
+
+message PaymentCallbackReply {
+  bool success = 1;
+}
+
+// ──────────────────────────────────────────────
+// 共用响应
+// ──────────────────────────────────────────────
+
+message ExpressOrderReply {
+  int64 id = 1;
+  int64 user_id = 2;
+  string order_no = 3;
+  string express_no = 4;
+
+  string sender_name = 5;
+  string sender_phone = 6;
+  string sender_province = 7;
+  string sender_city = 8;
+  string sender_district = 9;
+  string sender_detail = 10;
+
+  string receiver_name = 11;
+  string receiver_phone = 12;
+  string receiver_province = 13;
+  string receiver_city = 14;
+  string receiver_district = 15;
+  string receiver_detail = 16;
+
+  double weight = 17;
+  int32 length = 18;
+  int32 width = 19;
+  int32 height = 20;
+
+  double base_freight = 21;
+  double insure_fee = 22;
+  double total_freight = 23;
+
+  ChannelCode channel_code = 24;
+  int64 locker_id = 25;
+  string box_type = 26;
+  int64 service_point_id = 27;
+  string pickup_date = 28;
+  string pickup_slot_code = 29;
+
+  PaymentMethod payment_method = 30;
+  PaymentStatus payment_status = 31;
+  bool privacy_protection = 32;
+
+  OrderStatus status = 33;
+  string tag = 34;
+  bool is_followed = 35;
+  string share_url = 36;
+  string pay_url = 39;
+
+  google.protobuf.Timestamp created_at = 37;
+  google.protobuf.Timestamp updated_at = 38;
+}
+
+message ExpressOrderSet {
+  repeated ExpressOrderReply orders = 1;
+  int32 total_count = 2;
+  string next_page_token = 3;
+}

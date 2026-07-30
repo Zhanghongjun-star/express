@@ -175,6 +175,16 @@ func (r *serviceAuthRepo) BlacklistAccessToken(context.Context, string, time.Dur
 	return nil
 }
 
+func (r *serviceAuthRepo) ValidateAccessToken(_ context.Context, accessToken string) (*biz.TokenSession, error) {
+	for _, session := range r.sessions {
+		if session.AccessToken == accessToken {
+			cp := *session
+			return &cp, nil
+		}
+	}
+	return nil, biz.ErrAuthUnauthenticated
+}
+
 func (r *serviceAuthRepo) UpdatePassword(_ context.Context, userID int64, passwordHash string) error {
 	if user, ok := r.usersByID[userID]; ok {
 		user.PasswordHash = passwordHash

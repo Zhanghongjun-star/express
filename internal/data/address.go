@@ -3,7 +3,6 @@ package data
 import (
 	"context"
 	"fmt"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -148,14 +147,13 @@ type amapGeocoder struct {
 	client *amap.Client
 }
 
-// NewAmapGeocoder 从环境变量 AMAP_WEB_KEY 读取高德 Key 构造 Geocoder。
+// NewAmapGeocoder 从全局变量 AmapKey 读取高德 Key 构造 Geocoder。
 // 若未配置 Key，返回一个 noop 实现：反查始终失败，但不影响地址的创建/更新。
 func NewAmapGeocoder() biz.Geocoder {
-	key := os.Getenv("AMAP_WEB_KEY")
-	if key == "" {
+	if AmapKey == "" {
 		return noopGeocoder{}
 	}
-	return &amapGeocoder{client: amap.NewClient(key)}
+	return &amapGeocoder{client: amap.NewClient(AmapKey)}
 }
 
 // GeocodeAddress 拼接省/市/区/详细地址后调用高德地理编码，返回纬度 lat、经度 lng。

@@ -117,6 +117,77 @@ func (IdentityRealNameAuth) TableName() string {
 	return "identity_real_name_auth"
 }
 
+// OrderFollow 对应 sf_order_follow 表，记录用户关注的订单。
+// 用户+订单唯一索引(uk_user_order)防重复关注，deleted_at 支持逻辑删除。
+type OrderFollow struct {
+	ID        int64     `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	UserID    int64     `gorm:"column:user_id;index:idx_user_id;uniqueIndex:uk_user_order;not null" db:"user_id" json:"user_id"`
+	OrderID   int64     `gorm:"column:order_id;uniqueIndex:uk_user_order;not null" db:"order_id" json:"order_id"`
+	CreatedAt time.Time `gorm:"column:created_at;not null" db:"created_at" json:"created_at"`
+	DeletedAt *time.Time `gorm:"column:deleted_at;index;default:null" db:"deleted_at" json:"deleted_at"`
+}
+
+func (OrderFollow) TableName() string {
+	return "sf_order_follow"
+}
+
+// OrderLabel 对应 sf_order_label 表，记录用户给订单设置的自定义标签。
+// upsert 写入：相同 user_id+order_id 覆盖旧标签内容。
+type OrderLabel struct {
+	ID        int64     `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	UserID    int64     `gorm:"column:user_id;index:idx_user_id;uniqueIndex:uk_user_order;not null" db:"user_id" json:"user_id"`
+	OrderID   int64     `gorm:"column:order_id;uniqueIndex:uk_user_order;not null" db:"order_id" json:"order_id"`
+	Content   string    `gorm:"column:content;type:varchar(100);not null" db:"content" json:"content"`
+	CreatedAt time.Time `gorm:"column:created_at;not null" db:"created_at" json:"created_at"`
+	UpdatedAt time.Time `gorm:"column:updated_at;not null" db:"updated_at" json:"updated_at"`
+	DeletedAt *time.Time `gorm:"column:deleted_at;index;default:null" db:"deleted_at" json:"deleted_at"`
+}
+
+func (OrderLabel) TableName() string {
+	return "sf_order_label"
+}
+
+// OrderShare 对应 sf_order_share 表，记录用户生成的订单分享。
+// share_code 为 32 字符高熵随机码，公开查看时按 code 查询。
+type OrderShare struct {
+	ID           int64     `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	ShareCode    string    `gorm:"column:share_code;type:varchar(32);uniqueIndex;not null" db:"share_code" json:"share_code"`
+	UserID       int64     `gorm:"column:user_id;not null" db:"user_id" json:"user_id"`
+	OrderID      int64     `gorm:"column:order_id;not null" db:"order_id" json:"order_id"`
+	ShowSender   bool      `gorm:"column:show_sender;type:tinyint(1);default:0" db:"show_sender" json:"show_sender"`
+	ShowReceiver bool      `gorm:"column:show_receiver;type:tinyint(1);default:0" db:"show_receiver" json:"show_receiver"`
+	ShowPhone    bool      `gorm:"column:show_phone;type:tinyint(1);default:0" db:"show_phone" json:"show_phone"`
+	ShowStatus   bool      `gorm:"column:show_status;type:tinyint(1);default:1" db:"show_status" json:"show_status"`
+	Status       int32     `gorm:"column:status;type:tinyint;default:1" db:"status" json:"status"`
+	ExpiresAt    time.Time `gorm:"column:expires_at;index;not null" db:"expires_at" json:"expires_at"`
+	CreatedAt    time.Time `gorm:"column:created_at;not null" db:"created_at" json:"created_at"`
+}
+
+func (OrderShare) TableName() string {
+	return "sf_order_share"
+}
+
+// UserMessage 对应 sf_user_message 表，记录用户收到的业务消息。
+// uk_business_msg(business_type+business_id+message_type) 保证幂等。
+type UserMessage struct {
+	ID           int64      `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	UserID       int64      `gorm:"column:user_id;not null;index:idx_user_read_time" db:"user_id" json:"user_id"`
+	MessageType  string     `gorm:"column:message_type;type:varchar(32);not null;uniqueIndex:uk_business_msg;priority:3" db:"message_type" json:"message_type"`
+	Title        string     `gorm:"column:title;type:varchar(128);not null" db:"title" json:"title"`
+	Content      string     `gorm:"column:content;type:text;not null" db:"content" json:"content"`
+	BusinessType string     `gorm:"column:business_type;type:varchar(32);not null;uniqueIndex:uk_business_msg;priority:1" db:"business_type" json:"business_type"`
+	BusinessID   string     `gorm:"column:business_id;type:varchar(64);not null;uniqueIndex:uk_business_msg;priority:2" db:"business_id" json:"business_id"`
+	Priority     int32      `gorm:"column:priority;type:tinyint;default:0" db:"priority" json:"priority"`
+	IsRead       bool       `gorm:"column:is_read;type:tinyint(1);default:0;index:idx_user_read_time" db:"is_read" json:"is_read"`
+	ReadAt       *time.Time `gorm:"column:read_at;default:null" db:"read_at" json:"read_at"`
+	DeletedAt    *time.Time `gorm:"column:deleted_at;index;default:null" db:"deleted_at" json:"deleted_at"`
+	CreatedAt    time.Time  `gorm:"column:created_at;not null;index:idx_user_read_time" db:"created_at" json:"created_at"`
+}
+
+func (UserMessage) TableName() string {
+	return "sf_user_message"
+}
+
 // ──────────────────────────────────────────────
 // 寄件渠道
 // ──────────────────────────────────────────────
@@ -263,6 +334,83 @@ type PickupReservation struct {
 }
 
 func (PickupReservation) TableName() string { return "order_pickup_reservation" }
+
+// ExpressOrder 对应 sf_express_order 表，保存完整寄件订单生命周期数据。
+type ExpressOrder struct {
+	ID                      int64     `gorm:"primaryKey;column:id" db:"id" json:"id"`
+	UserID                  int64     `gorm:"column:user_id;index" db:"user_id" json:"user_id"`
+	OrderNo                 string    `gorm:"column:order_no;type:varchar(64);uniqueIndex" db:"order_no" json:"order_no"`
+	ExpressNo               string    `gorm:"column:express_no;type:varchar(64)" db:"express_no" json:"express_no"`
+
+	// 寄件人
+	SenderName              string    `gorm:"column:sender_name;type:varchar(32)" db:"sender_name" json:"sender_name"`
+	SenderPhone             string    `gorm:"column:sender_phone;type:varchar(11)" db:"sender_phone" json:"sender_phone"`
+	SenderProvince          string    `gorm:"column:sender_province;type:varchar(32)" db:"sender_province" json:"sender_province"`
+	SenderCity              string    `gorm:"column:sender_city;type:varchar(32)" db:"sender_city" json:"sender_city"`
+	SenderDistrict          string    `gorm:"column:sender_district;type:varchar(32)" db:"sender_district" json:"sender_district"`
+	SenderDetail            string    `gorm:"column:sender_detail;type:varchar(256)" db:"sender_detail" json:"sender_detail"`
+	SenderLat               float64   `gorm:"column:sender_lat;type:decimal(10,6)" db:"sender_lat" json:"sender_lat"`
+	SenderLng               float64   `gorm:"column:sender_lng;type:decimal(10,6)" db:"sender_lng" json:"sender_lng"`
+
+	// 收件人
+	ReceiverName            string    `gorm:"column:receiver_name;type:varchar(32)" db:"receiver_name" json:"receiver_name"`
+	ReceiverPhone           string    `gorm:"column:receiver_phone;type:varchar(11)" db:"receiver_phone" json:"receiver_phone"`
+	ReceiverProvince        string    `gorm:"column:receiver_province;type:varchar(32)" db:"receiver_province" json:"receiver_province"`
+	ReceiverCity            string    `gorm:"column:receiver_city;type:varchar(32)" db:"receiver_city" json:"receiver_city"`
+	ReceiverDistrict        string    `gorm:"column:receiver_district;type:varchar(32)" db:"receiver_district" json:"receiver_district"`
+	ReceiverDetail          string    `gorm:"column:receiver_detail;type:varchar(256)" db:"receiver_detail" json:"receiver_detail"`
+	ReceiverLat             float64   `gorm:"column:receiver_lat;type:decimal(10,6)" db:"receiver_lat" json:"receiver_lat"`
+	ReceiverLng             float64   `gorm:"column:receiver_lng;type:decimal(10,6)" db:"receiver_lng" json:"receiver_lng"`
+
+	// 包裹
+	Weight                  float64   `gorm:"column:weight;type:decimal(8,2)" db:"weight" json:"weight"`
+	Length                  int32     `gorm:"column:length;type:int" db:"length" json:"length"`
+	Width                   int32     `gorm:"column:width;type:int" db:"width" json:"width"`
+	Height                  int32     `gorm:"column:height;type:int" db:"height" json:"height"`
+
+	// 运费
+	BaseFreight             float64   `gorm:"column:base_freight;type:decimal(10,2)" db:"base_freight" json:"base_freight"`
+	InsureFee               float64   `gorm:"column:insure_fee;type:decimal(10,2)" db:"insure_fee" json:"insure_fee"`
+	TotalFreight            float64   `gorm:"column:total_freight;type:decimal(10,2)" db:"total_freight" json:"total_freight"`
+
+	// 寄件渠道
+	ChannelCode             string    `gorm:"column:channel_code;type:varchar(32)" db:"channel_code" json:"channel_code"`
+	LockerID                int64     `gorm:"column:locker_id;type:bigint" db:"locker_id" json:"locker_id"`
+	BoxType                 string    `gorm:"column:box_type;type:varchar(16)" db:"box_type" json:"box_type"`
+	ServicePointID          int64     `gorm:"column:service_point_id;type:bigint" db:"service_point_id" json:"service_point_id"`
+	PickupDate              string    `gorm:"column:pickup_date;type:date" db:"pickup_date" json:"pickup_date"`
+	PickupSlotCode          string    `gorm:"column:pickup_slot_code;type:varchar(32)" db:"pickup_slot_code" json:"pickup_slot_code"`
+	PickupStartTime         string    `gorm:"column:pickup_start_time;type:time" db:"pickup_start_time" json:"pickup_start_time"`
+	PickupEndTime           string    `gorm:"column:pickup_end_time;type:time" db:"pickup_end_time" json:"pickup_end_time"`
+
+	// 付款
+	PaymentMethod           string    `gorm:"column:payment_method;type:varchar(16)" db:"payment_method" json:"payment_method"`
+	PaymentStatus           string    `gorm:"column:payment_status;type:varchar(16);default:pending" db:"payment_status" json:"payment_status"`
+	PaidAt                  time.Time `gorm:"column:paid_at" db:"paid_at" json:"paid_at"`
+
+	// 隐私
+	PrivacyProtection       bool      `gorm:"column:privacy_protection;type:tinyint;default:0" db:"privacy_protection" json:"privacy_protection"`
+
+	// 状态
+	Status                  string    `gorm:"column:status;type:varchar(32);default:pending_pickup" db:"status" json:"status"`
+	DelFlag                 bool      `gorm:"column:del_flag;type:tinyint;default:0" db:"del_flag" json:"del_flag"`
+
+	// 标签/关注
+	Tag                     string    `gorm:"column:tag;type:varchar(64)" db:"tag" json:"tag"`
+	IsFollowed              bool      `gorm:"column:is_followed;type:tinyint;default:0" db:"is_followed" json:"is_followed"`
+
+	// 分享链接
+	ShareURL                string    `gorm:"column:share_url;type:varchar(512)" db:"share_url" json:"share_url"`
+
+	// 支付
+	PayURL                  string    `gorm:"column:pay_url;type:varchar(512)" db:"pay_url" json:"pay_url"`
+	TradeNo                 string    `gorm:"column:trade_no;type:varchar(64)" db:"trade_no" json:"trade_no"`
+
+	CreatedAt               time.Time `gorm:"column:created_at" db:"created_at" json:"created_at"`
+	UpdatedAt               time.Time `gorm:"column:updated_at" db:"updated_at" json:"updated_at"`
+}
+
+func (ExpressOrder) TableName() string { return "sf_express_order" }
 
 // IdentitySecurityLog 对应 identity_security_log 表，保存登录、改密、退出等安全事件。
 type IdentitySecurityLog struct {

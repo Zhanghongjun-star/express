@@ -19,10 +19,15 @@ var (
 	DB       *gorm.DB
 	RDB      *redis.Client
 	ESClient *elasticsearch.Client
+
+	AmapKey   string
+	SMSURL    string
+	SMSAcc    string
+	SMSPwd    string
 )
 
 // ProviderSet 数据层依赖注入。
-var ProviderSet = wire.NewSet(NewTodoRepo, NewAddressRepo, NewUserRepo, NewOrderRepo, NewChannelRepo, NewLockerRepo, NewLockerBoxRepo, NewServicePointRepo, NewPickupRepo, NewAuthRepo, NewFreightRepo, NewAmapGeocoder)
+var ProviderSet = wire.NewSet(NewTodoRepo, NewAddressRepo, NewUserRepo, NewOrderRepo, NewChannelRepo, NewLockerRepo, NewLockerBoxRepo, NewServicePointRepo, NewPickupRepo, NewAuthRepo, NewFreightRepo, NewExpressOrderRepo, NewAmapGeocoder)
 
 // InitData 初始化所有存储客户端。
 func InitData(r *conf.Registry) {
@@ -50,6 +55,13 @@ func InitData(r *conf.Registry) {
 	newES(&conf.Data_Elasticsearch{
 		Addr: d.Elasticsearch.Addr,
 	})
+
+	AmapKey = d.AmapKey
+	if d.SMS.URL != "" {
+		SMSURL = d.SMS.URL
+		SMSAcc = d.SMS.Account
+		SMSPwd = d.SMS.Password
+	}
 }
 
 // newGorm 初始化 MySQL 连接
@@ -76,6 +88,7 @@ func newGorm(c *conf.Data_Database) {
 		&PickupTimeSlot{},
 		&PickupReservation{},
 		&IdentitySecurityLog{},
+		&ExpressOrder{},
 	); err != nil {
 		fmt.Println(fmt.Sprintf("mysql 链接失败: %v", err))
 		return

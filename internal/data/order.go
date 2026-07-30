@@ -30,6 +30,17 @@ func (r *orderRepo) GetHistoryCount(ctx context.Context, userID int64) (*biz.His
 }
 
 func (r *orderRepo) ListHistoryRecords(ctx context.Context, userID int64, offset, limit int) ([]*biz.HistoryRecord, int32, error) {
+	var userPo User
+	if err := DB.WithContext(ctx).First(&userPo, userID).Error; err != nil {
+		return nil, 0, biz.ErrUserNotFound
+	}
+	now := time.Now()
+	if userPo.UpdateTime.Year() != now.Year() || userPo.UpdateTime.YearDay() != now.YearDay() {
+		DB.WithContext(ctx).Model(&User{}).Where("user_id = ?", userID).
+			Select("query_count_today", "update_time").
+			Updates(map[string]any{"query_count_today": 0, "update_time": now})
+	}
+
 	// 增加查询次数
 	DB.WithContext(ctx).Model(&User{}).Where("user_id = ?", userID).
 		UpdateColumn("query_count_today", gorm.Expr("query_count_today + 1"))
@@ -62,7 +73,7 @@ func (r *orderRepo) ExportHistory(ctx context.Context, userID int64, recordIDs [
 	if int(count) != len(recordIDs) {
 		return "", biz.ErrOrderNotFound
 	}
-	url := fmt.Sprintf("https://example.com/export/%d_%d.xlsx", userID, time.Now().UnixMilli())
+	url := fmt.Sprintf("/api/v1/export/download?user_id=%d&t=%d", userID, time.Now().UnixMilli())
 	return url, nil
 }
 

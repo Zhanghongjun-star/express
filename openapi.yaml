@@ -6,6 +6,294 @@ info:
     title: ""
     version: 0.0.1
 paths:
+    /api/express/orders/search:
+        post:
+            tags:
+                - ExpressService
+            description: '--- 订单搜索 ---'
+            operationId: ExpressService_SearchOrders
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/express.v1.SearchOrdersRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.SearchOrdersReply'
+    /api/express/orders/{id}/follow:
+        post:
+            tags:
+                - ExpressService
+            description: '--- 关注/取消关注 ---'
+            operationId: ExpressService_FollowOrder
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.FollowOrderReply'
+        delete:
+            tags:
+                - ExpressService
+            operationId: ExpressService_UnfollowOrder
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.UnfollowOrderReply'
+    /api/express/orders/{id}/label:
+        get:
+            tags:
+                - ExpressService
+            operationId: ExpressService_GetOrderLabel
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.GetOrderLabelReply'
+        put:
+            tags:
+                - ExpressService
+            description: '--- 标签 ---'
+            operationId: ExpressService_SetOrderLabel
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/express.v1.SetOrderLabelRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.SetOrderLabelReply'
+        delete:
+            tags:
+                - ExpressService
+            operationId: ExpressService_ClearOrderLabel
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.ClearOrderLabelReply'
+    /api/express/orders/{id}/shares:
+        post:
+            tags:
+                - ExpressService
+            description: '--- 分享 ---'
+            operationId: ExpressService_CreateOrderShare
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/express.v1.CreateOrderShareRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.CreateOrderShareReply'
+    /api/express/public/order-shares/{code}:
+        get:
+            tags:
+                - ExpressService
+            operationId: ExpressService_GetOrderShare
+            parameters:
+                - name: code
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.GetOrderShareReply'
+    /api/express/users/me/messages:
+        get:
+            tags:
+                - ExpressService
+            description: '--- 消息 ---'
+            operationId: ExpressService_ListUserMessages
+            parameters:
+                - name: messageType
+                  in: query
+                  schema:
+                    type: string
+                - name: readStatus
+                  in: query
+                  schema:
+                    type: string
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.ListUserMessagesReply'
+    /api/express/users/me/messages/read-all:
+        put:
+            tags:
+                - ExpressService
+            operationId: ExpressService_MarkAllMessagesRead
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.MarkAllMessagesReadReply'
+    /api/express/users/me/messages/{id}:
+        delete:
+            tags:
+                - ExpressService
+            operationId: ExpressService_DeleteUserMessage
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.DeleteUserMessageReply'
+    /api/express/users/me/messages/{id}/read:
+        put:
+            tags:
+                - ExpressService
+            operationId: ExpressService_MarkMessageRead
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/express.v1.MarkMessageReadReply'
+    /api/order/category/{category}:
+        get:
+            tags:
+                - OrderService
+            description: ListOrdersByCategory 按分类查看订单（寄件/收件/关注/待支付）
+            operationId: OrderService_ListOrdersByCategory
+            parameters:
+                - name: category
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.ExpressOrderSet'
+    /api/order/create:
+        post:
+            tags:
+                - OrderService
+            description: CreateExpressOrder 创建寄件订单
+            operationId: OrderService_CreateExpressOrder
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v3.CreateExpressOrderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.ExpressOrderReply'
     /api/order/freight/estimate:
         post:
             tags:
@@ -90,6 +378,198 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/order.v1.HistoryRecordSet'
+    /api/order/payment/callback:
+        post:
+            tags:
+                - OrderService
+            description: HandlePaymentCallback 处理支付回调，更新支付状态
+            operationId: OrderService_HandlePaymentCallback
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v3.PaymentCallbackRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.PaymentCallbackReply'
+    /api/order/search:
+        get:
+            tags:
+                - OrderService
+            description: SearchOrders 搜索订单（按单号/姓名/手机号）
+            operationId: OrderService_SearchOrders
+            parameters:
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+                - name: keyword
+                  in: query
+                  schema:
+                    type: string
+                - name: pageSize
+                  in: query
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.ExpressOrderSet'
+    /api/order/{id}:
+        get:
+            tags:
+                - OrderService
+            description: GetExpressOrder 获取订单详情
+            operationId: OrderService_GetExpressOrder
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.ExpressOrderReply'
+        delete:
+            tags:
+                - OrderService
+            description: DeleteExpressOrder 删除订单记录（逻辑删除，弹窗确认由前端处理）
+            operationId: OrderService_DeleteExpressOrder
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+                - name: userId
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /api/order/{id}/follow:
+        put:
+            tags:
+                - OrderService
+            description: FollowOrder 关注/取消关注订单
+            operationId: OrderService_FollowOrder
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v3.FollowOrderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.ExpressOrderReply'
+    /api/order/{id}/pay:
+        post:
+            tags:
+                - OrderService
+            description: PayExpressOrder 发起支付，返回支付链接
+            operationId: OrderService_PayExpressOrder
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v3.PayExpressOrderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.PayExpressOrderReply'
+    /api/order/{id}/share:
+        post:
+            tags:
+                - OrderService
+            description: ShareOrder 生成物流分享链接
+            operationId: OrderService_ShareOrder
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v3.ShareOrderRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.ShareOrderReply'
+    /api/order/{id}/tag:
+        put:
+            tags:
+                - OrderService
+            description: SetOrderTag 设置订单标签
+            operationId: OrderService_SetOrderTag
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/order.v3.SetOrderTagRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/order.v3.ExpressOrderReply'
     /api/user/account/status:
         get:
             tags:
@@ -279,6 +759,224 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.VerificationCodeReply'
+    /api/v1/shipping/channels:
+        get:
+            tags:
+                - ShippingService
+            description: |-
+                ListChannels returns all available shipping channels in the current
+                 region together with their availability status and extra fees.
+            operationId: ShippingService_ListChannels
+            parameters:
+                - name: districtCode
+                  in: query
+                  description: Administrative district code of the sender.
+                  schema:
+                    type: string
+                - name: latitude
+                  in: query
+                  description: |-
+                    Sender's latitude in WGS-84. Used together with longitude for
+                     location-based channel evaluation.
+                  schema:
+                    type: number
+                    format: double
+                - name: longitude
+                  in: query
+                  description: Sender's longitude in WGS-84.
+                  schema:
+                    type: number
+                    format: double
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/shipping.v1.ListChannelsResponse'
+    /api/v1/shipping/lockers:
+        get:
+            tags:
+                - ShippingService
+            description: |-
+                ListLockers returns nearby operational locker cabinets ordered by
+                 distance ascending. Returns INVALID_ARGUMENT when lat/lng are missing.
+            operationId: ShippingService_ListLockers
+            parameters:
+                - name: districtCode
+                  in: query
+                  description: Administrative district code to narrow the search.
+                  schema:
+                    type: string
+                - name: latitude
+                  in: query
+                  description: |-
+                    User's latitude in WGS-84. REQUIRED — returns INVALID_ARGUMENT when
+                     missing.
+                  schema:
+                    type: number
+                    format: double
+                - name: longitude
+                  in: query
+                  description: |-
+                    User's longitude in WGS-84. REQUIRED — returns INVALID_ARGUMENT when
+                     missing.
+                  schema:
+                    type: number
+                    format: double
+                - name: searchRadius
+                  in: query
+                  description: Search radius in meters. Defaults to 1000 when unset.
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageSize
+                  in: query
+                  description: Maximum number of lockers to return per page. Capped at 50 server-side.
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  description: Token from a previous response to fetch the next page.
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/shipping.v1.ListLockersResponse'
+    /api/v1/shipping/lockers/{lockerId}/box-types:
+        get:
+            tags:
+                - ShippingService
+            description: |-
+                ListBoxTypes returns all box-type specifications, inventory counts,
+                 and extra fees for a given locker cabinet.
+            operationId: ShippingService_ListBoxTypes
+            parameters:
+                - name: lockerId
+                  in: path
+                  description: Locker cabinet identifier. REQUIRED — taken from the URL path.
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/shipping.v1.ListBoxTypesResponse'
+    /api/v1/shipping/pickup-dates:
+        get:
+            tags:
+                - ShippingService
+            description: |-
+                ListPickupDates returns the available pickup dates (today, tomorrow,
+                 day-after-tomorrow) for the door-pickup channel. Expired time slots
+                 for today are already excluded.
+            operationId: ShippingService_ListPickupDates
+            parameters:
+                - name: districtCode
+                  in: query
+                  description: Administrative district code of the sender.
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/shipping.v1.ListPickupDatesResponse'
+    /api/v1/shipping/pickup-time-slots:
+        get:
+            tags:
+                - ShippingService
+            description: |-
+                ListPickupTimeSlots returns all time slots for a given date together
+                 with their remaining capacity. Slots with zero capacity are marked
+                 unavailable.
+            operationId: ShippingService_ListPickupTimeSlots
+            parameters:
+                - name: districtCode
+                  in: query
+                  description: Administrative district code.
+                  schema:
+                    type: string
+                - name: pickupDate
+                  in: query
+                  description: |-
+                    Target date in "YYYY-MM-DD". Must be within the next 3 days.
+                     Returns INVALID_ARGUMENT when the date is out of range.
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/shipping.v1.ListPickupTimeSlotsResponse'
+    /api/v1/shipping/service-points:
+        get:
+            tags:
+                - ShippingService
+            description: |-
+                ListServicePoints returns nearby SF stations or partner stores
+                 filtered by point_type, ordered by distance ascending.
+            operationId: ShippingService_ListServicePoints
+            parameters:
+                - name: pointType
+                  in: query
+                  description: |-
+                    Optional. Filter by service-point type. When unset both SF_STATION
+                     and PARTNER_STORE are returned.
+                  schema:
+                    type: integer
+                    format: enum
+                - name: districtCode
+                  in: query
+                  description: Administrative district code.
+                  schema:
+                    type: string
+                - name: latitude
+                  in: query
+                  description: |-
+                    User's latitude in WGS-84. REQUIRED — returns INVALID_ARGUMENT when
+                     missing.
+                  schema:
+                    type: number
+                    format: double
+                - name: longitude
+                  in: query
+                  description: |-
+                    User's longitude in WGS-84. REQUIRED — returns INVALID_ARGUMENT when
+                     missing.
+                  schema:
+                    type: number
+                    format: double
+                - name: pageSize
+                  in: query
+                  description: Maximum number of points per page. Capped at 50 server-side.
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  description: Token from a previous response to fetch the next page.
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/shipping.v1.ListServicePointsResponse'
     /api/v1/users/me/real-name-auth:
         get:
             tags:
@@ -313,11 +1011,70 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/auth.v1.RealNameAuthReply'
+    /v1/todos:
+        get:
+            tags:
+                - TodoService
+            description: |-
+                ListTodos returns a page of todo items, optionally filtered and ordered.
+                 Use the next_page_token from TodoSet to retrieve subsequent pages.
+                 Returns INVALID_ARGUMENT if filter, order_by, or page_token are malformed.
+            operationId: TodoService_ListTodos
+            parameters:
+                - name: pageSize
+                  in: query
+                  description: |-
+                    Optional. Maximum number of todo items to return in a single page.
+                     The server may apply a default and a maximum when unset or out of range.
+                  schema:
+                    type: integer
+                    format: int32
+                - name: pageToken
+                  in: query
+                  description: |-
+                    Optional. Token from a previous response's next_page_token used to fetch
+                     the next page. Leave empty to request the first page.
+                  schema:
+                    type: string
+                - name: filter
+                  in: query
+                  description: |-
+                    Optional. The standard list filter.
+                     Supported fields:
+                        * `title` (i.e. `title:"bug"`)
+                        * `content` (i.e. `content:"docs"`)
+                        * `completed` (i.e. `completed` or `NOT completed`)
+                        * `create_time` range (i.e. `create_time>="2026-01-01T00:00:00Z"`)
+                  schema:
+                    type: string
+                - name: orderBy
+                  in: query
+                  description: |-
+                    Optional. A comma-separated list of fields to order by.
+                     Supported fields:
+                        * `id`
+                        * `title`
+                        * `create_time`
+                        * `update_time`
+                     Append ` desc` to a field for descending order, e.g. `create_time desc`.
+                     Defaults to ascending order when no direction is supplied.
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/todo.v1.TodoSet'
     /v1/todos/create:
         post:
             tags:
                 - TodoService
-            description: "CreateTodo creates a new todo item and returns the persisted record\r\n with the server-assigned id, create_time, and update_time populated.\r\n Returns INVALID_ARGUMENT if the request payload fails validation."
+            description: |-
+                CreateTodo creates a new todo item and returns the persisted record
+                 with the server-assigned id, create_time, and update_time populated.
+                 Returns INVALID_ARGUMENT if the request payload fails validation.
             operationId: TodoService_CreateTodo
             requestBody:
                 content:
@@ -332,46 +1089,15 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/todo.v1.Todo'
-    /v1/todos/list:
-        get:
-            tags:
-                - TodoService
-            description: "ListTodos returns a page of todo items, optionally filtered and ordered.\r\n Use the next_page_token from TodoSet to retrieve subsequent pages.\r\n Returns INVALID_ARGUMENT if filter, order_by, or page_token are malformed."
-            operationId: TodoService_ListTodos
-            parameters:
-                - name: pageSize
-                  in: query
-                  description: "Optional. Maximum number of todo items to return in a single page.\r\n The server may apply a default and a maximum when unset or out of range."
-                  schema:
-                    type: integer
-                    format: int32
-                - name: pageToken
-                  in: query
-                  description: "Optional. Token from a previous response's next_page_token used to fetch\r\n the next page. Leave empty to request the first page."
-                  schema:
-                    type: string
-                - name: filter
-                  in: query
-                  description: "Optional. The standard list filter.\r\n Supported fields:\r\n    * `title` (i.e. `title:\"bug\"`)\r\n    * `content` (i.e. `content:\"docs\"`)\r\n    * `completed` (i.e. `completed` or `NOT completed`)\r\n    * `create_time` range (i.e. `create_time>=\"2026-01-01T00:00:00Z\"`)"
-                  schema:
-                    type: string
-                - name: orderBy
-                  in: query
-                  description: "Optional. A comma-separated list of fields to order by.\r\n Supported fields:\r\n    * `id`\r\n    * `title`\r\n    * `create_time`\r\n    * `update_time`\r\n Append ` desc` to a field for descending order, e.g. `create_time desc`.\r\n Defaults to ascending order when no direction is supplied."
-                  schema:
-                    type: string
-            responses:
-                "200":
-                    description: OK
-                    content:
-                        application/json:
-                            schema:
-                                $ref: '#/components/schemas/todo.v1.TodoSet'
     /v1/todos/sync:
         post:
             tags:
                 - TodoService
-            description: "SyncTodos opens a bidirectional stream for two-way synchronization.\r\n The client sends SyncTodoRequest messages describing local changes, and\r\n the server pushes back TodoEvent messages reflecting the resulting state.\r\n The stream stays open until either side closes it."
+            description: |-
+                SyncTodos opens a bidirectional stream for two-way synchronization.
+                 The client sends SyncTodoRequest messages describing local changes, and
+                 the server pushes back TodoEvent messages reflecting the resulting state.
+                 The stream stays open until either side closes it.
             operationId: TodoService_SyncTodos
             requestBody:
                 content:
@@ -390,12 +1116,19 @@ paths:
         put:
             tags:
                 - TodoService
-            description: "UpdateTodo applies a partial update to an existing todo item using a\r\n FieldMask. Only the fields listed in update_mask are overwritten; all\r\n other fields are left unchanged.\r\n Returns NOT_FOUND if the target todo does not exist, or\r\n INVALID_ARGUMENT if update_mask references unknown fields."
+            description: |-
+                UpdateTodo applies a partial update to an existing todo item using a
+                 FieldMask. Only the fields listed in update_mask are overwritten; all
+                 other fields are left unchanged.
+                 Returns NOT_FOUND if the target todo does not exist, or
+                 INVALID_ARGUMENT if update_mask references unknown fields.
             operationId: TodoService_UpdateTodo
             parameters:
                 - name: updateMask
                   in: query
-                  description: "Set of field paths in todo to overwrite. Fields not listed are left\r\n unchanged. Use a single path of `*` to replace every mutable field."
+                  description: |-
+                    Set of field paths in todo to overwrite. Fields not listed are left
+                     unchanged. Use a single path of `*` to replace every mutable field.
                   schema:
                     type: string
                     format: field-mask
@@ -416,12 +1149,17 @@ paths:
         get:
             tags:
                 - TodoService
-            description: "WatchTodos opens a server-side stream that emits a TodoEvent for every\r\n create, update, or delete that matches the supplied filter and ordering.\r\n The stream remains open until the client cancels or the server terminates it."
+            description: |-
+                WatchTodos opens a server-side stream that emits a TodoEvent for every
+                 create, update, or delete that matches the supplied filter and ordering.
+                 The stream remains open until the client cancels or the server terminates it.
             operationId: TodoService_WatchTodos
             parameters:
                 - name: pageSize
                   in: query
-                  description: "Optional. Maximum number of todo items returned in the initial snapshot\r\n before live events begin streaming."
+                  description: |-
+                    Optional. Maximum number of todo items returned in the initial snapshot
+                     before live events begin streaming.
                   schema:
                     type: integer
                     format: int32
@@ -451,7 +1189,9 @@ paths:
         get:
             tags:
                 - TodoService
-            description: "GetTodo returns a single todo item by its id.\r\n Returns NOT_FOUND if no todo exists with the supplied id."
+            description: |-
+                GetTodo returns a single todo item by its id.
+                 Returns NOT_FOUND if no todo exists with the supplied id.
             operationId: TodoService_GetTodo
             parameters:
                 - name: id
@@ -470,7 +1210,9 @@ paths:
         delete:
             tags:
                 - TodoService
-            description: "DeleteTodo permanently removes a todo item by its id.\r\n Returns NOT_FOUND if no todo exists with the supplied id."
+            description: |-
+                DeleteTodo permanently removes a todo item by its id.
+                 Returns NOT_FOUND if no todo exists with the supplied id.
             operationId: TodoService_DeleteTodo
             parameters:
                 - name: id
@@ -847,6 +1589,199 @@ components:
                 expiresIn:
                     type: integer
                     format: int32
+        express.v1.ClearOrderLabelReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+        express.v1.CreateOrderShareReply:
+            type: object
+            properties:
+                shareCode:
+                    type: string
+                shareUrl:
+                    type: string
+                expireAt:
+                    type: string
+                    format: date-time
+        express.v1.CreateOrderShareRequest:
+            required:
+                - id
+                - expireHours
+            type: object
+            properties:
+                id:
+                    type: string
+                expireHours:
+                    type: integer
+                    format: int32
+                showSender:
+                    type: boolean
+                showReceiver:
+                    type: boolean
+                showPhone:
+                    type: boolean
+                showStatus:
+                    type: boolean
+            description: '--- 分享 ---'
+        express.v1.DeleteUserMessageReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                unreadCount:
+                    type: integer
+                    format: int32
+        express.v1.FollowOrderReply:
+            type: object
+            properties:
+                followed:
+                    type: boolean
+        express.v1.GetOrderLabelReply:
+            type: object
+            properties:
+                content:
+                    type: string
+                hasLabel:
+                    type: boolean
+        express.v1.GetOrderShareReply:
+            type: object
+            properties:
+                orderId:
+                    type: string
+                senderName:
+                    type: string
+                receiverName:
+                    type: string
+                phone:
+                    type: string
+                status:
+                    type: string
+                orderStatus:
+                    type: string
+        express.v1.ListUserMessagesReply:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/express.v1.UserMessageItem'
+                total:
+                    type: integer
+                    format: int32
+                unreadCount:
+                    type: integer
+                    format: int32
+        express.v1.MarkAllMessagesReadReply:
+            type: object
+            properties:
+                updatedCount:
+                    type: integer
+                    format: int32
+                unreadCount:
+                    type: integer
+                    format: int32
+        express.v1.MarkMessageReadReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                unreadCount:
+                    type: integer
+                    format: int32
+        express.v1.OrderItem:
+            type: object
+            properties:
+                id:
+                    type: string
+                orderNo:
+                    type: string
+                expressNo:
+                    type: string
+                senderName:
+                    type: string
+                receiverName:
+                    type: string
+                status:
+                    type: string
+                hasFollowed:
+                    type: boolean
+                label:
+                    type: string
+                createTime:
+                    type: string
+                    format: date-time
+        express.v1.SearchOrdersReply:
+            type: object
+            properties:
+                items:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/express.v1.OrderItem'
+                total:
+                    type: integer
+                    format: int32
+        express.v1.SearchOrdersRequest:
+            required:
+                - keyword
+            type: object
+            properties:
+                keyword:
+                    type: string
+                page:
+                    type: integer
+                    format: int32
+                pageSize:
+                    type: integer
+                    format: int32
+            description: '--- 搜索 ---'
+        express.v1.SetOrderLabelReply:
+            type: object
+            properties:
+                content:
+                    type: string
+        express.v1.SetOrderLabelRequest:
+            required:
+                - id
+                - content
+            type: object
+            properties:
+                id:
+                    type: string
+                content:
+                    type: string
+            description: '--- 标签 ---'
+        express.v1.UnfollowOrderReply:
+            type: object
+            properties:
+                followed:
+                    type: boolean
+        express.v1.UserMessageItem:
+            type: object
+            properties:
+                id:
+                    type: string
+                messageType:
+                    type: string
+                title:
+                    type: string
+                content:
+                    type: string
+                businessType:
+                    type: string
+                businessId:
+                    type: string
+                priority:
+                    type: integer
+                    format: int32
+                isRead:
+                    type: boolean
+                readAt:
+                    type: string
+                    format: date-time
+                createdAt:
+                    type: string
+                    format: date-time
         order.v1.ExportHistoryReply:
             type: object
             properties:
@@ -955,6 +1890,512 @@ components:
                     description: 保价金额 0=不保价
                     format: double
             description: 运费预估请求
+        order.v3.CreateExpressOrderRequest:
+            required:
+                - userId
+                - senderName
+                - senderPhone
+                - senderProvince
+                - senderCity
+                - senderDetail
+                - receiverName
+                - receiverPhone
+                - receiverProvince
+                - receiverCity
+                - receiverDetail
+                - weight
+                - channelCode
+                - paymentMethod
+            type: object
+            properties:
+                userId:
+                    type: string
+                senderName:
+                    type: string
+                    description: 寄件人
+                senderPhone:
+                    type: string
+                senderProvince:
+                    type: string
+                senderCity:
+                    type: string
+                senderDistrict:
+                    type: string
+                senderDetail:
+                    type: string
+                receiverName:
+                    type: string
+                    description: 收件人
+                receiverPhone:
+                    type: string
+                receiverProvince:
+                    type: string
+                receiverCity:
+                    type: string
+                receiverDistrict:
+                    type: string
+                receiverDetail:
+                    type: string
+                weight:
+                    type: number
+                    description: 包裹
+                    format: double
+                length:
+                    type: integer
+                    format: int32
+                width:
+                    type: integer
+                    format: int32
+                height:
+                    type: integer
+                    format: int32
+                channelCode:
+                    type: integer
+                    description: 寄件渠道
+                    format: enum
+                lockerId:
+                    type: string
+                boxType:
+                    type: string
+                servicePointId:
+                    type: string
+                pickupDate:
+                    type: string
+                pickupSlotCode:
+                    type: string
+                paymentMethod:
+                    type: integer
+                    description: 付款方式
+                    format: enum
+                privacyProtection:
+                    type: boolean
+                    description: 隐私保护
+                expressType:
+                    type: integer
+                    description: 快递类型（与运费预估一致：1标快 2特快 3特惠）
+                    format: int32
+                insureValue:
+                    type: number
+                    format: double
+        order.v3.ExpressOrderReply:
+            type: object
+            properties:
+                id:
+                    type: string
+                userId:
+                    type: string
+                orderNo:
+                    type: string
+                expressNo:
+                    type: string
+                senderName:
+                    type: string
+                senderPhone:
+                    type: string
+                senderProvince:
+                    type: string
+                senderCity:
+                    type: string
+                senderDistrict:
+                    type: string
+                senderDetail:
+                    type: string
+                receiverName:
+                    type: string
+                receiverPhone:
+                    type: string
+                receiverProvince:
+                    type: string
+                receiverCity:
+                    type: string
+                receiverDistrict:
+                    type: string
+                receiverDetail:
+                    type: string
+                weight:
+                    type: number
+                    format: double
+                length:
+                    type: integer
+                    format: int32
+                width:
+                    type: integer
+                    format: int32
+                height:
+                    type: integer
+                    format: int32
+                baseFreight:
+                    type: number
+                    format: double
+                insureFee:
+                    type: number
+                    format: double
+                totalFreight:
+                    type: number
+                    format: double
+                channelCode:
+                    type: integer
+                    format: enum
+                lockerId:
+                    type: string
+                boxType:
+                    type: string
+                servicePointId:
+                    type: string
+                pickupDate:
+                    type: string
+                pickupSlotCode:
+                    type: string
+                paymentMethod:
+                    type: integer
+                    format: enum
+                paymentStatus:
+                    type: integer
+                    format: enum
+                privacyProtection:
+                    type: boolean
+                status:
+                    type: integer
+                    format: enum
+                tag:
+                    type: string
+                isFollowed:
+                    type: boolean
+                shareUrl:
+                    type: string
+                payUrl:
+                    type: string
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+        order.v3.ExpressOrderSet:
+            type: object
+            properties:
+                orders:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/order.v3.ExpressOrderReply'
+                totalCount:
+                    type: integer
+                    format: int32
+                nextPageToken:
+                    type: string
+        order.v3.FollowOrderRequest:
+            required:
+                - userId
+                - id
+            type: object
+            properties:
+                userId:
+                    type: string
+                id:
+                    type: string
+                follow:
+                    type: boolean
+        order.v3.PayExpressOrderReply:
+            type: object
+            properties:
+                payUrl:
+                    type: string
+                tradeNo:
+                    type: string
+        order.v3.PayExpressOrderRequest:
+            required:
+                - userId
+                - id
+            type: object
+            properties:
+                userId:
+                    type: string
+                id:
+                    type: string
+        order.v3.PaymentCallbackReply:
+            type: object
+            properties:
+                success:
+                    type: boolean
+        order.v3.PaymentCallbackRequest:
+            type: object
+            properties:
+                tradeNo:
+                    type: string
+                orderNo:
+                    type: string
+                paymentStatus:
+                    type: string
+                signature:
+                    type: string
+        order.v3.SetOrderTagRequest:
+            required:
+                - userId
+                - id
+            type: object
+            properties:
+                userId:
+                    type: string
+                id:
+                    type: string
+                tag:
+                    type: string
+        order.v3.ShareOrderReply:
+            type: object
+            properties:
+                shareUrl:
+                    type: string
+        order.v3.ShareOrderRequest:
+            required:
+                - userId
+                - id
+            type: object
+            properties:
+                userId:
+                    type: string
+                id:
+                    type: string
+        shipping.v1.BoxTypeInfo:
+            type: object
+            properties:
+                boxType:
+                    type: integer
+                    description: Compartment size category.
+                    format: enum
+                length:
+                    type: integer
+                    description: Compartment interior length in centimetres.
+                    format: int32
+                width:
+                    type: integer
+                    description: Compartment interior width in centimetres.
+                    format: int32
+                height:
+                    type: integer
+                    description: Compartment interior height in centimetres.
+                    format: int32
+                maxWeight:
+                    type: number
+                    description: Maximum weight this compartment can hold, in kilograms.
+                    format: double
+                boxFee:
+                    type: number
+                    description: Extra fee charged for using this compartment type.
+                    format: double
+                availableCount:
+                    type: integer
+                    description: Number of currently free compartments of this type.
+                    format: int32
+                status:
+                    type: integer
+                    description: Current compartment status.
+                    format: enum
+            description: BoxTypeInfo describes a specific compartment type within a locker.
+        shipping.v1.Channel:
+            type: object
+            properties:
+                channelCode:
+                    type: integer
+                    description: |-
+                        Enumerated channel code. The frontend MUST use this value rather than
+                         a hard-coded string.
+                    format: enum
+                name:
+                    type: string
+                    description: Human-readable channel name (e.g. "上门取件", "丰巢自提柜").
+                available:
+                    type: boolean
+                    description: Whether the channel is available in the requested region.
+                tip:
+                    type: string
+                    description: Clear prompt text shown when the channel is unavailable.
+                extraFee:
+                    type: number
+                    description: Extra fee charged for this channel in the current region.
+                    format: double
+            description: |-
+                Channel describes a single shipping channel and its availability in the
+                 current region.
+        shipping.v1.ListBoxTypesResponse:
+            type: object
+            properties:
+                boxTypes:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/shipping.v1.BoxTypeInfo'
+                    description: |-
+                        All compartment types available in this locker, each with its own
+                         size, fee, and free-count information.
+        shipping.v1.ListChannelsResponse:
+            type: object
+            properties:
+                channels:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/shipping.v1.Channel'
+                    description: |-
+                        All shipping channels available (or unavailable with reason) for the
+                         requested region. Channels that are globally decommissioned are omitted.
+        shipping.v1.ListLockersResponse:
+            type: object
+            properties:
+                lockers:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/shipping.v1.Locker'
+                    description: Page of operational lockers ordered by distance ascending.
+                nextPageToken:
+                    type: string
+                    description: |-
+                        Token to retrieve the next page. Empty when all results have been
+                         returned.
+        shipping.v1.ListPickupDatesResponse:
+            type: object
+            properties:
+                pickupDates:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/shipping.v1.PickupDate'
+                    description: |-
+                        Available pickup dates. Currently limited to today, tomorrow, and the
+                         day after tomorrow. Expired time slots for today are already excluded.
+        shipping.v1.ListPickupTimeSlotsResponse:
+            type: object
+            properties:
+                timeSlots:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/shipping.v1.PickupTimeSlot'
+                    description: |-
+                        All time slots for the requested district+date. Slots with remaining
+                         capacity <= 0 are marked unavailable and the frontend MUST prevent
+                         the user from selecting them.
+        shipping.v1.ListServicePointsResponse:
+            type: object
+            properties:
+                servicePoints:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/shipping.v1.ServicePoint'
+                    description: Page of service points ordered by distance ascending.
+                nextPageToken:
+                    type: string
+                    description: |-
+                        Token to retrieve the next page. Empty when all results have been
+                         returned.
+        shipping.v1.Locker:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: Unique locker cabinet identifier.
+                name:
+                    type: string
+                    description: Locker cabinet name displayed to the user.
+                address:
+                    type: string
+                    description: Human-readable address of the locker location.
+                latitude:
+                    type: number
+                    description: Latitude in WGS-84 coordinate system.
+                    format: double
+                longitude:
+                    type: number
+                    description: Longitude in WGS-84 coordinate system.
+                    format: double
+                distance:
+                    type: number
+                    description: Distance from the user's location in meters.
+                    format: double
+                status:
+                    type: integer
+                    description: |-
+                        Operational status: 1 = normal, 0 = out of service / maintenance.
+                         The frontend MUST filter out lockers where status == 0.
+                    format: int32
+            description: Locker represents a physical locker cabinet.
+        shipping.v1.PickupDate:
+            type: object
+            properties:
+                date:
+                    type: string
+                    description: The date string in "YYYY-MM-DD" format.
+                available:
+                    type: boolean
+                    description: Whether this date still has at least one available time slot.
+            description: |-
+                PickupDate represents a single date that the user can select for
+                 door-pickup.
+        shipping.v1.PickupTimeSlot:
+            type: object
+            properties:
+                districtCode:
+                    type: string
+                    description: Administrative district code to which this slot belongs.
+                pickupDate:
+                    type: string
+                    description: The date this slot belongs to, in "YYYY-MM-DD" format.
+                slotCode:
+                    type: string
+                    description: Unique slot identifier within the district+date scope.
+                startTime:
+                    type: string
+                    description: Slot start time in "HH:MM" format.
+                endTime:
+                    type: string
+                    description: Slot end time in "HH:MM" format.
+                capacity:
+                    type: integer
+                    description: Maximum number of reservations allowed for this slot.
+                    format: int32
+                reservedCount:
+                    type: integer
+                    description: Number of reservations already taken.
+                    format: int32
+                available:
+                    type: boolean
+                    description: |-
+                        Whether the slot can still be selected (reserved_count < capacity and
+                         not expired).
+                version:
+                    type: string
+                    description: |-
+                        Optimistic-lock version; the client MUST send this back when creating
+                         an order so the server can detect concurrent updates.
+            description: PickupTimeSlot describes a single bookable time window on a given date.
+        shipping.v1.ServicePoint:
+            type: object
+            properties:
+                id:
+                    type: string
+                    description: Unique service-point identifier.
+                name:
+                    type: string
+                    description: Display name of the service point.
+                address:
+                    type: string
+                    description: Human-readable address.
+                latitude:
+                    type: number
+                    description: Latitude in WGS-84.
+                    format: double
+                longitude:
+                    type: number
+                    description: Longitude in WGS-84.
+                    format: double
+                pointType:
+                    type: integer
+                    description: 'Point category: SF_STATION or PARTNER_STORE.'
+                    format: enum
+                distance:
+                    type: number
+                    description: Distance from the user's location in meters.
+                    format: double
+                status:
+                    type: integer
+                    description: 'Operational status: 1 = open, 0 = closed.'
+                    format: int32
+            description: ServicePoint represents an SF self-operated station or a partner store.
         todo.v1.SyncTodoRequest:
             type: object
             properties:
@@ -970,9 +2411,13 @@ components:
                     description: Identifier of the target todo. Required for `delete` and `update`.
                 updateMask:
                     type: string
-                    description: "Field mask used by `update` actions to limit which fields are overwritten.\r\n Ignored for `create` and `delete`."
+                    description: |-
+                        Field mask used by `update` actions to limit which fields are overwritten.
+                         Ignored for `create` and `delete`.
                     format: field-mask
-            description: "SyncTodoRequest is a single client message in the SyncTodos bidirectional\r\n stream. The action field selects which operation to perform on the server."
+            description: |-
+                SyncTodoRequest is a single client message in the SyncTodos bidirectional
+                 stream. The action field selects which operation to perform on the server.
         todo.v1.Todo:
             type: object
             properties:
@@ -1006,12 +2451,16 @@ components:
                 todo:
                     allOf:
                         - $ref: '#/components/schemas/todo.v1.Todo'
-                    description: "The todo item after the change. For `deleted` events only the id field\r\n is guaranteed to be populated."
+                    description: |-
+                        The todo item after the change. For `deleted` events only the id field
+                         is guaranteed to be populated.
                 eventTime:
                     type: string
                     description: Time at which the change was observed by the server.
                     format: date-time
-            description: "TodoEvent is a server-sent message describing a change to a todo item.\r\n It is emitted by both WatchTodos and SyncTodos streams."
+            description: |-
+                TodoEvent is a server-sent message describing a change to a todo item.
+                 It is emitted by both WatchTodos and SyncTodos streams.
         todo.v1.TodoSet:
             type: object
             properties:
@@ -1022,7 +2471,9 @@ components:
                     description: The page of todo items in the order requested by ListTodosRequest.order_by.
                 nextPageToken:
                     type: string
-                    description: "Token used to retrieve the next page via ListTodosRequest.page_token.\r\n Empty when there are no more results."
+                    description: |-
+                        Token used to retrieve the next page via ListTodosRequest.page_token.
+                         Empty when there are no more results.
             description: TodoSet is a paginated collection of todo items returned by ListTodos.
         user.v1.AccountStatusInfo:
             type: object
@@ -1107,8 +2558,17 @@ tags:
     - name: AddressService
     - name: AuthService
       description: AuthService exposes identity, login, token, password, and real-name auth APIs.
+    - name: ExpressService
     - name: OrderService
     - name: OrderService
+    - name: OrderService
+    - name: ShippingService
+      description: |-
+        ShippingService manages shipping channel selection, locker browsing,
+         service point queries, and pickup appointment scheduling.
     - name: TodoService
-      description: "TodoService provides a simple CRUD example for managing todo items.\r\n It demonstrates unary, server-streaming, and bidirectional-streaming RPCs\r\n together with AIP-style list filtering, ordering, and pagination."
+      description: |-
+        TodoService provides a simple CRUD example for managing todo items.
+         It demonstrates unary, server-streaming, and bidirectional-streaming RPCs
+         together with AIP-style list filtering, ordering, and pagination.
     - name: UserService
