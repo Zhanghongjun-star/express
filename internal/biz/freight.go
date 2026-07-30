@@ -425,20 +425,6 @@ func (uc *FreightUsecase) getProvinceZone(province string) int {
 			}
 		}
 	}
-	// 经济圈省份本身不在 provinceZones 中，需要特殊处理
-	// 如果不在任何分组中，默认为 Zone 4（较远）
-	for _, circleProvinces := range [][]string{
-		{"上海", "江苏", "浙江", "安徽"},
-		{"广东", "广西", "海南"},
-		{"北京", "天津", "河北"},
-		{"四川", "重庆"},
-	} {
-		for _, p := range circleProvinces {
-			if uc.normalizeProvince(p) == normalized {
-				return 3 // 经济圈省份之间通信默认 Zone 3
-			}
-		}
-	}
 	return 4 // 默认较远
 }
 
