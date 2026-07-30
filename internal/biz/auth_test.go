@@ -224,6 +224,23 @@ func (r *fakeAuthRepo) BlacklistAccessToken(context.Context, string, time.Durati
 	return nil
 }
 
+func (r *fakeAuthRepo) ValidateAccessToken(_ context.Context, token string) (*TokenSession, error) {
+	if token == "" {
+		return nil, ErrAuthUnauthenticated
+	}
+	sessions := make(map[int64]*TokenSession)
+	for _, user := range r.usersByID {
+		sessions[user.ID] = &TokenSession{
+			UserID:   user.ID,
+			RoleCode: user.RoleCode,
+		}
+	}
+	for _, s := range sessions {
+		return s, nil
+	}
+	return nil, ErrAuthUnauthenticated
+}
+
 func (r *fakeAuthRepo) UpdatePassword(_ context.Context, userID int64, passwordHash string) error {
 	if user, ok := r.usersByID[userID]; ok {
 		user.PasswordHash = passwordHash

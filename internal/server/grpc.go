@@ -3,11 +3,13 @@
 import (
 	addressv1 "shunfeng-miniprogram/api/address/v1"
 	authv1 "shunfeng-miniprogram/api/auth/v1"
-	orderv2 "shunfeng-miniprogram/api/order/v2"
 	orderv1 "shunfeng-miniprogram/api/order/v1"
+	orderv3 "shunfeng-miniprogram/api/order/v3"
+	orderv2 "shunfeng-miniprogram/api/order/v2"
 	shippingv1 "shunfeng-miniprogram/api/shipping/v1"
 	todov1 "shunfeng-miniprogram/api/todo/v1"
 	userv1 "shunfeng-miniprogram/api/user/v1"
+	"shunfeng-miniprogram/internal/biz"
 	"shunfeng-miniprogram/internal/conf"
 	"shunfeng-miniprogram/internal/service"
 
@@ -16,11 +18,12 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-func NewGRPCServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, shipping *service.ShippingService, freight *service.FreightService, auth *service.AuthService) *grpc.Server {
+func NewGRPCServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, shipping *service.ShippingService, freight *service.FreightService, auth *service.AuthService, expressOrder *service.ExpressOrderService, authUc *biz.AuthUsecase) *grpc.Server {
 
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(
 			recovery.Recovery(),
+			AuthMiddleware(authUc),
 		),
 	}
 	if c.Grpc.Network != "" {
@@ -42,5 +45,6 @@ func NewGRPCServer(c *conf.Server, todo *service.TodoService, user *service.User
 	if address != nil {
 		addressv1.RegisterAddressServiceServer(srv, address)
 	}
+	orderv3.RegisterOrderServiceServer(srv, expressOrder)
 	return srv
 }

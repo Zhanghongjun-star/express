@@ -276,17 +276,18 @@ type ListTodosRequest struct {
 	PageToken string `protobuf:"bytes,2,opt,name=page_token,json=pageToken,proto3" json:"page_token,omitempty"`
 	// Optional. The standard list filter.
 	// Supported fields:
-	//    * `title` (i.e. `title:"bug"`)
-	//    * `content` (i.e. `content:"docs"`)
-	//    * `completed` (i.e. `completed` or `NOT completed`)
-	//    * `create_time` range (i.e. `create_time>="2026-01-01T00:00:00Z"`)
+	//   - `title` (i.e. `title:"bug"`)
+	//   - `content` (i.e. `content:"docs"`)
+	//   - `completed` (i.e. `completed` or `NOT completed`)
+	//   - `create_time` range (i.e. `create_time>="2026-01-01T00:00:00Z"`)
 	Filter string `protobuf:"bytes,3,opt,name=filter,proto3" json:"filter,omitempty"`
 	// Optional. A comma-separated list of fields to order by.
 	// Supported fields:
-	//    * `id`
-	//    * `title`
-	//    * `create_time`
-	//    * `update_time`
+	//   - `id`
+	//   - `title`
+	//   - `create_time`
+	//   - `update_time`
+	//
 	// Append ` desc` to a field for descending order, e.g. `create_time desc`.
 	// Defaults to ascending order when no direction is supplied.
 	OrderBy       string `protobuf:"bytes,4,opt,name=order_by,json=orderBy,proto3" json:"order_by,omitempty"`
@@ -720,12 +721,12 @@ const file_todo_v1_todo_proto_rawDesc = "" +
 	"\x06action\x18\x01 \x01(\tR\x06action\x12!\n" +
 	"\x04todo\x18\x02 \x01(\v2\r.todo.v1.TodoR\x04todo\x129\n" +
 	"\n" +
-	"event_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\teventTime2\xe9\x04\n" +
+	"event_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\teventTime2\xe4\x04\n" +
 	"\vTodoService\x12W\n" +
 	"\n" +
 	"CreateTodo\x12\x1a.todo.v1.CreateTodoRequest\x1a\r.todo.v1.Todo\"\x1e\x82\xd3\xe4\x93\x02\x18:\x04todo\"\x10/v1/todos/create\x12I\n" +
-	"\aGetTodo\x12\x17.todo.v1.GetTodoRequest\x1a\r.todo.v1.Todo\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/todos/{id}\x12P\n" +
-	"\tListTodos\x12\x19.todo.v1.ListTodosRequest\x1a\x10.todo.v1.TodoSet\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/todos/list\x12W\n" +
+	"\aGetTodo\x12\x17.todo.v1.GetTodoRequest\x1a\r.todo.v1.Todo\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/todos/{id}\x12K\n" +
+	"\tListTodos\x12\x19.todo.v1.ListTodosRequest\x1a\x10.todo.v1.TodoSet\"\x11\x82\xd3\xe4\x93\x02\v\x12\t/v1/todos\x12W\n" +
 	"\n" +
 	"UpdateTodo\x12\x1a.todo.v1.UpdateTodoRequest\x1a\r.todo.v1.Todo\"\x1e\x82\xd3\xe4\x93\x02\x18:\x04todo\x1a\x10/v1/todos/update\x12X\n" +
 	"\n" +

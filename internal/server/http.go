@@ -7,10 +7,12 @@ import (
 	addressv1 "shunfeng-miniprogram/api/address/v1"
 	authv1 "shunfeng-miniprogram/api/auth/v1"
 	orderv1 "shunfeng-miniprogram/api/order/v1"
+	orderv3 "shunfeng-miniprogram/api/order/v3"
 	orderv2 "shunfeng-miniprogram/api/order/v2"
 	shippingv1 "shunfeng-miniprogram/api/shipping/v1"
 	todov1 "shunfeng-miniprogram/api/todo/v1"
 	userv1 "shunfeng-miniprogram/api/user/v1"
+	"shunfeng-miniprogram/internal/biz"
 	"shunfeng-miniprogram/internal/conf"
 	"shunfeng-miniprogram/internal/service"
 
@@ -20,11 +22,12 @@ import (
 )
 
 // NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, shipping *service.ShippingService, freight *service.FreightService, auth *service.AuthService) *http.Server {
+func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, shipping *service.ShippingService, freight *service.FreightService, auth *service.AuthService, expressOrder *service.ExpressOrderService, authUc *biz.AuthUsecase) *http.Server {
 
 	var opts = []http.ServerOption{
 		http.Middleware(
 			recovery.Recovery(),
+			AuthMiddleware(authUc),
 			validate.Validator(func(req any) error {
 				if msg, ok := req.(proto.Message); ok {
 					if err := fieldbehavior.ValidateRequiredFields(msg); err != nil {
@@ -54,5 +57,6 @@ func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.User
 	if address != nil {
 		addressv1.RegisterAddressServiceHTTPServer(srv, address)
 	}
+	orderv3.RegisterOrderServiceHTTPServer(srv, expressOrder)
 	return srv
 }

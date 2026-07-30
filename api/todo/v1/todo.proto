@@ -40,7 +40,7 @@ service TodoService {
   // Returns INVALID_ARGUMENT if filter, order_by, or page_token are malformed.
   rpc ListTodos (ListTodosRequest) returns (TodoSet) {
     option (google.api.http) = {
-      get: "/v1/todos/list"
+      get: "/v1/todos"
     };
   }
 

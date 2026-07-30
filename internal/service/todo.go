@@ -78,7 +78,7 @@ func (s *TodoService) ListTodos(ctx context.Context, req *v1.ListTodosRequest) (
 	if err != nil {
 		return nil, err
 	}
-	if err := orderBy.ValidateForPaths("id", "title", "create_time", "update_time"); err != nil {
+	if err = orderBy.ValidateForPaths("id", "title", "create_time", "update_time"); err != nil {
 		return nil, err
 	}
 	if req.PageSize <= 0 {
@@ -156,7 +156,7 @@ func (s *TodoService) WatchTodos(req *v1.WatchTodosRequest, stream v1.TodoServic
 	if err != nil {
 		return err
 	}
-	if err := orderBy.ValidateForPaths("id", "title", "create_time", "update_time"); err != nil {
+	if err = orderBy.ValidateForPaths("id", "title", "create_time", "update_time"); err != nil {
 		return err
 	}
 	if req.PageSize <= 0 {

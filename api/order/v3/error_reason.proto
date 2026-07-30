@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package order.v3;
+
+option go_package = "shunfeng-miniprogram/api/order/v3;v3";
+
+enum ErrorReason {
+  ORDER_INVALID_ARGUMENT = 0;
+  ORDER_NOT_FOUND = 1;
+  ORDER_EXPORT_FORBIDDEN = 2;
+  ORDER_QUERY_LIMIT_EXCEEDED = 3;
+  ORDER_CREATE_FAILED = 4;
+  ORDER_CHANNEL_UNAVAILABLE = 5;
+  ORDER_PAYMENT_REQUIRED = 6;
+}

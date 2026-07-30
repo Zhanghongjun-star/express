@@ -175,6 +175,7 @@ type AuthRepo interface {
 	DeleteTokenSession(context.Context, string) error
 	DeleteUserTokenSessions(context.Context, int64) error
 	BlacklistAccessToken(context.Context, string, time.Duration) error
+	ValidateAccessToken(context.Context, string) (*TokenSession, error)
 	UpdatePassword(context.Context, int64, string) error
 	SaveRealNameAuth(context.Context, *RealNameAuth) (*RealNameAuth, error)
 	GetRealNameAuth(context.Context, int64) (*RealNameAuth, error)
@@ -308,6 +309,21 @@ func (uc *AuthUsecase) RefreshToken(ctx context.Context, refreshToken, deviceID 
 	}
 	_ = uc.repo.DeleteTokenSession(ctx, refreshToken)
 	return uc.issueToken(ctx, user, deviceID)
+}
+
+// ValidateAccessToken 校验 access token 有效性，返回会话信息。
+func (uc *AuthUsecase) ValidateAccessToken(ctx context.Context, accessToken string) (*TokenSession, error) {
+	if strings.TrimSpace(accessToken) == "" {
+		return nil, ErrAuthInvalidArgument
+	}
+	session, err := uc.repo.ValidateAccessToken(ctx, accessToken)
+	if err != nil {
+		return nil, err
+	}
+	if time.Now().After(session.ExpiresAt) {
+		return nil, ErrAuthUnauthenticated
+	}
+	return session, nil
 }
 
 // Logout 退出当前设备或全部设备，并将 access token 加入黑名单。

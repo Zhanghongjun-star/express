@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"strings"
 	"time"
 
@@ -40,7 +41,16 @@ func (r *authRepo) SaveVerificationCode(ctx context.Context, vc *biz.Verificatio
 	if err != nil {
 		return err
 	}
-	return RDB.Set(ctx, verificationKey(vc.Target, vc.TargetType, vc.Scene), body, time.Until(vc.ExpiresAt)).Err()
+	if err := RDB.Set(ctx, verificationKey(vc.Target, vc.TargetType, vc.Scene), body, time.Until(vc.ExpiresAt)).Err(); err != nil {
+		return err
+	}
+	if vc.TargetType == biz.TargetTypePhone {
+		msg := fmt.Sprintf("您的验证码是：%s。请不要把验证码泄露给其他人。", vc.Code)
+		if sendErr := SendSMS(ctx, vc.Target, msg); sendErr != nil {
+			fmt.Println(fmt.Sprintf("sms 发送失败: %v", sendErr))
+		}
+	}
+	return nil
 }
 
 func (r *authRepo) GetVerificationCode(ctx context.Context, target, targetType, scene string) (*biz.VerificationCode, error) {
@@ -159,12 +169,39 @@ func (r *authRepo) SaveTokenSession(ctx context.Context, session *biz.TokenSessi
 		return err
 	}
 	ttl := time.Until(session.ExpiresAt)
+	accessTTL := 2 * time.Hour
 	pipe := RDB.TxPipeline()
 	pipe.Set(ctx, tokenSessionKey(session.RefreshToken), body, ttl)
+	pipe.Set(ctx, accessTokenKey(session.AccessToken), body, accessTTL)
 	pipe.SAdd(ctx, userSessionsKey(session.UserID), session.RefreshToken)
 	pipe.Expire(ctx, userSessionsKey(session.UserID), ttl)
 	_, err = pipe.Exec(ctx)
 	return err
+}
+
+func (r *authRepo) ValidateAccessToken(ctx context.Context, accessToken string) (*biz.TokenSession, error) {
+	if RDB == nil {
+		return nil, biz.ErrAuthInvalidStatus
+	}
+	blacklisted, err := RDB.Exists(ctx, accessBlacklistKey(accessToken)).Result()
+	if err != nil {
+		return nil, err
+	}
+	if blacklisted > 0 {
+		return nil, biz.ErrAuthUnauthenticated
+	}
+	body, err := RDB.Get(ctx, accessTokenKey(accessToken)).Bytes()
+	if err == redis.Nil {
+		return nil, biz.ErrAuthUnauthenticated
+	}
+	if err != nil {
+		return nil, err
+	}
+	var session biz.TokenSession
+	if err := json.Unmarshal(body, &session); err != nil {
+		return nil, err
+	}
+	return &session, nil
 }
 
 func (r *authRepo) GetTokenSession(ctx context.Context, refreshToken string) (*biz.TokenSession, error) {
@@ -463,4 +500,8 @@ func userSessionsKey(userID int64) string {
 
 func accessBlacklistKey(accessToken string) string {
 	return "auth:access_blacklist:" + accessToken
+}
+
+func accessTokenKey(accessToken string) string {
+	return "auth:access:" + accessToken
 }

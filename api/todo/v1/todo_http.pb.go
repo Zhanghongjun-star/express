@@ -62,7 +62,7 @@ func RegisterTodoServiceHTTPServer(s *http.Server, srv TodoServiceHTTPServer) {
 	r := s.Route("/")
 	r.Handle("POST", "/v1/todos/create", _TodoService_CreateTodo0_HTTP_Handler(srv))
 	r.Handle("GET", "/v1/todos/{id}", _TodoService_GetTodo0_HTTP_Handler(srv))
-	r.Handle("GET", "/v1/todos/list", _TodoService_ListTodos0_HTTP_Handler(srv))
+	r.Handle("GET", "/v1/todos", _TodoService_ListTodos0_HTTP_Handler(srv))
 	r.Handle("PUT", "/v1/todos/update", _TodoService_UpdateTodo0_HTTP_Handler(srv))
 	r.Handle("DELETE", "/v1/todos/{id}", _TodoService_DeleteTodo0_HTTP_Handler(srv))
 	r.Handle("GET", "/v1/todos/watch", _TodoService_WatchTodos0_HTTP_Handler(srv))
@@ -391,7 +391,7 @@ func (c *TodoServiceHTTPClientImpl) GetTodo(ctx context.Context, in *GetTodoRequ
 // Returns INVALID_ARGUMENT if filter, order_by, or page_token are malformed.
 func (c *TodoServiceHTTPClientImpl) ListTodos(ctx context.Context, in *ListTodosRequest, opts ...http.CallOption) (*TodoSet, error) {
 	var out TodoSet
-	pattern := "/v1/todos/list"
+	pattern := "/v1/todos"
 	path := http.BuildPath(pattern, in, http.WithQueryParams())
 	opts = append([]http.CallOption{
 		http.Accept("application/protojson"),

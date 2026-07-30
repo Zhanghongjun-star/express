@@ -44,9 +44,16 @@ message Data {
   message Elasticsearch {
     string addr = 1;
   }
+  message SMS {
+    string url = 1;       // 互亿无线 API URL
+    string account = 2;   // 互亿无线 API account
+    string password = 3;  // 互亿无线 API password
+  }
   Database database = 1;
   Redis redis = 2;
   Elasticsearch elasticsearch = 3;
+  string amap_key = 4;
+  SMS sms = 5;
 }
 
 message Registry {
