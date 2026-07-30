@@ -10,5 +10,8 @@ var ProviderSet = wire.NewSet(
 	NewOrderService,
 	// 查快递模块服务
 	NewExpressService,
+	// 寄件模块服务
+	NewShippingService,
+	NewFreightService,
+	NewAuthService,
 )
-var ProviderSet = wire.NewSet(NewTodoService, NewAddressService, NewUserService, NewOrderService, NewShippingService, NewFreightService, NewAuthService)

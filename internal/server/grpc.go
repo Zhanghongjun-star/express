@@ -17,9 +17,7 @@ import (
 )
 
 // NewGRPCServer new a gRPC server.
-// express 参数为查快递模块服务，可为 nil。
-func NewGRPCServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, express *service.ExpressService) *grpc.Server {
-func NewGRPCServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, shipping *service.ShippingService, freight *service.FreightService, auth *service.AuthService) *grpc.Server {
+func NewGRPCServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, express *service.ExpressService, shipping *service.ShippingService, freight *service.FreightService, auth *service.AuthService) *grpc.Server {
 
 	var opts = []grpc.ServerOption{
 		grpc.Middleware(

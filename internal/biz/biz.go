@@ -13,5 +13,11 @@ var ProviderSet = wire.NewSet(
 	NewOrderLabelUsecase,
 	NewOrderShareUsecase,
 	NewUserMessageUsecase,
+	// 寄件模块
+	NewChannelUsecase,
+	NewLockerUsecase,
+	NewServicePointUsecase,
+	NewPickupUsecase,
+	NewFreightUsecase,
+	NewAuthUsecase,
 )
-var ProviderSet = wire.NewSet(NewTodoUsecase, NewAddressUsecase, NewUserUsecase, NewOrderUsecase, NewChannelUsecase, NewLockerUsecase, NewServicePointUsecase, NewPickupUsecase, NewFreightUsecase, NewAuthUsecase)

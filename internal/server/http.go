@@ -21,10 +21,7 @@ import (
 )
 
 // NewHTTPServer new an HTTP server。
-// express 参数为查快递模块服务，可为 nil。
-func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, express *service.ExpressService) *http.Server {
-// NewHTTPServer new an HTTP server.
-func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, shipping *service.ShippingService, freight *service.FreightService, auth *service.AuthService) *http.Server {
+func NewHTTPServer(c *conf.Server, todo *service.TodoService, user *service.UserService, address *service.AddressService, order *service.OrderService, express *service.ExpressService, shipping *service.ShippingService, freight *service.FreightService, auth *service.AuthService) *http.Server {
 
 	var opts = []http.ServerOption{
 		http.Middleware(

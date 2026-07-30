@@ -186,6 +186,8 @@ type UserMessage struct {
 
 func (UserMessage) TableName() string {
 	return "sf_user_message"
+}
+
 // ──────────────────────────────────────────────
 // 寄件渠道
 // ──────────────────────────────────────────────
