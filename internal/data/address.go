@@ -2,9 +2,14 @@ package data
 
 import (
 	"context"
+	"fmt"
+	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"shunfeng-miniprogram/internal/biz"
+	"shunfeng-miniprogram/internal/pkg/amap"
 )
 
 // addressRepo 地址仓储的 GORM 实现。
@@ -109,6 +114,8 @@ func newAddressPO(in *biz.Address) *Address {
 		District:      in.District,
 		DetailAddr:    in.DetailAddr,
 		IsDefault:     in.IsDefault,
+		Latitude:      in.Latitude,
+		Longitude:     in.Longitude,
 	}
 }
 
@@ -128,8 +135,65 @@ func toAddressBiz(in *Address) *biz.Address {
 		District:      in.District,
 		DetailAddr:    in.DetailAddr,
 		IsDefault:     in.IsDefault,
+		Latitude:      in.Latitude,
+		Longitude:     in.Longitude,
 		CreateTime:    in.CreateTime,
 		UpdateTime:    in.UpdateTime,
 		DelFlag:       in.DelFlag,
 	}
+}
+
+// amapGeocoder 基于高德地图 SDK 实现 biz.Geocoder，将文本地址转换为经纬度。
+type amapGeocoder struct {
+	client *amap.Client
+}
+
+// NewAmapGeocoder 从环境变量 AMAP_WEB_KEY 读取高德 Key 构造 Geocoder。
+// 若未配置 Key，返回一个 noop 实现：反查始终失败，但不影响地址的创建/更新。
+func NewAmapGeocoder() biz.Geocoder {
+	key := os.Getenv("AMAP_WEB_KEY")
+	if key == "" {
+		return noopGeocoder{}
+	}
+	return &amapGeocoder{client: amap.NewClient(key)}
+}
+
+// GeocodeAddress 拼接省/市/区/详细地址后调用高德地理编码，返回纬度 lat、经度 lng。
+func (g *amapGeocoder) GeocodeAddress(ctx context.Context, province, city, district, detail string) (float64, float64, error) {
+	full := strings.Join([]string{province, city, district, detail}, "")
+	if strings.TrimSpace(full) == "" {
+		return 0, 0, fmt.Errorf("empty address")
+	}
+	opts := []amap.GeocodeOption{}
+	if city != "" {
+		opts = append(opts, amap.GeocodeWithCity(city))
+	}
+	resp, err := g.client.Geocode(ctx, full, opts...)
+	if err != nil {
+		return 0, 0, err
+	}
+	if len(resp.Geocodes) == 0 {
+		return 0, 0, fmt.Errorf("no geocode result for %q", full)
+	}
+	// 高德 Location 格式为 "经度,纬度"。
+	parts := strings.Split(string(resp.Geocodes[0].Location), ",")
+	if len(parts) != 2 {
+		return 0, 0, fmt.Errorf("invalid location: %q", resp.Geocodes[0].Location)
+	}
+	lng, err := strconv.ParseFloat(strings.TrimSpace(parts[0]), 64)
+	if err != nil {
+		return 0, 0, fmt.Errorf("parse lng: %w", err)
+	}
+	lat, err := strconv.ParseFloat(strings.TrimSpace(parts[1]), 64)
+	if err != nil {
+		return 0, 0, fmt.Errorf("parse lat: %w", err)
+	}
+	return lat, lng, nil
+}
+
+// noopGeocoder 未配置高德 Key 时的兜底实现。
+type noopGeocoder struct{}
+
+func (noopGeocoder) GeocodeAddress(ctx context.Context, province, city, district, detail string) (float64, float64, error) {
+	return 0, 0, fmt.Errorf("geocoder not configured (AMAP_WEB_KEY missing)")
 }

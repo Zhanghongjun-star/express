@@ -3,8 +3,7 @@ package data
 import (
 	"fmt"
 	"strings"
-
-	"shunfeng-miniprogram/internal/conf"
+	"time"
 
 	"github.com/go-kratos/kratos/contrib/registry/nacos/v3"
 	"github.com/go-kratos/kratos/v3/registry"
@@ -14,33 +13,49 @@ import (
 	"github.com/spf13/viper"
 )
 
-// RemoteConfig 从 Nacos 拉取的远程业务配置。
-var RemoteConfig conf.Bootstrap
+// RemoteConfig 从 Nacos 拉取的远程业务配置，匹配 yaml 层级结构。
+var RemoteConfig struct {
+	Data struct {
+		Database struct {
+			User     string
+			Password string
+			Host     string
+			Port     int
+			Database string
+		}
+		Redis struct {
+			Addr         string
+			Password     string
+			DB           int
+			ReadTimeout  string
+			WriteTimeout string
+		}
+		Elasticsearch struct {
+			Addr string
+		}
+	}
+}
 
 // NacosRegistrar 服务注册客户端。
 var NacosRegistrar registry.Registrar
 
-// newNacos 初始化 Nacos：先拉取远程配置，再创建服务注册客户端。
-func newNacos(r *conf.Registry) {
-	if r == nil || r.Nacos == nil {
-		return
-	}
-	nc := r.Nacos
-
+// newNacos 从 Nacos 配置中心拉取远程配置并创建服务注册客户端。
+func newNacos(addr string, port uint64, namespaceID, username, password, logDir, cacheDir, logLevel, dataID, group string) {
 	sc := []constant.ServerConfig{
 		{
-			IpAddr: nc.Addr,
-			Port:   nc.Port,
+			IpAddr: addr,
+			Port:   port,
 		},
 	}
-
 	cc := constant.ClientConfig{
-		NamespaceId:         nc.NamespaceId,
+		NamespaceId:         namespaceID,
+		Username:            username,
+		Password:            password,
 		TimeoutMs:           5000,
 		NotLoadCacheAtStart: true,
-		LogDir:              nc.LogDir,
-		CacheDir:            nc.CacheDir,
-		LogLevel:            nc.LogLevel,
+		LogDir:              logDir,
+		CacheDir:            cacheDir,
+		LogLevel:            logLevel,
 	}
 
 	configClient, err := clients.CreateConfigClient(map[string]interface{}{
@@ -54,8 +69,8 @@ func newNacos(r *conf.Registry) {
 	fmt.Println("nacos 配置客户端创建成功")
 
 	configYaml, err := configClient.GetConfig(vo.ConfigParam{
-		DataId: nc.DataId,
-		Group:  nc.Group,
+		DataId: dataID,
+		Group:  group,
 	})
 	if err != nil {
 		fmt.Println(fmt.Sprintf("nacos 获取配置失败: %v", err))
@@ -85,6 +100,15 @@ func newNacos(r *conf.Registry) {
 		fmt.Println(fmt.Sprintf("nacos 服务注册客户端创建失败: %v", err))
 		return
 	}
-	NacosRegistrar = nacos.New(namingClient, nacos.WithGroup(nc.Group))
+	NacosRegistrar = nacos.New(namingClient, nacos.WithGroup(group))
 	fmt.Println("nacos 链接成功")
+}
+
+// parseDuration 解析时间字符串为 Duration，失败返回默认值。
+func parseDuration(s string, def time.Duration) time.Duration {
+	d, err := time.ParseDuration(s)
+	if err != nil {
+		return def
+	}
+	return d
 }
