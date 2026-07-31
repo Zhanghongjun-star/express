@@ -18,3 +18,6 @@
 cmd/server/tmp/nacos/log/
 cmd/server/tmp/nacos/cache/
 
+
+# Frontend dependencies
+frontend/node_modules/

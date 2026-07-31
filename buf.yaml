@@ -1,5 +1,0 @@
-version: v2
-modules:
-  - path: api
-  - path: internal
-  - path: third_party
