@@ -55,9 +55,9 @@ type OrderServiceHTTPServer interface {
 func RegisterOrderServiceHTTPServer(s *http.Server, srv OrderServiceHTTPServer) {
 	r := s.Route("/")
 	r.Handle("POST", "/api/order/create", _OrderService_CreateExpressOrder0_HTTP_Handler(srv))
-	r.Handle("GET", "/api/order/{id}", _OrderService_GetExpressOrder0_HTTP_Handler(srv))
 	r.Handle("GET", "/api/order/search", _OrderService_SearchOrders0_HTTP_Handler(srv))
 	r.Handle("GET", "/api/order/category/{category}", _OrderService_ListOrdersByCategory0_HTTP_Handler(srv))
+	r.Handle("GET", "/api/order/{id}", _OrderService_GetExpressOrder0_HTTP_Handler(srv))
 	r.Handle("DELETE", "/api/order/{id}", _OrderService_DeleteExpressOrder0_HTTP_Handler(srv))
 	r.Handle("PUT", "/api/order/{id}/tag", _OrderService_SetOrderTag0_HTTP_Handler(srv))
 	r.Handle("PUT", "/api/order/{id}/follow", _OrderService_FollowOrder0_HTTP_Handler(srv))

@@ -76,6 +76,20 @@ func TestAuthUsecaseLoginLocksAccountAfterFiveFailures(t *testing.T) {
 	}
 }
 
+func TestAuthUsecaseLoginReturnsNotFoundForMissingAccount(t *testing.T) {
+	uc := NewAuthUsecase(newFakeAuthRepo())
+
+	_, err := uc.Login(context.Background(), &LoginCommand{
+		Account:  "13900139000",
+		Password: "password123",
+		DeviceID: "ios-1",
+	})
+
+	if !kratoserrors.IsNotFound(err) {
+		t.Fatalf("Login(missing account) error = %v, want not found", err)
+	}
+}
+
 func TestAuthUsecaseChangePasswordRejectsWrongOldPassword(t *testing.T) {
 	repo := newFakeAuthRepo()
 	repo.usersByID[7] = &IdentityAccount{

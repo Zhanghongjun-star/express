@@ -35,7 +35,7 @@ func (r *authRepo) SaveVerificationCode(ctx context.Context, vc *biz.Verificatio
 		return err
 	}
 	if !ok {
-		return biz.ErrAuthDuplicate
+		return biz.ErrAuthVerificationRateLimited
 	}
 	body, err := json.Marshal(vc)
 	if err != nil {

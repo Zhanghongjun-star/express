@@ -19,17 +19,17 @@ function normalizeSession(raw: any): Session {
 function normalizeRole(role: string): Role {
   const value = String(role || "user").toLowerCase();
   if (["courier", "merchant", "admin"].includes(value)) return value as Role;
-  if (value.includes("快递")) return "courier";
-  if (value.includes("商家") || value.includes("驿站")) return "merchant";
-  if (value.includes("运营")) return "admin";
+  if (value.includes("快递") || value.includes("courier")) return "courier";
+  if (value.includes("商家") || value.includes("merchant") || value.includes("站点")) return "merchant";
+  if (value.includes("运营") || value.includes("admin")) return "admin";
   return "user";
 }
 
 export const roleHome: Record<Role, string> = {
   user: "/user",
-  courier: "/courier",
-  merchant: "/merchant",
-  admin: "/admin",
+  courier: "/user",
+  merchant: "/user",
+  admin: "/user",
 };
 
 export const useAuthStore = defineStore("auth", () => {

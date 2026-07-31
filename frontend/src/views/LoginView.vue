@@ -1,53 +1,68 @@
 <template>
   <div class="login-page">
-    <section class="login-panel">
-      <div class="identity-band">
-        <div class="stamp">SF</div>
-        <p>{{ app.copy }}</p>
-        <h1>{{ app.title }}</h1>
-        <div class="lane-map">
-          <span>{{ app.steps[0] }}</span><i></i><span>{{ app.steps[1] }}</span><i></i><span>{{ app.steps[2] }}</span>
+    <div v-if="showSplash" class="sf-splash-screen">
+      <img src="/sf-splash.png" alt="顺丰速运启动页" />
+    </div>
+
+    <main v-else class="login-stage">
+      <section class="login-visual">
+        <div class="login-visual-frame">
+          <img src="/sf-splash.png" alt="顺丰速运视觉图" />
         </div>
-      </div>
-      <el-card class="auth-card" shadow="never">
-        <div class="app-login-title">
-          <strong>{{ app.name }}</strong>
+      </section>
+
+      <section class="login-panel">
+        <div class="login-brand">
+          <span>{{ app.name }}</span>
+          <strong>{{ app.title }}</strong>
+          <p>{{ app.copy }}</p>
         </div>
-        <el-tabs v-model="mode" stretch @tab-change="clearFeedback">
-          <el-tab-pane label="登录" name="login" />
-          <el-tab-pane label="注册" name="register" />
-        </el-tabs>
-        <el-alert v-if="feedback" :title="feedback" :type="feedbackType" class="login-alert" show-icon :closable="false" />
-        <el-form :model="form" label-position="top" @submit.prevent>
-          <el-form-item label="账号">
-            <el-input v-model.trim="form.account" placeholder="手机号或邮箱" @keyup.enter="submit" />
-          </el-form-item>
-          <el-form-item v-if="mode === 'register'" label="验证码">
-            <div class="inline-field">
-              <el-input v-model.trim="form.verifyCode" placeholder="6 位验证码" @keyup.enter="submit" />
-              <el-button :loading="codeLoading" @click="sendCode">获取</el-button>
-            </div>
-          </el-form-item>
-          <el-form-item label="密码">
-            <el-input v-model="form.password" placeholder="8-32 位密码" show-password @keyup.enter="submit" />
-          </el-form-item>
-          <el-button type="primary" class="full-button" :loading="loading" @click="submit">
-            {{ mode === "login" ? `登录${app.name}` : `注册${app.name}` }}
-          </el-button>
-          <el-button class="full-button ghost" @click="preview">本地预览进入{{ app.name }}</el-button>
-        </el-form>
-      </el-card>
-    </section>
+
+        <el-card class="auth-card" shadow="never">
+          <el-tabs v-model="mode" stretch @tab-change="clearFeedback">
+            <el-tab-pane label="登录" name="login" />
+            <el-tab-pane label="注册" name="register" />
+          </el-tabs>
+
+          <el-alert
+            v-if="feedback"
+            :title="feedback"
+            :type="feedbackType"
+            class="login-alert"
+            show-icon
+            :closable="false"
+          />
+
+          <el-form class="auth-form" :model="form" label-position="top" @submit.prevent>
+            <el-form-item label="账号">
+              <el-input v-model.trim="form.account" placeholder="手机号或邮箱" @keyup.enter="submit" />
+            </el-form-item>
+            <el-form-item v-if="mode === 'register'" label="验证码">
+              <div class="inline-field">
+                <el-input v-model.trim="form.verifyCode" placeholder="6 位验证码" @keyup.enter="submit" />
+                <el-button :loading="codeLoading" @click="sendCode">获取</el-button>
+              </div>
+            </el-form-item>
+            <el-form-item label="密码">
+              <el-input v-model="form.password" placeholder="8-32 位密码" show-password @keyup.enter="submit" />
+            </el-form-item>
+            <el-button type="primary" class="full-button" :loading="loading" @click="submit">
+              {{ mode === "login" ? "立即登录" : "立即注册" }}
+            </el-button>
+            <el-button class="full-button ghost" @click="preview">本地预览</el-button>
+          </el-form>
+        </el-card>
+      </section>
+    </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
+import { onMounted, reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
 import { useRoute, useRouter } from "vue-router";
 import { roleHome, useAuthStore } from "@/stores/auth";
 import { userApi } from "@/api/user";
-import type { Role } from "@/types";
 
 type FeedbackType = "success" | "warning" | "error" | "info";
 
@@ -57,38 +72,25 @@ const auth = useAuthStore();
 const mode = ref<"login" | "register">("login");
 const loading = ref(false);
 const codeLoading = ref(false);
+const showSplash = ref(true);
 const feedback = ref("");
 const feedbackType = ref<FeedbackType>("info");
 const form = reactive({ account: "", password: "", verifyCode: "" });
 
-const role = computed(() => (route.meta.loginRole || "user") as Role);
-const appMap: Record<Role, { name: string; title: string; copy: string; steps: string[] }> = {
-  user: {
-    name: "用户端 App",
-    title: "顺丰用户寄件 App",
-    copy: "寄快递、查快递、地址簿",
-    steps: ["寄件", "查件", "我的"],
-  },
-  courier: {
-    name: "快递员端 App",
-    title: "顺丰快递员作业 App",
-    copy: "派件、揽件、异常上报",
-    steps: ["任务", "导航", "签收"],
-  },
-  merchant: {
-    name: "商家端 App",
-    title: "顺丰驿站商家 App",
-    copy: "入库、取件、财务对账",
-    steps: ["入库", "核验", "对账"],
-  },
-  admin: {
-    name: "运营端 App",
-    title: "顺丰运营管理 App",
-    copy: "数据总计、明细查询、导出",
-    steps: ["统计", "筛选", "导出"],
-  },
+const app = {
+  name: "顺丰速运",
+  title: "欢迎回来",
+  hero: "寄件、查件、地址簿、会员福利，一个界面全搞定",
+  badge: "SF EXPRESS",
+  subtitle: "像手机应用一样清爽的顺丰服务入口",
+  copy: "登录后进入首页，已完成接口的功能会直接连接后端与数据库。",
 };
-const app = computed(() => appMap[role.value]);
+
+onMounted(() => {
+  window.setTimeout(() => {
+    showSplash.value = false;
+  }, 2600);
+});
 
 function accountType() {
   return form.account.includes("@") ? "email" : "phone";
@@ -131,7 +133,7 @@ function validateBase() {
     return false;
   }
   if (form.password.length < 8 || form.password.length > 32) {
-    setFeedback("密码需要 8-32 位，和后端注册/登录规则保持一致。", "warning");
+    setFeedback("密码需要 8-32 位。", "warning");
     return false;
   }
   return true;
@@ -143,7 +145,7 @@ async function sendCode() {
   const isEmail = form.account.includes("@");
   const validAccount = isEmail ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.account) : /^1\d{10}$/.test(form.account);
   if (!validAccount) {
-    return setFeedback(isEmail ? "邮箱格式不正确，请检查后再获取验证码。" : "手机号格式不正确，请输入 11 位手机号。", "warning");
+    return setFeedback(isEmail ? "邮箱格式不正确，请先检查。" : "手机号格式不正确，请输入 11 位手机号。", "warning");
   }
   codeLoading.value = true;
   try {
@@ -171,21 +173,25 @@ async function submit() {
         verifyCode: form.verifyCode,
       });
     }
-    if (auth.session?.role !== role.value) {
-      ElMessage.warning(`当前账号不是${app.value.name}角色，已进入账号对应应用。`);
-    }
-    setFeedback(`${mode.value === "login" ? "登录" : "注册"}成功，正在进入${app.value.name}。`, "success", false);
-    router.push(String(route.query.redirect || roleHome[auth.session?.role || role.value]));
+    setFeedback(`${mode.value === "login" ? "登录" : "注册"}成功，正在进入页面。`, "success", false);
+    router.push(String(route.query.redirect || roleHome.user));
   } catch (error) {
-    setFeedback(`${mode.value === "login" ? "登录" : "注册"}失败：${error instanceof Error ? error.message : "请检查账号、密码和后端服务。"}`);
+    const message = error instanceof Error ? error.message : "请检查账号、密码和后端服务。";
+    if (mode.value === "login" && message.includes("还没有注册")) {
+      mode.value = "register";
+      form.verifyCode = "";
+      setFeedback(message, "warning");
+      return;
+    }
+    setFeedback(`${mode.value === "login" ? "登录" : "注册"}失败：${message}`);
   } finally {
     loading.value = false;
   }
 }
 
 function preview() {
-  auth.switchRole(role.value);
-  setFeedback(`已进入${app.value.name}本地预览。`, "success");
-  router.push(roleHome[role.value]);
+  auth.switchRole("user");
+  setFeedback("已进入本地预览。", "success");
+  router.push(roleHome.user);
 }
 </script>

@@ -150,50 +150,53 @@ func toExpressOrderPO(in *biz.ExpressOrder) *ExpressOrder {
 		return nil
 	}
 	return &ExpressOrder{
-		UserID:           in.UserID,
-		OrderNo:          in.OrderNo,
-		ExpressNo:        in.ExpressNo,
-		SenderName:       in.SenderName,
-		SenderPhone:      in.SenderPhone,
-		SenderProvince:   in.SenderProvince,
-		SenderCity:       in.SenderCity,
-		SenderDistrict:   in.SenderDistrict,
-		SenderDetail:     in.SenderDetail,
-		SenderLat:        in.SenderLat,
-		SenderLng:        in.SenderLng,
-		ReceiverName:     in.ReceiverName,
-		ReceiverPhone:    in.ReceiverPhone,
-		ReceiverProvince: in.ReceiverProvince,
-		ReceiverCity:     in.ReceiverCity,
-		ReceiverDistrict: in.ReceiverDistrict,
-		ReceiverDetail:   in.ReceiverDetail,
-		ReceiverLat:      in.ReceiverLat,
-		ReceiverLng:      in.ReceiverLng,
-		Weight:           in.Weight,
-		Length:           in.Length,
-		Width:            in.Width,
-		Height:           in.Height,
-		BaseFreight:      in.BaseFreight,
-		InsureFee:        in.InsureFee,
-		TotalFreight:     in.TotalFreight,
-		ChannelCode:      in.ChannelCode,
-		LockerID:         in.LockerID,
-		BoxType:          in.BoxType,
-		ServicePointID:   in.ServicePointID,
-		PickupDate:       in.PickupDate,
-		PickupSlotCode:   in.PickupSlotCode,
-		PaymentMethod:    in.PaymentMethod,
-		PaymentStatus:    in.PaymentStatus,
+		UserID:            in.UserID,
+		OrderNo:           in.OrderNo,
+		ExpressNo:         in.ExpressNo,
+		SenderName:        in.SenderName,
+		SenderPhone:       in.SenderPhone,
+		SenderProvince:    in.SenderProvince,
+		SenderCity:        in.SenderCity,
+		SenderDistrict:    in.SenderDistrict,
+		SenderDetail:      in.SenderDetail,
+		SenderLat:         in.SenderLat,
+		SenderLng:         in.SenderLng,
+		ReceiverName:      in.ReceiverName,
+		ReceiverPhone:     in.ReceiverPhone,
+		ReceiverProvince:  in.ReceiverProvince,
+		ReceiverCity:      in.ReceiverCity,
+		ReceiverDistrict:  in.ReceiverDistrict,
+		ReceiverDetail:    in.ReceiverDetail,
+		ReceiverLat:       in.ReceiverLat,
+		ReceiverLng:       in.ReceiverLng,
+		Weight:            in.Weight,
+		Length:            in.Length,
+		Width:             in.Width,
+		Height:            in.Height,
+		BaseFreight:       in.BaseFreight,
+		InsureFee:         in.InsureFee,
+		TotalFreight:      in.TotalFreight,
+		ChannelCode:       in.ChannelCode,
+		LockerID:          in.LockerID,
+		BoxType:           in.BoxType,
+		ServicePointID:    in.ServicePointID,
+		PickupDate:        in.PickupDate,
+		PickupSlotCode:    in.PickupSlotCode,
+		PickupStartTime:   stringPtrIfNotEmpty(in.PickupStartTime),
+		PickupEndTime:     stringPtrIfNotEmpty(in.PickupEndTime),
+		PaymentMethod:     in.PaymentMethod,
+		PaymentStatus:     in.PaymentStatus,
+		PaidAt:            timePtrIfNotZero(in.PaidAt),
 		PrivacyProtection: in.PrivacyProtection,
-		Status:           in.Status,
-		DelFlag:          in.DelFlag,
-		Tag:              in.Tag,
-		IsFollowed:       in.IsFollowed,
-		ShareURL:         in.ShareURL,
-		PayURL:           in.PayURL,
-		TradeNo:          in.TradeNo,
-		CreatedAt:        in.CreatedAt,
-		UpdatedAt:        in.UpdatedAt,
+		Status:            in.Status,
+		DelFlag:           in.DelFlag,
+		Tag:               in.Tag,
+		IsFollowed:        in.IsFollowed,
+		ShareURL:          in.ShareURL,
+		PayURL:            in.PayURL,
+		TradeNo:           in.TradeNo,
+		CreatedAt:         in.CreatedAt,
+		UpdatedAt:         in.UpdatedAt,
 	}
 }
 
@@ -202,51 +205,54 @@ func toExpressOrderBiz(in *ExpressOrder) *biz.ExpressOrder {
 		return nil
 	}
 	return &biz.ExpressOrder{
-		ID:               in.ID,
-		UserID:           in.UserID,
-		OrderNo:          in.OrderNo,
-		ExpressNo:        in.ExpressNo,
-		SenderName:       in.SenderName,
-		SenderPhone:      in.SenderPhone,
-		SenderProvince:   in.SenderProvince,
-		SenderCity:       in.SenderCity,
-		SenderDistrict:   in.SenderDistrict,
-		SenderDetail:     in.SenderDetail,
-		SenderLat:        in.SenderLat,
-		SenderLng:        in.SenderLng,
-		ReceiverName:     in.ReceiverName,
-		ReceiverPhone:    in.ReceiverPhone,
-		ReceiverProvince: in.ReceiverProvince,
-		ReceiverCity:     in.ReceiverCity,
-		ReceiverDistrict: in.ReceiverDistrict,
-		ReceiverDetail:   in.ReceiverDetail,
-		ReceiverLat:      in.ReceiverLat,
-		ReceiverLng:      in.ReceiverLng,
-		Weight:           in.Weight,
-		Length:           in.Length,
-		Width:            in.Width,
-		Height:           in.Height,
-		BaseFreight:      in.BaseFreight,
-		InsureFee:        in.InsureFee,
-		TotalFreight:     in.TotalFreight,
-		ChannelCode:      in.ChannelCode,
-		LockerID:         in.LockerID,
-		BoxType:          in.BoxType,
-		ServicePointID:   in.ServicePointID,
-		PickupDate:       in.PickupDate,
-		PickupSlotCode:   in.PickupSlotCode,
-		PaymentMethod:    in.PaymentMethod,
-		PaymentStatus:    in.PaymentStatus,
+		ID:                in.ID,
+		UserID:            in.UserID,
+		OrderNo:           in.OrderNo,
+		ExpressNo:         in.ExpressNo,
+		SenderName:        in.SenderName,
+		SenderPhone:       in.SenderPhone,
+		SenderProvince:    in.SenderProvince,
+		SenderCity:        in.SenderCity,
+		SenderDistrict:    in.SenderDistrict,
+		SenderDetail:      in.SenderDetail,
+		SenderLat:         in.SenderLat,
+		SenderLng:         in.SenderLng,
+		ReceiverName:      in.ReceiverName,
+		ReceiverPhone:     in.ReceiverPhone,
+		ReceiverProvince:  in.ReceiverProvince,
+		ReceiverCity:      in.ReceiverCity,
+		ReceiverDistrict:  in.ReceiverDistrict,
+		ReceiverDetail:    in.ReceiverDetail,
+		ReceiverLat:       in.ReceiverLat,
+		ReceiverLng:       in.ReceiverLng,
+		Weight:            in.Weight,
+		Length:            in.Length,
+		Width:             in.Width,
+		Height:            in.Height,
+		BaseFreight:       in.BaseFreight,
+		InsureFee:         in.InsureFee,
+		TotalFreight:      in.TotalFreight,
+		ChannelCode:       in.ChannelCode,
+		LockerID:          in.LockerID,
+		BoxType:           in.BoxType,
+		ServicePointID:    in.ServicePointID,
+		PickupDate:        in.PickupDate,
+		PickupSlotCode:    in.PickupSlotCode,
+		PickupStartTime:   stringValue(in.PickupStartTime),
+		PickupEndTime:     stringValue(in.PickupEndTime),
+		PaymentMethod:     in.PaymentMethod,
+		PaymentStatus:     in.PaymentStatus,
+		PaidAt:            timeValue(in.PaidAt),
 		PrivacyProtection: in.PrivacyProtection,
-		Status:           in.Status,
-		DelFlag:          in.DelFlag,
-		Tag:              in.Tag,
-		IsFollowed:       in.IsFollowed,
-		ShareURL:         in.ShareURL,
-		PayURL:           in.PayURL,
-		TradeNo:          in.TradeNo,
-		CreatedAt:        in.CreatedAt,
-		UpdatedAt:        in.UpdatedAt,
+		Status:            in.Status,
+		DelFlag:           in.DelFlag,
+		Tag:               in.Tag,
+		IsFollowed:        in.IsFollowed,
+		ShareURL:          in.ShareURL,
+		PayURL:            in.PayURL,
+		TradeNo:           in.TradeNo,
+		CreatedAt:         in.CreatedAt,
+		UpdatedAt:         in.UpdatedAt,
 	}
 }
 
@@ -258,4 +264,30 @@ func toExpressOrderBizList(in []ExpressOrder) []*biz.ExpressOrder {
 	return out
 }
 
+func stringPtrIfNotEmpty(value string) *string {
+	if value == "" {
+		return nil
+	}
+	return &value
+}
 
+func stringValue(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
+}
+
+func timePtrIfNotZero(value time.Time) *time.Time {
+	if value.IsZero() {
+		return nil
+	}
+	return &value
+}
+
+func timeValue(value *time.Time) time.Time {
+	if value == nil {
+		return time.Time{}
+	}
+	return *value
+}

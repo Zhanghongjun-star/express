@@ -1,7 +1,56 @@
 import { http } from "./http";
 import type { Address, HistoryRecord, Profile, Session } from "@/types";
 
+export interface ExpressOrderInput {
+  user_id: number;
+  sender_name: string;
+  sender_phone: string;
+  sender_province: string;
+  sender_city: string;
+  sender_district: string;
+  sender_detail: string;
+  receiver_name: string;
+  receiver_phone: string;
+  receiver_province: string;
+  receiver_city: string;
+  receiver_district: string;
+  receiver_detail: string;
+  weight: number;
+  length?: number;
+  width?: number;
+  height?: number;
+  channel_code: number;
+  pickup_date?: string;
+  pickup_slot_code?: string;
+  payment_method: number;
+  privacy_protection?: boolean;
+  express_type?: number;
+  insure_value?: number;
+}
+
+export interface ExpressOrderReply {
+  id: number;
+  order_no: string;
+  express_no: string;
+  sender_name: string;
+  receiver_name: string;
+  status: string;
+  payment_status: string;
+  total_freight: number;
+  created_at?: string | { seconds?: number; nanos?: number };
+}
+
 const deviceId = () => localStorage.getItem("sf_device_id") || createDeviceId();
+const addressUpdateMask = [
+  "addr_type",
+  "receiver_name",
+  "receiver_phone",
+  "province",
+  "city",
+  "district",
+  "detail_addr",
+  "is_default",
+];
 
 function createDeviceId() {
   const id = `web-${crypto.randomUUID?.() || Date.now()}`;
@@ -60,7 +109,8 @@ export const userApi = {
     return http.post<unknown, Address>("/v1/user/address/add", address);
   },
   updateAddress(address: Address) {
-    return http.put<unknown, Address>(`/v1/user/address/edit/${address.id}`, address);
+    const updateMaskQuery = addressUpdateMask.map((field) => `update_mask.paths=${encodeURIComponent(field)}`).join("&");
+    return http.put<unknown, Address>(`/v1/user/address/edit/${address.id}?${updateMaskQuery}`, address);
   },
   deleteAddress(userId: number, id: number) {
     return http.delete(`/v1/user/address/${id}`, { params: { user_id: userId } });
@@ -75,6 +125,19 @@ export const userApi = {
   },
   listHistory(userId: number) {
     return http.get<unknown, { records: HistoryRecord[]; total_count: number }>("/api/order/history/list", {
+      params: { user_id: userId, page_size: 20 },
+    });
+  },
+  createExpressOrder(payload: ExpressOrderInput) {
+    return http.post<unknown, ExpressOrderReply>("/api/order/create", payload);
+  },
+  searchExpressOrders(userId: number, keyword: string) {
+    return http.get<unknown, { orders: ExpressOrderReply[]; total_count: number }>("/api/order/search", {
+      params: { user_id: userId, keyword, page_size: 20 },
+    });
+  },
+  listExpressOrdersByCategory(userId: number, category: string) {
+    return http.get<unknown, { orders: ExpressOrderReply[]; total_count: number }>(`/api/order/category/${category}`, {
       params: { user_id: userId, page_size: 20 },
     });
   },

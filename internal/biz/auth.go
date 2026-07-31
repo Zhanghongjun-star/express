@@ -53,6 +53,8 @@ var (
 	ErrAuthNotFound = errors.NotFound(v1.ErrorReason_AUTH_RESOURCE_NOT_FOUND.String(), "auth resource not found")
 	// ErrAuthDuplicate 表示手机号、邮箱或身份证已存在。
 	ErrAuthDuplicate = errors.Conflict(v1.ErrorReason_AUTH_DUPLICATE_REQUEST.String(), "auth resource duplicated")
+	// ErrAuthVerificationRateLimited 表示验证码发送过于频繁。
+	ErrAuthVerificationRateLimited = errors.TooManyRequests(v1.ErrorReason_AUTH_DUPLICATE_REQUEST.String(), "verification code sent too frequently")
 	// ErrAuthInvalidStatus 表示账号或认证状态不允许当前操作。
 	ErrAuthInvalidStatus = errors.Conflict(v1.ErrorReason_AUTH_INVALID_STATUS.String(), "invalid auth status")
 )
@@ -271,7 +273,10 @@ func (uc *AuthUsecase) Login(ctx context.Context, cmd *LoginCommand) (*TokenResu
 	}
 	user, err := uc.repo.FindUserByAccount(ctx, strings.TrimSpace(cmd.Account))
 	if err != nil {
-		return nil, ErrAuthUnauthenticated
+		if errors.IsNotFound(err) {
+			return nil, ErrAuthNotFound
+		}
+		return nil, err
 	}
 	if user.AccountStatus == AccountStatusDisabled {
 		return nil, ErrAuthAccountDisabled

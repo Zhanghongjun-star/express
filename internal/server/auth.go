@@ -21,11 +21,11 @@ const (
 )
 
 var publicPaths = map[string]bool{
-	"/api.v1.AuthService/SendVerificationCode": true,
-	"/api.v1.AuthService/Register":             true,
-	"/api.v1.AuthService/Login":                true,
-	"/api.v1.AuthService/RefreshToken":         true,
-	"/api.v1.AuthService/Logout":               true,
+	"/auth.v1.AuthService/SendVerificationCode":    true,
+	"/auth.v1.AuthService/Register":                true,
+	"/auth.v1.AuthService/Login":                   true,
+	"/auth.v1.AuthService/RefreshToken":            true,
+	"/auth.v1.AuthService/Logout":                  true,
 	"/order.v3.OrderService/HandlePaymentCallback": true,
 }
 
