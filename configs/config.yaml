@@ -1,0 +1,19 @@
+﻿server:
+  http:
+    addr: 0.0.0.0:8000
+    timeout: 1s
+  grpc:
+    addr: 0.0.0.0:9000
+    timeout: 1s
+registry:
+  nacos:
+    addr: 115.190.225.153
+    port: 8848
+    namespace_id: public
+    username: nacos
+    password: nacos
+    log_dir: /tmp/nacos/log
+    cache_dir: /tmp/nacos/cache
+    log_level: debug
+    data_id: "77"
+    group: DEFAULT_GROUP
